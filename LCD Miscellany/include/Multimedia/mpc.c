@@ -42,11 +42,11 @@ struct MPCController extends MediaPlayerController {
 	}
 
 	function Next() {
-		%UpdateAndRefresh(901);
+		%UpdateAndRefresh(921);
 	}
 
 	function Prev() {
-		%UpdateAndRefresh(902);
+		%UpdateAndRefresh(920);
 	}
 
 	function ToggleMute() {
