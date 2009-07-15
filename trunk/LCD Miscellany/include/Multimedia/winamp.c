@@ -96,7 +96,7 @@ struct WinampController extends MediaPlayerController {
 		// the sign of the 32-bit number.  The and isn't necessary, but doesn't hurt.
 		$mask = ((%position & 0x80000000)<<32)>>32;
 		%position |= $mask;
-		%position &= $mask;
+		%position &= $mask |  0x7FFFFFFF;
 		%position /= 1000;
 		//%position = ParseBinaryInt($data, 12, 4)/1000;
 
