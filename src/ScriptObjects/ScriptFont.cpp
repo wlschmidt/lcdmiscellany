@@ -385,7 +385,7 @@ int CharBlock::Init(int rangeStart, DynamicFont *tm, HDC hDC) {
 			chars[i].top = (char)gm.gmptGlyphOrigin.y;
 			chars[i].bottom = (char)(gm.gmptGlyphOrigin.y + gm.gmBlackBoxY-1);
 
-			int bmpWidth = 4*(gm.gmBlackBoxX+31)/32;
+			int bmpWidth = 4*((gm.gmBlackBoxX+31)/32);
 			int ypos = width*(gm.gmptGlyphOrigin.y-minHeight)+pos;
 			int srcypos = 0;
 			for (unsigned int y=0; y<gm.gmBlackBoxY; y++) {
