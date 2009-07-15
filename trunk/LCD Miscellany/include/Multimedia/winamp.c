@@ -94,7 +94,9 @@ struct WinampController extends MediaPlayerController {
 		%position = SendMessage(%handle, 0x0400, 0, 105); ///1000;
 		// On 64-bit systems, get a 32-bit number read as a 64-bit one.  So propogate
 		// the sign of the 32-bit number.  The and isn't necessary, but doesn't hurt.
-		%position |= ((%position & 0x80000000)<<32)>>32;
+		$mask = ((%position & 0x80000000)<<32)>>32;
+		%position |= $mask;
+		%position &= $mask;
 		%position /= 1000;
 		//%position = ParseBinaryInt($data, 12, 4)/1000;
 
