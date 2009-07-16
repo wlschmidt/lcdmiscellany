@@ -112,7 +112,7 @@ struct MediaView extends View {
 			%bigTitleScroller = ManualScrollingText(,320,1,1,28);
 			%bigArtistScroller = ManualScrollingText(,320,1,1,22);
 			%bump = 0;
-			//RegisterKeyEvent(0, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3);
+			RegisterKeyEvent(0, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3);
 			%players[%player].Update();
 			// Can update $player twice, at times.  Not a huge deal.
 			for ($i=0; $i < size(%players); $i++) {
