@@ -1,0 +1,13 @@
+EXPORTS
+    Init
+	GetItunesInfo
+	ItunesPrevTrack
+	ItunesNextTrack
+	ItunesPlay
+	ItunesPause
+	ItunesPlayPause
+	ItunesMute
+	ItunesStop
+	ItunesChangeMode
+	ItunesChangeVolume
+
