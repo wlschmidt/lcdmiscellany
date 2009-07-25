@@ -1,4 +1,4 @@
-//#include <stdio.h>              // sprintf()
+#include <stdio.h>              // sprintf()
 #include <stdlib.h>             // calloc(), strtoul()
 //#include <malloc.h>             // calloc()
 //#include <string.h>             // strlen(), strcmp(), strstr()
@@ -12,9 +12,9 @@
 #include "Unicode.h"
 //HANDLE hMutex = CreateMutex(0,0,0);
 
-TGetAddrInfoW GetAddrInfoW = 0;
-TFreeAddrInfoW FreeAddrInfoW = 0;
-TGetNameInfoW GetNameInfoW = 0;
+TGetAddrInfoW pGetAddrInfoW = 0;
+TFreeAddrInfoW pFreeAddrInfoW = 0;
+TGetNameInfoW pGetNameInfoW = 0;
 
 int InitSockets() {
 	WSAData junk;
@@ -22,13 +22,14 @@ int InitSockets() {
 		return 0;
 	HMODULE hMod = GetModuleHandleA("Ws2_32.dll");
 	if (hMod) {
-		GetAddrInfoW  = (TGetAddrInfoW) GetProcAddress(hMod, "GetAddrInfoW");
-		FreeAddrInfoW = (TFreeAddrInfoW)GetProcAddress(hMod, "FreeAddrInfoW");
-		GetNameInfoW = (TGetNameInfoW)GetProcAddress(hMod, "GetNameInfoW");
-		if (!GetAddrInfoW || !FreeAddrInfoW) {
-			GetAddrInfoW  = 0;
-			// When I don't want the string, dun matter.
-			FreeAddrInfoW = (TFreeAddrInfoW)freeaddrinfo;
+		pGetAddrInfoW  = (TGetAddrInfoW) GetProcAddress(hMod, "GetAddrInfoW");
+		pFreeAddrInfoW = (TFreeAddrInfoW)GetProcAddress(hMod, "FreeAddrInfoW");
+		pGetNameInfoW = (TGetNameInfoW)GetProcAddress(hMod, "GetNameInfoW");
+		if (!pGetAddrInfoW || !pFreeAddrInfoW || !pGetNameInfoW) {
+			pGetNameInfoW = 0;
+			pGetAddrInfoW  = 0;
+			// Simplifies things slightly to not have to check before freeing.
+			pFreeAddrInfoW = (TFreeAddrInfoW)freeaddrinfo;
 		}
 	}
 	return 1;
@@ -59,11 +60,11 @@ unsigned long WINAPI LookupDNSThreadProc(void *r) {
 	//hints.ai_flags = AI_CANONNAME;
 	wchar_t *temp;
 	int iport = (unsigned int) data->port;
-	if (GetAddrInfoW && (temp = (wchar_t*) alloca(sizeof(wchar_t)*(1+strlen(data->dns))))) {
+	if (pGetAddrInfoW && (temp = (wchar_t*) alloca(sizeof(wchar_t)*(1+strlen(data->dns))))) {
 		wchar_t port[10];
 		_itow(iport, port, 10);
 		UTF8toUTF16(temp, data->dns);
-		if (GetAddrInfoW(temp, port, (ADDRINFOW*)&hints, (ADDRINFOW**)&data->firstAddr)) {
+		if (pGetAddrInfoW(temp, port, (ADDRINFOW*)&hints, (ADDRINFOW**)&data->firstAddr)) {
 			data->firstAddr = 0;
 		}
 	}

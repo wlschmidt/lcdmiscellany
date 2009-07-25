@@ -23,9 +23,9 @@ typedef int (WSAAPI *TGetNameInfoW) (
 
 typedef void (WSAAPI *TFreeAddrInfoW) (IN  PADDRINFOW      pAddrInfo);
 
-extern TGetAddrInfoW GetAddrInfoW;
-extern TFreeAddrInfoW FreeAddrInfoW;
-extern TGetNameInfoW GetNameInfoW;
+extern TGetAddrInfoW pGetAddrInfoW;
+extern TFreeAddrInfoW pFreeAddrInfoW;
+extern TGetNameInfoW pGetNameInfoW;
 
 
 //Note:  Must cleanup addrinfo.

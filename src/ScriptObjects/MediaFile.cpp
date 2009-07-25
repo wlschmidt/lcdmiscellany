@@ -9,7 +9,7 @@
 #include "../malloc.h"
 #include "../Unicode.h"
 #include "../util.h"
-#include "Qedit.h"
+// #include "Qedit.h"
 #include "ScriptObjects.h"
 #include "../SymbolTable.h"
 #include "../ScriptProcs/Event/Event.h"
@@ -39,7 +39,7 @@ struct MediaFileData {
     IMediaEventEx *pEvent;
 	IBasicAudio *pAudio;
 	IMediaSeeking *pSeeking;
-	ISampleGrabber *pGrabber;
+	// ISampleGrabber *pGrabber;
 	StringValue *title;
 	StringValue *author;
 	StringValue *fileName;
@@ -191,6 +191,7 @@ static int InitMediaObjects(MediaFileData *mf, ScriptValue &s) {
 			if (!mf->pGraph && FAILED(r=CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&mf->pGraph))) {
 				return 0;
 			}
+			/*
 			if (!mf->pGrabber) {
 				IBaseFilter *temp;
 				if (!FAILED(CoCreateInstance(CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&temp))) {
@@ -216,6 +217,7 @@ static int InitMediaObjects(MediaFileData *mf, ScriptValue &s) {
 					temp->Release();
 				}
 			}
+			//*/
 			if ((mf->pControl || SUCCEEDED(mf->pGraph->QueryInterface(IID_IMediaControl, (void **)&mf->pControl))) &&
 				(mf->pEvent   || SUCCEEDED(mf->pGraph->QueryInterface(IID_IMediaEventEx, (void **)&mf->pEvent)))) {
 					mf->pEvent->SetNotifyWindow((OAHWND)ghWnd, WMU_DSHOW_EVENT, (LONG_PTR)s.objectVal);
@@ -309,6 +311,7 @@ void MediaFileStop(ScriptValue &s, ScriptValue *args) {
 			}
 		}
 		else {
+			/*
 			if (mf->pGrabber) {
 				IBaseFilter * filter;
 				if (SUCCEEDED(mf->pGrabber->QueryInterface(IID_IBaseFilter, (void**)&filter))) {
@@ -318,6 +321,7 @@ void MediaFileStop(ScriptValue &s, ScriptValue *args) {
 				mf->pGrabber->Release();
 				mf->pGrabber = 0;
 			}
+			//*/
 			if (mf->pAudio) {
 				mf->pAudio->Release();
 				mf->pAudio = 0;
@@ -539,7 +543,7 @@ inline double GetFrequencyIntensity(double re, double im)
 void MediaFileGetFFT(ScriptValue &s, ScriptValue *args) {
 	MediaFileData* mf = GetMediaFileData(s);
 	CreateNullValue(s);
-	if (mf && mf->pGrabber) {
+	/*if (mf && mf->pGrabber) {
 		AM_MEDIA_TYPE mt;
 		if (!FAILED(mf->pGrabber->GetConnectedMediaType(&mt))) {
 			if (mt.formattype == FORMAT_WaveFormatEx &&
@@ -555,114 +559,114 @@ void MediaFileGetFFT(ScriptValue &s, ScriptValue *args) {
 						res = mf->pGrabber->GetCurrentBuffer(&size, buffer);
 						buffer = buffer;
 
-    DWORD nCount = 0;
-	double finleft[FFT_LEN];
-	double finright[FFT_LEN];
-	double fout[FFT_LEN];
-	double foutimg[FFT_LEN];
-	double fdraw[FFT_LEN];
-    for (DWORD dw = 0; dw < FFT_LEN; dw++)
-    {
-        {
-            //copy audio signal to fft real component for left channel
-            finleft[nCount] = (double)((short*)buffer)[dw++];
-            //copy audio signal to fft real component for right channel
-            finright[nCount++] = (double)((short*)buffer)[dw];
-        }
-    }
-    //Perform FFT on left channel
-    fft_double(FFT_LEN/2,finleft,fout,foutimg);
-    double re,im,fmax=-99999.9f,fmin=99999.9f;
-	if (CreateListValue(s, 130)) {
-		for (int i=1; i<62; i++) {
-			ScriptValue sv;
-			CreateDoubleValue(sv, fdraw[i]);
-			s.listVal->PushBack(sv);
-		}
-	}
-    for(int i=0;i < FFT_LEN/4;i++)
-    //Use FFT_LEN/4 since the data is mirrored within the array.
-    {
-        re = fout[i];
-        im = foutimg[i];
-        //get amplitude and scale to 0..256 range
-        fdraw[i]=AmplitudeScaled(re,im,FFT_LEN/2,256);
-        if (fdraw[i] > fmax)
-        {
-            fmax = fdraw[i];
-        }
-        if (fdraw[i] < fmin)
-        {
-            fmin = fdraw[i];
-        }
-    }
-    //Use this to send the average band amplitude to something
-    int nAvg, nBars=16, nCur = 0;
-	if (CreateListValue(s, 64)) {
-		for (int i=0; i<FFT_LEN/4; i++) {
-			ScriptValue sv;
-			CreateDoubleValue(sv, sqrt(fout[i]*fout[i]+foutimg[i]*foutimg[i]));
-			s.listVal->PushBack(sv);
-		}
-	}
-    for(int i=1;i < FFT_LEN/4;i++)
-    {
-        nAvg = 0;
-        for (int n=0; n < nBars; n++)
-        {
-            nAvg += (int)fdraw[i];
-        }
-        nAvg /= nBars;
-        //Send data here to something,
-        //nothing to send it to so we print it.
-        //TRACE("Average for Bar#%d is %d\n",nCur++,nAvg);
-        i+=nBars-1;
-    }
-	/*
-    DataHolder* pDataHolder = (DataHolder*)lpData;
-    // Draw left channel
-    CFrequencyGraph* pPeak = (CFrequencyGraph*)pDataHolder->pData;
-    if (::IsWindow(pPeak->GetSafeHwnd()))
-    {
-        pPeak->SetYRange(0,256);
-        pPeak->Update(FFT_LEN/4,fdraw);
-    }
-    
-    // Perform FFT on right channel
-    fmax=-99999.9f,fmin=99999.9f;
-    fft_double(FFT_LEN/2,0,finright,NULL,fout,foutimg);
-    fdraw[0] = fdraw[FFT_LEN/4] = 0;
-    for(i=1;i < FFT_LEN/4-1;i++)
-    //Use FFT_LEN/4 since the data is mirrored within the array.
-    {
-        re = fout[i];
-        im = foutimg[i];
-        //get Decibels in 0-110 range
-        fdraw[i] = Decibels(re,im);
-        if (fdraw[i] > fmax)
-        {
-            fmax = fdraw[i];
-        }
-        if (fdraw[i] < fmin)
-        {
-            fmin = fdraw[i];
-        }
-    }
-    //Draw right channel
-    CFrequencyGraph* pPeak2 = (CFrequencyGraph*)pDataHolder->pData2;
-    if (::IsWindow(pPeak2->GetSafeHwnd()))
-    {
-        pPeak2->SetNumberOfSteps(50);
-        //Use updated dynamic range for scaling
-        pPeak2->SetYRange((int)fmin,(int)fmax);
-        pPeak2->Update(FFT_LEN/4,fdraw);
-    }//*/
-						free(buffer);
+						DWORD nCount = 0;
+						double finleft[FFT_LEN];
+						double finright[FFT_LEN];
+						double fout[FFT_LEN];
+						double foutimg[FFT_LEN];
+						double fdraw[FFT_LEN];
+						for (DWORD dw = 0; dw < FFT_LEN; dw++)
+						{
+							{
+								//copy audio signal to fft real component for left channel
+								finleft[nCount] = (double)((short*)buffer)[dw++];
+								//copy audio signal to fft real component for right channel
+								finright[nCount++] = (double)((short*)buffer)[dw];
+							}
+						}
+						//Perform FFT on left channel
+						fft_double(FFT_LEN/2,finleft,fout,foutimg);
+						double re,im,fmax=-99999.9f,fmin=99999.9f;
+						if (CreateListValue(s, 130)) {
+							for (int i=1; i<62; i++) {
+								ScriptValue sv;
+								CreateDoubleValue(sv, fdraw[i]);
+								s.listVal->PushBack(sv);
+							}
+						}
+						for(int i=0;i < FFT_LEN/4;i++)
+						//Use FFT_LEN/4 since the data is mirrored within the array.
+						{
+							re = fout[i];
+							im = foutimg[i];
+							//get amplitude and scale to 0..256 range
+							fdraw[i]=AmplitudeScaled(re,im,FFT_LEN/2,256);
+							if (fdraw[i] > fmax)
+							{
+								fmax = fdraw[i];
+							}
+							if (fdraw[i] < fmin)
+							{
+								fmin = fdraw[i];
+							}
+						}
+						//Use this to send the average band amplitude to something
+						int nAvg, nBars=16, nCur = 0;
+						if (CreateListValue(s, 64)) {
+							for (int i=0; i<FFT_LEN/4; i++) {
+								ScriptValue sv;
+								CreateDoubleValue(sv, sqrt(fout[i]*fout[i]+foutimg[i]*foutimg[i]));
+								s.listVal->PushBack(sv);
+							}
+						}
+						for(int i=1;i < FFT_LEN/4;i++)
+						{
+							nAvg = 0;
+							for (int n=0; n < nBars; n++)
+							{
+								nAvg += (int)fdraw[i];
+							}
+							nAvg /= nBars;
+							//Send data here to something,
+							//nothing to send it to so we print it.
+							//TRACE("Average for Bar#%d is %d\n",nCur++,nAvg);
+							i+=nBars-1;
+						}
+						/*
+						DataHolder* pDataHolder = (DataHolder*)lpData;
+						// Draw left channel
+						CFrequencyGraph* pPeak = (CFrequencyGraph*)pDataHolder->pData;
+						if (::IsWindow(pPeak->GetSafeHwnd()))
+						{
+							pPeak->SetYRange(0,256);
+							pPeak->Update(FFT_LEN/4,fdraw);
+						}
+					    
+						// Perform FFT on right channel
+						fmax=-99999.9f,fmin=99999.9f;
+						fft_double(FFT_LEN/2,0,finright,NULL,fout,foutimg);
+						fdraw[0] = fdraw[FFT_LEN/4] = 0;
+						for(i=1;i < FFT_LEN/4-1;i++)
+						//Use FFT_LEN/4 since the data is mirrored within the array.
+						{
+							re = fout[i];
+							im = foutimg[i];
+							//get Decibels in 0-110 range
+							fdraw[i] = Decibels(re,im);
+							if (fdraw[i] > fmax)
+							{
+								fmax = fdraw[i];
+							}
+							if (fdraw[i] < fmin)
+							{
+								fmin = fdraw[i];
+							}
+						}
+						//Draw right channel
+						CFrequencyGraph* pPeak2 = (CFrequencyGraph*)pDataHolder->pData2;
+						if (::IsWindow(pPeak2->GetSafeHwnd()))
+						{
+							pPeak2->SetNumberOfSteps(50);
+							//Use updated dynamic range for scaling
+							pPeak2->SetYRange((int)fmin,(int)fmax);
+							pPeak2->Update(FFT_LEN/4,fdraw);
+						}//*/
+/*						free(buffer);
 					}
 			}
 			FreeMediaType(&mt);
 		}
-	}
+	}//*/
 }
 
 void MediaFileGetState(ScriptValue &s, ScriptValue *args) {

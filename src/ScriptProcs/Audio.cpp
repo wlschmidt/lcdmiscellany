@@ -1,11 +1,10 @@
+
 #include "Audio.h"
 #include "../global.h"
 #include "../malloc.h"
 #include "../vm.h"
 #include <Mmsystem.h>
 #include "../util.h"
-
-#define __IKsJackDescription_INTERFACE_DEFINED__
 
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>

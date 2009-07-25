@@ -17,7 +17,7 @@ enum ConnectionType : unsigned short {
 	CONNECTION_SYSTRAY_ICON,
 };
 
-enum HID_DEVICE_TYPE : unsigned short {
+enum HID_DEVICE_TYPE {
 	HID_LCD_G11,
 	HID_LCD_G15_V1,
 	HID_LCD_G15_V2,
@@ -39,8 +39,7 @@ public:
 	G15 *g15;
 	// Exact type, values given to 
 	HID_DEVICE_TYPE hidType;
-	Device(int width, int height, int bpp, ConnectionType cType, HID_DEVICE_TYPE hidType, char *id);
-	virtual ~Device();
+
 	StringValue *id;
 
 	ConnectionType cType;
@@ -52,7 +51,9 @@ public:
 	char sendImage;
 
 	unsigned int gKeyState;
-	int timers[32];
+
+	Device(int width, int height, int bpp, ConnectionType cType, HID_DEVICE_TYPE hidType, char *id);
+	virtual ~Device();
 
 	virtual inline int UpdateImage() {
 		return 0;
