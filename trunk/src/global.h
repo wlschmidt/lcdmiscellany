@@ -70,46 +70,6 @@ extern HWND nextClipboardListener;
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-struct TempData {
-	unsigned long size;
-	char *data;
-
-	inline int SetSize(int s) {
-		void *t = realloc(data, s);
-		if (!t && s) return 0;
-
-		data = (char*)t;
-		size = s;
-		return 1;
-	}
-	inline void Clear() {
-		free(data);
-		data = 0;
-		size = 0;
-	}
-	inline char *GetString(char *s2) {
-		char *s = data;
-		while (s[0]) {
-			char *s3 = s2;
-			while (*s == *s3) {
-				if (!*s) {
-					while (s[-1]) s--;
-					s--;
-					while (s[-1]) s--;
-					return s;
-				}
-				s3++;
-				s++;
-			}
-			while (*s) s++;
-			s++;
-		}
-		return 0;
-	}
-};
-
-extern TempData scratch;
-
 #define VK_BROWSER_BACK        0xA6
 #define VK_BROWSER_FORWARD     0xA7
 #define VK_BROWSER_REFRESH     0xA8

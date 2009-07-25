@@ -10,7 +10,6 @@
 
 #include "global.h"
 #include "Device.h"
-#include "sdk/v3.01/lglcd.h"
 #include "http/httpGetPage.h"
 #include "stringUtil.h"
 #include "ScriptObjects/ScriptObjects.h"
@@ -20,43 +19,29 @@
 #include "G15Util/G15HID.h"
 #include "util.h"
 #include "ScriptObjects/SysTrayIcon.h"
+#include "plugin/plugins.h"
 
-//GUID GUID_MONITOR_POWER_ON =
-//{ 0x02731015L, 0x4510, 0x4526, { 0x99, 0xE6, 0xE5, 0xA1, 0x7E, 0xBD, 0x1A, 0xEA } };
-
+// Unique identifier for use with COPY_DATA.
+// Does not currently matter.
 #define EXEC_MESSAGE ((__int64)0x6543263461789675)
-
-#if (_MSC_VER<1300)
-//#pragma comment(lib, "lib\\MSVCRTd.lib")
-#endif
 
 HWND nextClipboardHwnd = 0;
 
-//#include <stdio.h>
-//#include <stdlib.h>
-
 #include "Timer.h"
 
-// include the Logitech LCD SDK header
-//#include "../../include/lglcd.h"
-// make sure we use the library
 #include "Screen.h"
 #include "Config.h"
 #include "PerfMon.h"
-//#include "ToolBar.h"
 
-//#include "SystemStats.h"
 #include "Network.h"
 #include "ShortCut.h"
-#include "Unicode.h"
 #include "vm.h"
 #include "ScriptProcs/networking/ScriptIP.h"
 #include "ScriptProcs/Event/Event.h"
-//#include "fonts.h"
+
 #include "ScriptProcs/Event/Keyboard.h"
 #include "ScriptProcs/Audio.h"
 
-TempData scratch = {0,0};
 PerfMon perfMon;
 
 void RedrawNow(StringValue *dev) {
@@ -1160,7 +1145,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			ChangeClipboardChain(hWnd, nextClipboardHwnd);
 			nextClipboardHwnd = 0;
 			quitting = 1;
-			if (devices[0]->cType == CONNECTION_DIRECT) {
+			if (devices && devices[0]->cType == CONNECTION_DIRECT) {
 				for (int i=0; i<numDevices; i++) {
 					if (devices[i]->cType == CONNECTION_DIRECT) {
 						devices[i]->Clear();
@@ -1398,6 +1383,7 @@ int WINAPI WinMain(	HINSTANCE hInst,
 	activeScreen = dummyScreen = new Device(160, 43, 1, CONNECTION_NULL, SDK_160_43_1, "");
 	UpdateSDKDevices();
 	InitHID();
+	InitPlugins();
 	{
 		int test = config.GetConfigInt((unsigned char*)"Script", (unsigned char*) "ScriptDebug", 0);
 		if (test & 1) {
@@ -1500,8 +1486,9 @@ int WINAPI WinMain(	HINSTANCE hInst,
 		}
 	}
 	delete dummyScreen;
-	UninitSDK();
+	UninitPlugins();
 	UninitHID();
+	UninitSDK();
 	UninitIcons();
 	CleanupDdraw();
 	config.Save();
@@ -1515,7 +1502,6 @@ int WINAPI WinMain(	HINSTANCE hInst,
 	CleanKeyEvents();
 
 	CleanupScripting();
-	scratch.Clear();
 	UninitAudio();
 	CleanupVistaVolume();
 	KillCom();

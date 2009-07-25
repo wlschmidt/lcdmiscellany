@@ -10,17 +10,13 @@ void GetForegroundWindow(ScriptValue &s, ScriptValue *args) {
 }
 
 void MyGetWindowText(ScriptValue &s, ScriptValue *args) {
-	int len = GetWindowTextLength((HWND)args[0].intVal);
+	int len = GetWindowTextLengthW((HWND)args[0].intVal);
 	if (len > 0) {
-		if ((int)scratch.size < len*2+200) {
-			if (!scratch.SetSize(len*2 + 200)) return;
-		}
-		int len2 = GetWindowText((HWND)args[0].intVal, (wchar_t*)scratch.data, scratch.size/2);
-		unsigned char * temp2 = 0;
-		if (len2 && len2 < len + 199 && (temp2 = UTF16toUTF8Alloc((wchar_t*)scratch.data))) {
-			CreateStringValue(s, temp2);
-			free(temp2);
-		}
+		len += 200;
+		wchar_t *temp = (wchar_t*) malloc(sizeof(wchar_t) * len);
+		int len2 = GetWindowTextW((HWND)args[0].intVal, temp, len);
+		CreateStringValue(s, temp, len2);
+		free(temp);
 	}
 }
 

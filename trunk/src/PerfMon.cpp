@@ -291,6 +291,25 @@ int PerfMon::AddCounter(StringValue *objectType, StringValue *object, StringValu
 	return id;
 }
 
+char *GetString(char *s, char *s2) {
+	while (s[0]) {
+		char *s3 = s2;
+		while (*s == *s3) {
+			if (!*s) {
+				while (s[-1]) s--;
+				s--;
+				while (s[-1]) s--;
+				return s;
+			}
+			s3++;
+			s++;
+		}
+		while (*s) s++;
+		s++;
+	}
+	return 0;
+}
+
 void PerfMon::GetIDs() {
 	//*
 	int i;
@@ -319,8 +338,10 @@ void PerfMon::GetIDs() {
 			counters[i].objectType.id = ParseInt(str);
 		}
 	}//*/
-	TempData scratch = {0, 0};
 	int loadedData = 0;
+
+	unsigned long dataSize = 500;
+	char *data = (char*) malloc(dataSize);
 
 	for (i=0; i<numCounters; i++) {
 		if ((int)counters[i].objectType.id < 0 || (int)counters[i].counter.id < 0) {
@@ -328,27 +349,31 @@ void PerfMon::GetIDs() {
 				DWORD size = 0;
 				int w = RegQueryValueExA(HKEY_PERFORMANCE_TEXT, "Counter", 0, &type, 0, &size);
 				if (w != ERROR_SUCCESS || type != REG_MULTI_SZ) continue;
-				if (!scratch.SetSize(size+1)) continue;
-				w = RegQueryValueExA(HKEY_PERFORMANCE_TEXT, "Counter", 0, &type, (unsigned char*)scratch.data, &size);
+				if (dataSize < size) {
+					void *temp = realloc(data, size + 100);
+					if (!temp) continue;
+					dataSize = size + 100;
+					data = (char*) temp;
+				}
+				w = RegQueryValueExA(HKEY_PERFORMANCE_TEXT, "Counter", 0, &type, (BYTE*)data, &size);
 				if (w != ERROR_SUCCESS) continue;
-				scratch.data[size] = 0;
+				data[size] = 0;
 				loadedData = 1;
 			}
 
 			char *junk;
-			if ((int)counters[i].objectType.id < 0  && (str = scratch.GetString((char*)counters[i].objectType.s->value))) {
+			if ((int)counters[i].objectType.id < 0  && (str = GetString(data, (char*)counters[i].objectType.s->value))) {
 				int w = (int)strlen(str);
 				if (w <= sizeof(counters[i].objectTypeString)) {
 					strcpy(counters[i].objectTypeString, str);
 					counters[i].objectType.id = strtoul(str, &junk, 0);
 				}
 			}
-			if ((int)counters[i].counter.id < 0  && (str = scratch.GetString((char*)counters[i].counter.s->value))) {
+			if ((int)counters[i].counter.id < 0  && (str = GetString(data, (char*)counters[i].counter.s->value))) {
 				counters[i].counter.id = strtoul(str, &junk, 0);
 			}
 		}
 	}
-	if (scratch.size) scratch.Clear();
 }
 
 char *total = "_Total";
@@ -501,7 +526,6 @@ void __fastcall PerfMon::Update(int bandwidth) {
 	//while(test>=0) {test--;
 
 	int i, j;
-	unsigned long dataSize;
 	char queryString[5000];
 	char *q = queryString;
 	{
@@ -598,44 +622,46 @@ void __fastcall PerfMon::Update(int bandwidth) {
 			q++[0] = ' ';
 		}
 	}
-	if (q != queryString) {
+
+	static unsigned long lastDataSize = 0;
+	unsigned long dataSize = lastDataSize + 2000;
+	unsigned char *data = (unsigned char*) malloc(dataSize);
+
+	if (q != queryString && data) {
 		q[-1] = 0;
 		int w = ERROR_MORE_DATA;
 
 		wchar_t *q = UTF8toUTF16Alloc((unsigned char*)queryString);
 		if (q) {
 			while (1) {
-				if (scratch.size<500) scratch.SetSize(500);
-				dataSize = scratch.size;
-				if (q)
-				w = RegQueryValueExW(HKEY_PERFORMANCE_DATA, q, 0, 0, (unsigned char*)scratch.data, &dataSize);
-				if (w == ERROR_SUCCESS) break;
-				if (w != ERROR_MORE_DATA || !scratch.SetSize(dataSize * 2)) {
+				w = RegQueryValueExW(HKEY_PERFORMANCE_DATA, q, 0, 0, data, &dataSize);
+				if (w != ERROR_MORE_DATA || dataSize + 2000 < 2000) break;
+				void *temp = realloc(data, dataSize += 2000);
+				if (!temp) {
 					w = ERROR_MORE_DATA;
 					break;
 				}
+				data = (unsigned char*) temp;
 			}
 			free(q);
 		}
 		//RegCloseKey(HKEY_PERFORMANCE_DATA);
 
-		PERF_DATA_BLOCK *header = (PERF_DATA_BLOCK *) scratch.data;
+		PERF_DATA_BLOCK *header = (PERF_DATA_BLOCK *) data;
 		if (w != ERROR_SUCCESS || dataSize < sizeof(PERF_DATA_BLOCK) ||
 			header->HeaderLength < 0 || header->HeaderLength > dataSize) {
-			// ??
-			return;
-		}
-		if (dataSize + (dataSize/2) < scratch.size) {
-			scratch.SetSize(dataSize + (dataSize/4));
-			header = (PERF_DATA_BLOCK *) scratch.data;
+				free(data);
+				lastDataSize = 0;
+				// ??
+				return;
 		}
 
-
+		lastDataSize = dataSize;
 
 		int pos = header->HeaderLength;
 
 		for (unsigned int k=0; k<header->NumObjectTypes; k++) {
-			PERF_OBJECT_TYPE *type = (PERF_OBJECT_TYPE*) (scratch.data+pos);
+			PERF_OBJECT_TYPE *type = (PERF_OBJECT_TYPE*) (data+pos);
 			//if (pos + sizeof(PERF_OBJECT_TYPE) > dataSize ||
 			//	((pos + type->TotalByteLength > dataSize) |
 			//	 (type->HeaderLength < sizeof(PERF_OBJECT_TYPE)) |
@@ -650,7 +676,7 @@ void __fastcall PerfMon::Update(int bandwidth) {
 					if (counters[i].objectType.id == type->ObjectNameTitleIndex) {
 						int pos2 = pos + type->HeaderLength;
 						for (unsigned int j = 0; j <type->NumCounters; j++) {
-							PERF_COUNTER_DEFINITION* def = (PERF_COUNTER_DEFINITION*) &scratch.data[pos2];
+							PERF_COUNTER_DEFINITION* def = (PERF_COUNTER_DEFINITION*) &data[pos2];
 							//if (pos2 + sizeof(PERF_COUNTER_DEFINITION) > pos + type->TotalByteLength ||
 							//	pos2 + def->ByteLength > pos + type->TotalByteLength ||
 							//	def->ByteLength < 0 ||
@@ -700,7 +726,7 @@ void __fastcall PerfMon::Update(int bandwidth) {
 							PERF_INSTANCE_DEFINITION *inst = 0;
 							char *name = 0;
 							if (type->NumInstances != PERF_NO_INSTANCES) {
-								inst = (PERF_INSTANCE_DEFINITION *) &scratch.data[pos2];
+								inst = (PERF_INSTANCE_DEFINITION *) &data[pos2];
 								/*
 								if (pos2 + sizeof(PERF_INSTANCE_DEFINITION) > dataSize ||
 									inst->ByteLength < 0 || pos2 + inst->ByteLength > dataSize ||
@@ -710,8 +736,8 @@ void __fastcall PerfMon::Update(int bandwidth) {
 									break;
 									//*/
 								wchar_t * name2;
-								if (inst->NameLength > 2 && ((wchar_t*)&scratch.data[pos2 + inst->NameOffset])[0]) {
-									name2 = (wchar_t*)&scratch.data[pos2 + inst->NameOffset];
+								if (inst->NameLength > 2 && ((wchar_t*)&data[pos2 + inst->NameOffset])[0]) {
+									name2 = (wchar_t*)&data[pos2 + inst->NameOffset];
 									name2[inst->NameLength/2-1] = 0;
 									/*
 									//if (type->CodePage == 0) {
@@ -747,7 +773,7 @@ void __fastcall PerfMon::Update(int bandwidth) {
 								name = "";
 							}
 
-							PERF_COUNTER_BLOCK * block = (PERF_COUNTER_BLOCK *) &scratch.data[pos2];
+							PERF_COUNTER_BLOCK * block = (PERF_COUNTER_BLOCK *) &data[pos2];
 							/*
 							if (pos2 + sizeof(PERF_COUNTER_BLOCK) > dataSize ||
 								block->ByteLength < 0 || pos2 + block->ByteLength > dataSize ||
@@ -761,11 +787,11 @@ void __fastcall PerfMon::Update(int bandwidth) {
 									__int64 value;
 									int happy = 0;
 									if (counter->CounterSize == 4) {
-										value = ((int*)&scratch.data[pos2 + counter->CounterOffset])[0];
+										value = ((int*)&data[pos2 + counter->CounterOffset])[0];
 										happy = 1;
 									}
 									else if (counter->CounterSize == 8) {
-										value = ((__int64*)&scratch.data[pos2 + counter->CounterOffset])[0];
+										value = ((__int64*)&data[pos2 + counter->CounterOffset])[0];
 										happy = 1;
 									}
 									if (happy) {
@@ -901,8 +927,6 @@ void __fastcall PerfMon::Update(int bandwidth) {
 		if (counters[i].normalUpdate)
 			counters[i].CleanOld();
 	}
-
-	if (scratch.size > 20000) scratch.Clear();
 
 	//}
 
