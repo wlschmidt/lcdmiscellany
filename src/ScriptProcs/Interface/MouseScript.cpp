@@ -93,8 +93,6 @@ void MouseUp(ScriptValue &s, ScriptValue *args) {
 	mouse_event(button, 0, 0, button2, 0);
 }
 
-#define MOUSEEVENTF_HWHEEL 0x1000
-
 void MouseScroll(ScriptValue &s, ScriptValue *args) {
 	int wheel = MOUSEEVENTF_WHEEL;
 	if (args[1].i32 == 1) {

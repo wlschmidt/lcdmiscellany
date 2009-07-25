@@ -51,11 +51,9 @@ struct LCDInfo {
 	// At the moment, mostly not used...
 	int refreshRate;
 
-	void *appData;
-
 	lcdStart *Start;
 	lcdStop *Stop;
-	lcdUpdate *Update();
+	lcdUpdate *Update;
 };
 
 // Callback functions passed to LCD plugins.  Thread safe,
