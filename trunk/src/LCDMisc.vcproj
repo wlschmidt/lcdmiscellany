@@ -131,6 +131,102 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory=".\..\Debug"
+			IntermediateDirectory=".\..\Temp\Debug"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Debug/LCDMisc.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				DefaultCharIsUnsigned="false"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+				DisableSpecificWarnings="4995,4996"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="oleaut32.lib Advapi32.lib gdi32.lib Ole32.lib User32.lib pdh.lib Winmm.lib Vfw32.lib Ws2_32.lib Strmiids.lib shell32.lib Iphlpapi.lib Psapi.lib Setupapi.lib hid.lib hidclass.lib hidparse.lib ddraw.lib comctl32.lib wbemuuid.lib"
+				OutputFile=".\..\LCD Miscellany\$(ProjectName)_debug.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				DelayLoadDLLs="ddraw.dll;comctl32.dll;ole32.dll;psapi.dll;shell32.dll"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				LargeAddressAware="2"
+				TargetMachine="1"
+				Profile="false"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile=".\Debug/LCDMisc.bsc"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|x64"
 			OutputDirectory="..\$(PlatformName)$(ConfigurationName)"
 			IntermediateDirectory="..\temp\$(PlatformName)$(ConfigurationName)"
@@ -233,102 +329,6 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory=".\..\Debug"
-			IntermediateDirectory=".\..\Temp\Debug"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/LCDMisc.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				DefaultCharIsUnsigned="false"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="4"
-				DisableSpecificWarnings="4995,4996"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="oleaut32.lib Advapi32.lib gdi32.lib Ole32.lib User32.lib pdh.lib Winmm.lib Vfw32.lib Ws2_32.lib Strmiids.lib shell32.lib Iphlpapi.lib Psapi.lib Setupapi.lib hid.lib hidclass.lib hidparse.lib ddraw.lib comctl32.lib wbemuuid.lib"
-				OutputFile=".\..\LCD Miscellany\$(ProjectName)_debug.exe"
-				LinkIncremental="2"
-				SuppressStartupBanner="true"
-				DelayLoadDLLs="ddraw.dll;comctl32.dll;ole32.dll;psapi.dll;shell32.dll"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				LargeAddressAware="2"
-				TargetMachine="1"
-				Profile="false"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Debug/LCDMisc.bsc"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
@@ -462,7 +462,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -470,7 +470,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -498,7 +498,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -506,7 +506,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -549,7 +549,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|x64"
+						Name="Debug|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -557,7 +557,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|Win32"
+						Name="Release|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -612,7 +612,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|x64"
+							Name="Debug|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -620,7 +620,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug|Win32"
+							Name="Release|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -660,7 +660,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|x64"
+							Name="Debug|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -668,7 +668,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug|Win32"
+							Name="Release|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -725,7 +725,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|x64"
+							Name="Debug|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -734,7 +734,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug|Win32"
+							Name="Release|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -813,7 +813,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|x64"
+						Name="Debug|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -821,7 +821,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|Win32"
+						Name="Release|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -937,7 +937,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|x64"
+							Name="Debug|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -946,7 +946,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug|Win32"
+							Name="Release|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1060,7 +1060,7 @@
 								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|x64"
+								Name="Debug|Win32"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -1069,7 +1069,7 @@
 								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug|Win32"
+								Name="Release|x64"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -1317,7 +1317,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|x64"
+							Name="Debug|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1326,7 +1326,7 @@
 							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug|Win32"
+							Name="Release|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1367,6 +1367,36 @@
 				</File>
 				<File
 					RelativePath=".\G15Util\G15HID.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="plugin"
+				>
+				<File
+					RelativePath=".\plugin\plugin.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\plugin\plugin.h"
 					>
 				</File>
 			</Filter>

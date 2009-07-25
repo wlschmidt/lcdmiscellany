@@ -10,7 +10,6 @@
 #include "Network.h"
 #include "malloc.h"
 #include "Unicode.h"
-//HANDLE hMutex = CreateMutex(0,0,0);
 
 TGetAddrInfoW pGetAddrInfoW = 0;
 TFreeAddrInfoW pFreeAddrInfoW = 0;
