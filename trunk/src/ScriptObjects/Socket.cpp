@@ -72,7 +72,7 @@ void IPAddrNetProc (addrinfo *info, __int64 id) {
 			}
 		}
 		// Not sure it matters, but this will always point to the right function.
-		FreeAddrInfoW((ADDRINFOW*)info);
+		pFreeAddrInfoW((ADDRINFOW*)info);
 	}
 	stack->Push(sv);
 	RunStack(stack);
@@ -187,9 +187,9 @@ DWORD WINAPI DNSThreadProc (__in  LPVOID lpParameter) {
 		//*/
 	}
 	if (size) {
-		if (GetNameInfoW) {
+		if (pGetNameInfoW) {
 			wchar_t host2[1000];
-			res = GetNameInfoW(addr, size, host2, sizeof(host2)/sizeof(wchar_t), 0, 0, 0);
+			res = pGetNameInfoW(addr, size, host2, sizeof(host2)/sizeof(wchar_t), 0, 0, 0);
 			if (!res) {
 				UTF16toUTF8(host, host2);
 			}

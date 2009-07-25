@@ -762,13 +762,6 @@ const unsigned int WM_TASKBARCREATED = RegisterWindowMessageA("TaskbarCreated");
 
 HWND lastForegroundWindow = 0;
 
-#define PBT_POWERSETTINGCHANGE 32787
-typedef struct {
-  GUID PowerSetting;
-  DWORD DataLength;
-  UCHAR Data[1];
-} POWERBROADCAST_SETTING;
-
 int screenSaverOn = 0;
 int monitorOff = 0;
 

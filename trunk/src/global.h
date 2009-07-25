@@ -2,7 +2,7 @@
 #pragma once
 #define _UNICODE
 #define UNICODE
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0600
 #define WINVER _WIN32_WINNT
 
 #define _WSPIAPI_COUNTOF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
