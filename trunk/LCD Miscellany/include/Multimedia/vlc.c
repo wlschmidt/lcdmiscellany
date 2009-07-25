@@ -26,9 +26,8 @@ struct VLCController extends MediaPlayerController {
 
 	// For the love of god...
 	function GetTrack() {
-		$junk = HttpGetWait(%playlistUrl);
-		// O(n^2), assuming a valid playlist.  Otherwise, could be O(n^3).
-		$playlist = RegExp($junk, "[.\n]*<node ([.\n]*?current=|"current|"[.\n]*?)</node>")[0][0];
+		$playlist = HttpGetWait(%playlistUrl);
+
 		$index = RegExp($playlist, "(current=|"current|")")[0][1];
 		%track = %tracks = 0;
 		while (1) {
@@ -40,7 +39,7 @@ struct VLCController extends MediaPlayerController {
 			if ($pos < $index) %track++;
 		}
 		if (%needTitle) {
-			$temp = RegExp($playlist, "[^>]*?name=|"(.*?)|"[^>]*\/>", $index);
+			$temp = RegExp($playlist, "name=|"(.*?)|"", $index);
 			if (IsList($temp)) {
 				%title = RegExp($temp[0][0], "([^\\/]*)$")[0][0];
 			}
@@ -183,28 +182,11 @@ struct VLCController extends MediaPlayerController {
 		}
 		else %state = 2;
 
-		// If names contain '<' character, will be escaped, so have to use the XML parser here.
-		$xml3 = ParseXML(RegExp($xml, "name=|"Meta-information|">([.\n]*?)</category>")[0][0]);
-		%needTitle = 1;
-		for ($j=0; $j<size($xml3); $j += 2) {
-			$xml4 = $xml3[$j+1];
-			$n = GetVLCXMLName($xml4);
-			if ($n ==S "Title") {
-				if (%title !=S $xml4[3]) {
-					// If title or duration changes,
-					// recheck playlist.
-					$needUpdate = 1;
-					%needTitle = 0;
-				}
-				%title = $xml4[3];
-			}
-			else if ($n ==S "Artist") {
-				%artist = $xml4[3];
-			}
-			else if ($n ==S "Date") {
-				%year = $xml4[3];
-			}
-		}
+		//Don't need XML parser as XML is escaped in CDATA (Maybe new to VLC v1.0)
+		%title = RegExp($xml, "<title><!\[CDATA\[(.*?)\]\]></title>")[0][0];
+		%artist = RegExp($xml, "<artist><!\[CDATA\[(.*?)\]\]></artist>")[0][0];
+		%year = RegExp($xml, "<date><!\[CDATA\[(.*?)\]\]></date>")[0][0];
+
 
 		if ($needUpdate) {
 			NeedRedraw();
