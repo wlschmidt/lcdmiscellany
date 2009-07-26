@@ -179,7 +179,7 @@ Plugin::~Plugin() {
 void Plugin::LcdDestroy(int index) {
 	ActiveLcdInfo *info = &lcd.lcds[index];
 	if (info->device) {
-		delete info->device;
+		DeleteDevice(info->device);
 	}
 	if (info->info->Destroy) {
 		info->info->Destroy(info->info);
