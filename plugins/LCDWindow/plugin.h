@@ -90,7 +90,7 @@ typedef void (CALLBACK * lcdDeviceChange)(int id);
 // Triggers event, with the specified string as a paramter.  Strings are assumed to be in UTF8.
 // If need more than one parameter, can use a delimited list, and scripts can split it themselves.
 // If no parameter is needed, param can be null.
-typedef void (CALLBACK * lcdTriggerEvent)(int id, unsigned char *eventName, unsigned char *param);
+typedef void (CALLBACK * lcdTriggerEvent)(int id, char *eventName, char *param);
 
 struct LcdCallbacks {
 	// For simplicity, same as LCDInfo version (LCD_PLUGIN_VERSION).
@@ -114,7 +114,7 @@ struct LcdCallbacks {
 
 // Callbacks contains all callback functions.  Callback structure
 // will not be modified, so no need to make your own copy.
-typedef int (CALLBACK * lcdInit)(const LcdCallbacks *callbacks);
+typedef int (CALLBACK * lcdInit)(LcdCallbacks *callbacks);
 
 // Called when done.  No other commands will be called unless lcdInit()
 // is called first.

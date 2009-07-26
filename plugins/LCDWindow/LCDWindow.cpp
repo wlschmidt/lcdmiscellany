@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <stdio.h>
 #include "plugin.h"
 
 HINSTANCE ghInst;
@@ -18,16 +19,74 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	int i = -1;
 	if (windows[0].hWnd == hWnd) i = 0;
 	else if (windows[1].hWnd == hWnd) i = 1;
+	char eventArg[1000];
 	if (i >= 0) {
 		switch (uMsg) {
 			case WM_CLOSE:
 				DestroyWindow(hWnd);
+				break;
+			case WM_LBUTTONDOWN:
+			case WM_LBUTTONUP:
+			case WM_RBUTTONDOWN:
+			case WM_RBUTTONUP:
+			case WM_MBUTTONDOWN:
+			case WM_MBUTTONUP:
+			case WM_MOUSEMOVE:
+				if (callback) {
+					int x = (short)lParam;
+					int y = (short)(lParam>>16);
+					sprintf(eventArg, "%i,%i", x, y);
+					switch (uMsg) {
+						case WM_LBUTTONDOWN:
+							callback->TriggerEvent(callback->id, "MouseLDown", eventArg);
+							break;
+						case WM_LBUTTONUP:
+							callback->TriggerEvent(callback->id, "MouseLUp", eventArg);
+							break;
+						case WM_MBUTTONDOWN:
+							callback->TriggerEvent(callback->id, "MouseMDown", eventArg);
+							break;
+						case WM_MBUTTONUP:
+							callback->TriggerEvent(callback->id, "MouseMUp", eventArg);
+							break;
+						case WM_RBUTTONDOWN:
+							callback->TriggerEvent(callback->id, "MouseRDown", eventArg);
+							break;
+						case WM_RBUTTONUP:
+							callback->TriggerEvent(callback->id, "MouseRUp", eventArg);
+							break;
+						case WM_MOUSEMOVE:
+							callback->TriggerEvent(callback->id, "MouseMove", eventArg);
+							break;
+						default:
+							break;
+					}
+				}
+
 				break;
 			case WM_DESTROY:
 				windows[i].hWnd = 0;
 				if (callback) {
 					callback->DeviceChange(callback->id);
 				}
+				break;
+			case WM_SIZE:
+				{
+					RECT r;
+					GetClientRect(hWnd, &r);
+					if (r.right > 0 && r.bottom > 0) {
+						// Try and prevent flood of queued messages while resizing.
+						int needMessage = 0;
+						if (windows[i].realWidth == windows[i].width &&
+							windows[i].realHeight == windows[i].height)
+								needMessage = 1;
+						windows[i].realWidth = r.right;
+						windows[i].realHeight = r.bottom;
+						if (needMessage && callback) callback->DeviceChange(callback->id);
+					}
+				}
+				break;
+			default:
 				break;
 		}
 	}
@@ -80,7 +139,7 @@ void InitWindow(WindowInfo *win, char *name) {
 }
 
 int registered = 0;
-int CALLBACK lcdInit(const LcdCallbacks *callbacks) {
+int CALLBACK lcdInit(LcdCallbacks *callbacks) {
 	callback = callbacks;
 	WNDCLASS wndclass = {
 		0,
