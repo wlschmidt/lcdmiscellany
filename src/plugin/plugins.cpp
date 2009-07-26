@@ -1,3 +1,5 @@
+#define LCD_TYPEDEFS
+
 #include "../Global.h"
 #include "../Device.h"
 #include "plugin.h"
@@ -64,8 +66,15 @@ public:
 
 	// Currently ignore the return value.
 	int UpdateImage() {
+		BitmapInfo bmp;
+		bmp.version = LCD_PLUGIN_VERSION;
+		bmp.width = width;
+		bmp.height = height;
+		bmp.hDC = hDC;
 		if (info->bpp > 8) {
-			info->Update(info, (unsigned char*)image, width, height, 32);
+			bmp.bpp = 32;
+			bmp.bitmap = (unsigned char*)image;
+			info->Update(info, &bmp);
 		}
 		else {
 			unsigned char *pixels = (unsigned char*) malloc(width*height);
@@ -74,7 +83,9 @@ public:
 				// Division by 3 without the divide.
 				pixels[p] = ((((int)image[p].r + (int)image[p].g + (int)image[p].b) + 1) * 43691) >> 17;
 			}
-			info->Update(info, pixels, width, height, 8);
+			bmp.bpp = 8;
+			bmp.bitmap = pixels;
+			info->Update(info, &bmp);
 			free(pixels);
 		}
 		return 1;
@@ -156,7 +167,7 @@ Plugin::Plugin(int id, HMODULE module) {
 	lcd.Init = (lcdInit) GetProcAddress(module, "lcdInit");
 	lcd.Uninit = (lcdUninit) GetProcAddress(module, "lcdUninit");
 	lcd.Enum = (lcdEnum) GetProcAddress(module, "lcdEnum");
-	if (lcd.Enum && (lcd.Init || lcd.Init(&lcd.callbacks))) {
+	if (lcd.Enum && (!lcd.Init || lcd.Init(&lcd.callbacks))) {
 		type |= PLUGIN_TYPE_LCD;
 		LcdEnum();
 	}
@@ -220,6 +231,7 @@ void Plugin::LcdEnum() {
 			lcd.lcds[lcd.numLcds].info = info;
 			if (!info->Start || info->Start(info)) {
 				lcd.lcds[lcd.numLcds].device = new DllLcdDevice(this, info);
+				AddDevice(lcd.lcds[lcd.numLcds].device);
 			}
 			lcd.numLcds++;
 		}
