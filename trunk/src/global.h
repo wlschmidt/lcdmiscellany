@@ -114,6 +114,9 @@ extern HWND nextClipboardListener;
 #define WMU_TRIGGER_EVENT_FULL	(WM_APP + 0x304)
 #define WMU_EATEN_KEY			(WM_APP + 0x305)
 
+#define WMA_LCD_DEVICE_CHANGE	 (WM_APP + 0x310)
+#define WMA_TRIGGER_EVEN_BY_NAME (WM_APP + 0x311)
+
 #include "globals.h"
 
 

@@ -9,14 +9,17 @@ enum UpdateResult {
 	UPDATE_KILL_ME
 };
 
+// Communication method.
 enum ConnectionType : unsigned short {
 	CONNECTION_NULL,
 	CONNECTION_SDK103,
 	CONNECTION_SDK301,
 	CONNECTION_DIRECT,
 	CONNECTION_SYSTRAY_ICON,
+	CONNECTION_3RD_PARTY
 };
 
+// Display device type.
 enum HID_DEVICE_TYPE {
 	HID_LCD_G11,
 	HID_LCD_G15_V1,
@@ -27,6 +30,7 @@ enum HID_DEVICE_TYPE {
 	SDK_160_43_1 = 64,
 	SDK_320_240_32 = 65,
 	SYSTRAY_ICON = 128,
+	LCD_3RD_PARTY = 256,
 };
 
 // Currently only used (in other files) as an optimization.

@@ -14,37 +14,41 @@
  * Functions for LCD plugins. *
  ******************************/
 
-struct LCDInfo;
+struct LcdInfo;
 
 // Return 0 on fail.  Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.  Not required.
 // Currently always called on each device right after enumerating
 // all devices, but may allow for more advanved behavior later.
-typedef int (CALLBACK * lcdStart)(LCDInfo *info);
+typedef int (CALLBACK * lcdStart)(LcdInfo *info);
 
 // Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.  Not required.
 // Currently always called on each device right before destroying
 // it, but may allow for more advanved behavior later.
-typedef void (CALLBACK * lcdStop)(LCDInfo *info);
+typedef void (CALLBACK * lcdStop)(LcdInfo *info);
 
 // Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.
 // Final function called on info.  Not required.
-typedef void (CALLBACK * lcdDestroy)(LCDInfo *info);
+typedef void (CALLBACK * lcdDestroy)(LcdInfo *info);
 
 // Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.  Required for each LCD.
-typedef void (CALLBACK * lcdUpdate)(LCDInfo *info, unsigned char *bitmap, int width, int height);
+// Bpp is 8 (for 1 or 8 bpp lcds) or 32 (for 24 or 32 bpp lcds).
+typedef void (CALLBACK * lcdUpdate)(LcdInfo *info, unsigned char *bitmap, int width, int height, int bpp);
 
 // Plugin returns a pointed to a populated data structure in response to lcdEnum.
-struct LCDInfo {
+struct LcdInfo {
 	// Version of the interface the plugin supports.
 	int version;
 
+	// Both must be >= 1;
 	int width;
 	int height;
-	// Should be 1, 8, 24, or 32.
+
+	// Must be 1, 8, 24, or 32.
+	// 1 and 8 images are send as 8 bpp structures, and 24 and 32 are passed as 32.
 	int bpp;
 
 	// String identifying the LCD.  Ideally, should be unique.
@@ -76,7 +80,7 @@ typedef void (CALLBACK * lcdDeviceChange)(int id);
 // If no parameter is needed, param can be null.
 typedef void (CALLBACK * lcdTriggerEvent)(int id, unsigned char *eventName, unsigned char *param);
 
-struct LCDCallbacks {
+struct LcdCallbacks {
 	// For simplicity, same as LCDInfo version (LCD_PLUGIN_VERSION).
 	int version;
 
@@ -98,7 +102,7 @@ struct LCDCallbacks {
 
 // Callbacks contains all callback functions.  Callback structure
 // will not be modified, so no need to make your own copy.
-typedef int (CALLBACK * lcdInit)(const LCDCallbacks *callbacks);
+typedef int (CALLBACK * lcdInit)(const LcdCallbacks *callbacks);
 
 // Called when done.  No other commands will be called unless lcdInit()
 // is called first.
@@ -110,7 +114,7 @@ typedef void (CALLBACK * lcdUninit)();
 // Returned structure must stay valid until its destroy function is called on itself.
 // It will be be called until it returns null.
 // All devices will be stopped and then destroyed before enumerating devices again.
-typedef LCDInfo * (CALLBACK * lcdEnum)();
+typedef LcdInfo * (CALLBACK * lcdEnum)();
 
 
 #endif

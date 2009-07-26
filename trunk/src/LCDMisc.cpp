@@ -618,24 +618,15 @@ static void Draw() {
 	int redrawn = 0;
 
 	int SDKConnections = 0;
+	int needDummy = 1;
 	for (int i=0; i<numDevices; i++) {
 		SDKConnections += (devices[i]->cType == CONNECTION_SDK103 || devices[i]->cType == CONNECTION_SDK301);
 	}
 
-	if (!SDKConnections) {
-		// Prevents recursive calls.
-		if (((Device*)dummyScreen)->needRedraw) {
-			// Prevents recursive calls with initial check, just in case.
-			dummyScreen = 0;
-			ScriptValue sv;
-			CreateNullValue(sv);
-			TriggerEvent(drawEvent, CAN_DRAW, &sv);
-			lastDraw = tick;
-			dummyScreen = activeScreen;
-			redrawn = 1;
-		}
-	}
 	for (int i=0; i<numDevices; i++) {
+		if (devices[i]->cType != CONNECTION_SYSTRAY_ICON) {
+			needDummy = 0;
+		}
 		if (devices[i]->cType == CONNECTION_DIRECT && SDKConnections) {
 			devices[i]->sendImage = 0;
 			continue;
@@ -684,6 +675,19 @@ static void Draw() {
 				redrawn = 1;
 			}
 			activeScreen = dummyScreen;
+		}
+	}
+	if (needDummy) {
+		// Prevents recursive calls.
+		if (((Device*)dummyScreen)->needRedraw) {
+			// Prevents recursive calls with initial check, just in case.
+			dummyScreen = 0;
+			ScriptValue sv;
+			CreateNullValue(sv);
+			TriggerEvent(drawEvent, CAN_DRAW, &sv);
+			lastDraw = tick;
+			dummyScreen = activeScreen;
+			redrawn = 1;
 		}
 	}
 
@@ -871,6 +875,24 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 					id = keyDownEvent;
 				}
 				TriggerEvent(id, &modifier, &vk, &string);
+			}
+			return 0;
+		case WMA_LCD_DEVICE_CHANGE:
+			RefreshPluginDevices(wParam);
+			return 0;
+		case WMA_TRIGGER_EVEN_BY_NAME:
+			{
+				unsigned char *e = (unsigned char*) wParam;
+				ScriptValue sv;
+				CreateStringValue(sv, (StringValue*)lParam);
+				int id = GetEventId(e, 1);
+				free(e);
+				if (id >= 0) {
+					TriggerEvent(id, &sv);
+				}
+				else {
+					sv.Release();
+				}
 			}
 			return 0;
 		case WMU_TRIGGER_EVENT:

@@ -66,13 +66,6 @@ public:
 		}
 		else if (width == 320 && height == 240 && bpp == 32) {
 			memcpy(bmp.bmp_qvga32.pixels, image, sizeof(bmp.bmp_qvga32.pixels));
-			/*
-			for (int p = 240*320-1; p>=0; p--) {
-				bmp.bmp_qvga32.pixels[4*p] = image[p].b;
-				bmp.bmp_qvga32.pixels[4*p+1] = image[p].g;
-				bmp.bmp_qvga32.pixels[4*p+2] = image[p].r;
-				bmp.bmp_qvga32.pixels[4*p+3] = image[p].a;
-			}//*/
 			bmp.hdr.Format = LGLCD_BMP_FORMAT_QVGAx32;
 			res = lgLcdUpdateBitmap(deviceID, &bmp.hdr, LGLCD_PRIORITY_NORMAL);
 			if (res != ERROR_SUCCESS) {

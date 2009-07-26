@@ -35,6 +35,10 @@ int GetEventId(unsigned char *string, int make) {
 void SetEventHandler(ScriptValue &s, ScriptValue *args) {
 	if (args[0].stringVal->len == 0) return;
 	TableEntry<Event> *entry = Events.Find(args[0].stringVal);
+	if (!entry) {
+		GetEventId(args[0].stringVal->value, 1);
+		entry = Events.Find(args[0].stringVal);
+	}
 	CreateIntValue(s, 0);
 	int res;
 	if (!entry) {

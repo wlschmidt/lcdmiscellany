@@ -8,5 +8,6 @@
 
 void InitPlugins();
 void UninitPlugins();
+void RefreshPluginDevices(int id);
 
 #endif
