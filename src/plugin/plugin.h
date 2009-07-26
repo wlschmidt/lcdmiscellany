@@ -18,10 +18,14 @@ struct LCDInfo;
 
 // Return 0 on fail.  Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.  Not required.
+// Currently always called on each device right after enumerating
+// all devices, but may allow for more advanved behavior later.
 typedef int (CALLBACK * lcdStart)(LCDInfo *info);
 
 // Function specified by LCDInfo structure.
 // Info contains what lcdEnum returned.  Not required.
+// Currently always called on each device right before destroying
+// it, but may allow for more advanved behavior later.
 typedef void (CALLBACK * lcdStop)(LCDInfo *info);
 
 // Function specified by LCDInfo structure.
@@ -42,6 +46,11 @@ struct LCDInfo {
 	int height;
 	// Should be 1, 8, 24, or 32.
 	int bpp;
+
+	// String identifying the LCD.  Ideally, should be unique.
+	// Can be used to identify the display in scripts,
+	// though currently not used much/at all.  Must be in UTF8.
+	char *id;
 
 	// At the moment, mostly not used...
 	int refreshRate;
@@ -97,11 +106,11 @@ typedef int (CALLBACK * lcdInit)(const LCDCallbacks *callbacks);
 typedef void (CALLBACK * lcdUninit)();
 
 // Required.  Plugin must allocate and populate info itself.
-// Returns 0 on fail.
-// Return value must stay valid until its destroy function is called on itself.
-// index is a 0-based index.  It will be be called for each successive integer until it
-// returns 0.  All devices will be destroyed before enumerating devices again.
-typedef LCDInfo * (CALLBACK * lcdEnum)(int index);
+// Returns null on fail or if there are no devices.
+// Returned structure must stay valid until its destroy function is called on itself.
+// It will be be called until it returns null.
+// All devices will be stopped and then destroyed before enumerating devices again.
+typedef LCDInfo * (CALLBACK * lcdEnum)();
 
 
 #endif
