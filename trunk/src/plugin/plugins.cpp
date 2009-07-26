@@ -142,16 +142,11 @@ void CALLBACK LcdDeviceChange(int id) {
 	PostMessage(ghWnd, WMA_LCD_DEVICE_CHANGE, id, 0);
 }
 
-void CALLBACK LcdTriggerEvent(int id, unsigned char *eventName, unsigned char *param) {
+void CALLBACK LcdTriggerEvent(int id, char *eventName, char *param) {
 	ScriptValue sv;
-	CreateStringValue(sv, param);
-	PostMessage(ghWnd, WMA_TRIGGER_EVEN_BY_NAME, (WPARAM)strdup((char*)eventName), (LPARAM)sv.stringVal);
+	CreateStringValue(sv, (unsigned char*)param);
+	PostMessage(ghWnd, WMA_TRIGGER_EVEN_BY_NAME, (WPARAM)strdup(eventName), (LPARAM)sv.stringVal);
 }
-
-// Triggers event, with the specified string as a paramter.  Strings are assumed to be in UTF8.
-// If need more than one parameter, can use a delimited list, and scripts can split it themselves.
-// If no parameter is needed, param can be null.
-typedef void (CALLBACK * lcdTriggerEvent)(int id, unsigned char *eventName, unsigned char *param);
 
 Plugin::Plugin(int id, HMODULE module) {
 	hMod = module;
