@@ -11,6 +11,9 @@
 #include "malloc.h"
 #include "Unicode.h"
 
+#include <Ws2tcpip.h>
+#include <Wspiapi.h>
+
 TGetAddrInfoW pGetAddrInfoW = 0;
 TFreeAddrInfoW pFreeAddrInfoW = 0;
 TGetNameInfoW pGetNameInfoW = 0;

@@ -5,16 +5,13 @@
 #define _WIN32_WINNT 0x0600
 #define WINVER _WIN32_WINNT
 
-#define _WSPIAPI_COUNTOF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 //*
 //#define WIN32_LEAN_AND_MEAN
 
-//#define _WSPIAPI_COUNTOF
 //#define STRSAFE_NO_DEPRECATE
 
 #define VC_EXTRALEAN
 #define NOMCX
-//#define NOCOMM
 #define NOKANJI
 #define NOCRYPT
 #define NOSCROLL

@@ -18,6 +18,9 @@
 #undef IcmpSendEcho2
 unsigned int AddrType;
 
+#include <Ws2tcpip.h>
+#include <Wspiapi.h>
+
 #pragma pack(push, 1)
 struct ProtocolVersion {
 	unsigned char major, minor;
@@ -71,8 +74,10 @@ void IPAddrNetProc (addrinfo *info, __int64 id) {
 				info2 = info2->ai_next;
 			}
 		}
-		// Not sure it matters, but this will always point to the right function.
-		pFreeAddrInfoW((ADDRINFOW*)info);
+		if (pFreeAddrInfoW)
+			pFreeAddrInfoW((ADDRINFOW*)info);
+		else
+			freeaddrinfo((ADDRINFOA*)info);
 	}
 	stack->Push(sv);
 	RunStack(stack);
