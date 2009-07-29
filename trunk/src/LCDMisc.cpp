@@ -1,6 +1,6 @@
 #ifndef X64
 #ifdef _DEBUG
-//#include <vld.h>
+#include <vld.h>
 #endif
 #endif
 
@@ -878,7 +878,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			}
 			return 0;
 		case WMA_LCD_DEVICE_CHANGE:
-			RefreshPluginDevices(wParam);
+			RefreshPluginDevices((int)wParam);
 			return 0;
 		case WMA_TRIGGER_EVEN_BY_NAME:
 			{

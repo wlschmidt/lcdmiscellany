@@ -922,6 +922,7 @@ void __fastcall PerfMon::Update(int bandwidth) {
 			pos += type->TotalByteLength;
 		}
 	}
+	free(data);
 
 	for (i=0; i<numCounters; i++) {
 		if (counters[i].normalUpdate)
