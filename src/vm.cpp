@@ -56,8 +56,7 @@ void CoerceStrings(ScriptValue &sv, ScriptValue& sv2,ScriptValue &sv3, ScriptVal
 
 void CoerceDoubleNoRelease(ScriptValue &sv, ScriptValue& sv2) {
 	if (sv.type & SCRIPT_DOUBLE) {
-		sv2.intVal = sv.intVal;
-		sv2.type = SCRIPT_DOUBLE;
+		sv2 = sv;
 		return;
 	}
 	double d = 0;

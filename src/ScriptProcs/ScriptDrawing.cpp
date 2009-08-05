@@ -249,11 +249,6 @@ void FormatText(ScriptValue &s, ScriptValue *args) {
 		}
 	}
 	free(breaks);
-	/*
-	Forma
-	ScriptValue sv;
-	AllocateStringValue(&sv, args[0].stringVal->len*2);
-	*/
 }
 
 void SetBgColor(ScriptValue &s, ScriptValue *args) {

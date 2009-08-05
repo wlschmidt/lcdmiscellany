@@ -19,6 +19,8 @@ void ClearImage(ScriptValue &s, ScriptValue* args);
 void InvertImage(ScriptValue &s, ScriptValue* args);
 void ImageSize(ScriptValue &s, ScriptValue *args);
 void IntersectImage(ScriptValue &s, ScriptValue* args);
+void DrawTransformedImage(ScriptValue &s, ScriptValue* args);
+void DrawRotatedScaledImage(ScriptValue &s, ScriptValue* args);
 
 void ScriptGetClipboardData(ScriptValue &s, ScriptValue *args);
 void ScriptSetClipboardData(ScriptValue &s, ScriptValue *args);

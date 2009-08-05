@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include "Tokenizer.h"
+#include "Global.h"
 #include <limits.h>
 #include <math.h>
 #include <stdlib.h>

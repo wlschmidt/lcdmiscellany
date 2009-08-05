@@ -50,12 +50,6 @@ struct VLCController extends MediaPlayerController {
 		%UpdateAndRefresh("?command=pl_stop");
 	}
 
-	// Incredibly evil, horrible, lame VLC interface requirement.
-	// VLC has a play button.  I cannot mimick it.  I can only load
-	// a needlessly complicated playlist file, find a random id in it,
-	// and play.  Why, dear lord, WHY?  Might be away around it with
-	// VLC's wonderfully documented language...And I though winamp
-	// was bad...
 	function GetEvilId() {
 		$junk = RegExp(HttpGetWait(%playlistUrl), "id=|"([0-9]*?)|"\W*current", 0);
 		return $junk[0][0];
@@ -85,7 +79,7 @@ struct VLCController extends MediaPlayerController {
 	}
 
 	function UpdateAndRefresh($param) {
-		// Significantly speeds response.
+		// Significantly speeds responsiveness.
 		SpawnHttpRequest(%statusUrl +s $param);
 		%UpdateWait($param);
 		NeedRedraw();

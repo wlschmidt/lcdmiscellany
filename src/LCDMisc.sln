@@ -23,6 +23,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		AMDCaProjectFile = 
+		AMDCaProjectFile = D:\My Programs\LCDMisc\src\CodeAnalyst\LCDMisc.caw
 	EndGlobalSection
 EndGlobal

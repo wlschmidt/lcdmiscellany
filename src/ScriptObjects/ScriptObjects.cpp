@@ -203,6 +203,8 @@ int RegisterObjectTypes() {
 									{"InvertImage", InvertImage, C_obj6ints},
 									{"IntersectImage", IntersectImage, C_obj6ints},
 									{"DrawImage", DrawImage, C_obj6ints},
+									{"DrawTransformedImage", DrawTransformedImage, C_obj16doubles},
+									{"DrawRotatedScaledImage", DrawRotatedScaledImage, C_obj5doubles},
 									{"GetClipboardData", ScriptGetClipboardData, C_2ints},
 									// Only here because GetClipboardData() is.
 									{"SetClipboardData", ScriptSetClipboardData, C_direct}

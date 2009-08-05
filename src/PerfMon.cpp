@@ -526,7 +526,7 @@ void __fastcall PerfMon::Update(int bandwidth) {
 	//while(test>=0) {test--;
 
 	int i, j;
-	char queryString[5000];
+	char queryString[8000];
 	char *q = queryString;
 	{
 		ULONG haveCpuData = 0;
@@ -625,9 +625,9 @@ void __fastcall PerfMon::Update(int bandwidth) {
 
 	static unsigned long lastDataSize = 0;
 	unsigned long dataSize = lastDataSize + 2000;
-	unsigned char *data = (unsigned char*) malloc(dataSize);
+	unsigned char *data;
 
-	if (q != queryString && data) {
+	if (q != queryString && (data = (unsigned char*) malloc(dataSize))) {
 		q[-1] = 0;
 		int w = ERROR_MORE_DATA;
 
@@ -921,8 +921,8 @@ void __fastcall PerfMon::Update(int bandwidth) {
 			}
 			pos += type->TotalByteLength;
 		}
+		free(data);
 	}
-	free(data);
 
 	for (i=0; i<numCounters; i++) {
 		if (counters[i].normalUpdate)

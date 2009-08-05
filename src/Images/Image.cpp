@@ -13,14 +13,6 @@
 #include "gif.h"
 #include "png.h"
 
-/*
-template <class T>
-GenericImage<T> *MakeGenericImage(unsigned int width, unsigned int height, int spp);
-
-template <class T>
-GenericImage<T> *ResizeGenericImage(GenericImage<T> *img);
-//*/
-
 int MakeAllocatedBitImage(ScriptValue &s, int w, int h) {
 	if (!AllocateCustomValue(s, sizeof(AllocatedBitImage) + (((w+31)/32)*h-1) * sizeof(int))) return 0;
 	AllocatedBitImage *out = (AllocatedBitImage*) s.stringVal->value;

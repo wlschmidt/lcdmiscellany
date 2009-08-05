@@ -1,6 +1,6 @@
 #ifndef X64
 #ifdef _DEBUG
-#include <vld.h>
+//#include <vld.h>
 #endif
 #endif
 
@@ -564,28 +564,6 @@ static int FlushImage(int drawn) {
 			}
 		}
 	}
-	/*for (int i = 0; i<numDevices;) {
-		if (!screen.Display(devices[i])) {
-			lgLcdDisconnect(devices[i]);
-			numDevices--;
-			if (!numDevices) {
-				Disconnect();
-				// Try every 2 secs once lose connection.
-				return 0;
-			}
-			else devices[i] = devices[numDevices];
-		}
-		else {
-			i++;
-		}
-	}//*/
-	//if (!numDevices) {
-		//Open();
-		//if (connection == LGLCD_INVALID_CONNECTION || !numDevices) {
-		//	G15SendImage();
-		//}
-		//else return 0;
-	//}
 
 	unsigned __int64 t = GetTickCountNoOverflow();
 	// Reenumerate if errors or if not connected to the 3.01 SDK or it's been a while.
