@@ -152,6 +152,97 @@ void DrawImage(ScriptValue &s, ScriptValue* args) {
 	}
 }
 
+void DrawTransformedImage(ScriptValue &s, ScriptValue* args) {
+	if (args[0].type == SCRIPT_OBJECT) {
+		if (args[0].objectVal->type == Image32Type) {
+			GenericImage<unsigned char> *img = (GenericImage<unsigned char> *)args[0].objectVal->values[0].stringVal->value;
+			//activeScreen->DisplayImage(args[1].i32, args[2].i32, args[3].i32, args[4].i32, args[5].i32, args[6].i32, img);
+			DoubleQuad src, dst;
+			int fullImage = 1;
+			for (int i=0; i<4; i++) {
+				dst.p[i].x = args[1+2*i].doubleVal;
+				dst.p[i].y = args[1+2*i+1].doubleVal;
+				src.p[i].x = args[9+2*i].doubleVal;
+				src.p[i].y = args[9+2*i+1].doubleVal;
+				if (src.p[i].x != 0 || src.p[i].y != 0) fullImage = 0;
+			}
+			if (fullImage) {
+				src.p[0].x = 0;
+				src.p[0].y = 0;
+
+				src.p[1].x = img->width-1;
+				src.p[1].y = 0;
+
+				src.p[2].x = img->width-1;
+				src.p[2].y = img->height-1;
+
+				src.p[3].x = 0;
+				src.p[3].y = img->height-1;
+			}
+			else {
+				for (int i=0; i<4; i++) {
+					if (src.p[i].x < -0.5) src.p[i].x = -0.5;
+					if (src.p[i].x > img->width-0.5) src.p[i].x = img->width-0.5;
+					if (src.p[i].y < -0.5) src.p[i].y = -0.5;
+					if (src.p[i].y > img->height-0.5) src.p[i].y = img->height-0.5;
+				}
+			}
+			activeScreen->DisplayTransformedImage(&dst, &src, img);
+			CreateIntValue(s, 1);
+		}
+	}
+}
+
+void DrawRotatedScaledImage(ScriptValue &s, ScriptValue* args) {
+	if (args[0].type == SCRIPT_OBJECT) {
+		if (args[0].objectVal->type == Image32Type) {
+			GenericImage<unsigned char> *img = (GenericImage<unsigned char> *)args[0].objectVal->values[0].stringVal->value;
+			DoubleQuad src, dst;
+			double x = args[1].doubleVal;
+			double y = args[2].doubleVal;
+			double rotate = args[3].doubleVal;
+			double scaleX = args[4].doubleVal;
+			double scaleY = args[5].doubleVal;
+			if (!scaleX) scaleX = 1.0;
+			if (!scaleY) scaleY = scaleX;
+
+			src.p[0].x = 0;
+			src.p[0].y = 0;
+
+			src.p[1].x = img->width-1;
+			src.p[1].y = 0;
+
+			src.p[2].x = img->width-1;
+			src.p[2].y = img->height-1;
+
+			src.p[3].x = 0;
+			src.p[3].y = img->height-1;
+
+			double rx = scaleX * img->width/2.0;
+			double ry = scaleY * img->width/2.0;
+
+			double cx = x + rx;
+			double cy = y + ry;
+			double cr = cos(rotate);
+			double sr = sin(rotate);
+
+			dst.p[0].x = cx - cr*rx + sr*ry-1.0;
+			dst.p[1].x = cx + cr*rx + sr*ry-1.0;
+			dst.p[2].x = cx + cr*rx - sr*ry;
+			dst.p[3].x = cx - cr*rx - sr*ry;
+
+			dst.p[0].y = cy - sr*rx - cr*ry;
+			dst.p[1].y = cy + sr*rx - cr*ry;
+			dst.p[2].y = cy + sr*rx + cr*ry-1.0;
+			dst.p[3].y = cy - sr*rx + cr*ry-1.0;
+
+			activeScreen->DisplayTransformedImage(&dst, &src, img);
+
+			CreateIntValue(s, 1);
+		}
+	}
+}
+
 void InvertImage(ScriptValue &s, ScriptValue* args) {
 	if (args[0].type == SCRIPT_OBJECT && args[0].objectVal->type == ImageType) {
 		BitImage* b = (BitImage*) args[0].objectVal->values[0].stringVal->value;

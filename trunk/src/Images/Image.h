@@ -2,6 +2,7 @@
 #define IMAGE_H
 
 #include "..\\ScriptValue.h"
+#include <math.h>
 
 struct BitImage {
 	int width, height;
@@ -70,8 +71,94 @@ struct GenericImage {
 	inline void Cleanup() {
 		free(this);
 	}
+	void GetPixel(Color4 *c, int x, int y) const;
+	// Assumes pixel is within image.
+	void GetPixelBilinear(Color4 *c, float x, float y) const;
 };
 
+inline void GenericImage<unsigned char>::GetPixel(Color4 *c, int x, int y) const {
+	unsigned char *px = &pixels[memWidth * y + x * spp]; 
+	if (spp == 4) {
+		*c = *(Color4*)px;
+	}
+	else if (spp == 3) {
+		c->color3 = *(Color3*)px;
+		c->a = 255;
+	}
+	else if (spp == 2) {
+		c->r = c->g = c->b = px[0];
+		c->a = px[1];
+	}
+	else if (spp == 1) {
+		c->r = c->g = c->b = px[0];
+		c->a = 255;
+	}
+}
+
+inline void GenericImage<unsigned char>::GetPixelBilinear(Color4 *c, float x, float y) const {
+	float x1, x2, y1, y2;
+	int wx1, wx2, wy1, wy2;
+
+	if (x < 0) x = 0;
+	x1 = floor(x);
+	x2 = x1+1.0f;
+	if (x2 >= width) {
+		x = x2 = (float)width-1.0f;
+		x1 = x2 - 1;
+	}
+	wx1 = (int)(256*(x2 - x));
+	wx2 = 256-wx1;
+
+	if (y < 0) y = 0;
+	y1 = floor(y);
+	y2 = y1+1.0f;
+	if (y2 >= height) {
+		y = y2 = (float)height-1.0f;
+		y1 = y2 - 1;
+	}
+	wy1 = (int)(256*(y2 - y));
+	wy2 = 256 - wy1;
+
+	unsigned char *px1y1 = &pixels[memWidth * (int)y1 + spp * (int)x1];
+	unsigned char *px2y1 = px1y1 + spp;
+	unsigned char *px1y2 = px1y1 + memWidth;
+	unsigned char *px2y2 = px1y1 + memWidth+spp;
+	Color4 *cx1y1 = (Color4*) px1y1;
+	Color4 *cx2y1 = (Color4*) px2y1;
+	Color4 *cx1y2 = (Color4*) px1y2;
+	Color4 *cx2y2 = (Color4*) px2y2;
+
+	if (spp >= 3) {
+		int wx1y1 = wx1*wy1;
+		int wx2y1 = wx2*wy1;
+		int wx1y2 = wx1*wy2;
+		int wx2y2 = wx2*wy2;
+		c->r = (wx1y1 * cx1y1->r + wx2y1 * cx2y1->r + 
+			    wx1y2 * cx1y2->r + wx2y2 * cx2y2->r + 128*256) / (256*256);
+		c->g = (wx1y1 * cx1y1->g + wx2y1 * cx2y1->g + 
+				wx1y2 * cx1y2->g + wx2y2 * cx2y2->g + 128*256) / (256*256);
+		c->b = (wx1y1 * cx1y1->b + wx2y1 * cx2y1->b + 
+				wx1y2 * cx1y2->b + wx2y2 * cx2y2->b + 128*256) / (256*256);
+		if (spp == 3) {
+			c->a = 255;
+		}
+		else {
+			c->a = (wx1y1 * cx1y1->a + wx2y1 * cx2y1->a + 
+					wx1y2 * cx1y2->a + wx2y2 * cx2y2->a + 128*256) / (256*256);
+		}
+	}
+	else {
+		c->r = c->g = c->b = (wy1 * (wx1 * px1y1[0] + wx2 * px2y1[0]) + 
+							  wy2 * (wx1 * px1y2[0] + wx2 * px2y2[0]) + 128*256) / (256*256);
+		if (spp == 1) {
+			c->a = 255;
+		}
+		else {
+			c->a = (wy1 * (wx1 * px1y1[1] + wx2 * px2y1[1]) + 
+					wy2 * (wx1 * px1y2[1] + wx2 * px2y2[1]) + 128*256) / (256*256);
+		}
+	}
+}
 template <class T>
 inline int MakeGenericImage(ScriptValue &s, unsigned int width, unsigned int height, int spp) {
 	unsigned long memWidth = (width*spp+3)&~3;

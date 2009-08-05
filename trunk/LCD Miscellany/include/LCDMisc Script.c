@@ -206,11 +206,7 @@ function Init() {
 
 	// Tray icons.  Uncomment whichever ones you like.
 	//AddCpuIcon();
-	AddTotalCpuIcon();
+	//AddTotalCpuIcon();
 	//AddNetIcon();
-	/*while(1) {
-		GetDeviceState();
-	}//*/
-	// MontorPower(2);
 }
 

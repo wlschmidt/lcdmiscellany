@@ -5,6 +5,7 @@
 #include "Unicode.h"
 #include "sdk/v3.01/lglcd.h"
 #include "stringUtil.h"
+#include <math.h>
 
 #ifdef X64
 #pragma comment(lib, "sdk\\v3.01\\lgLcd64.lib")
@@ -671,6 +672,12 @@ int Screen::DisplayTextCentered(int x, int y, unsigned char *text, int len, int 
 	return width;
 }
 
+void FlipBR (Color4 *c) {
+	unsigned char temp = c->r;
+	c->r = c->b;
+	c->b = temp;
+}
+
 void Screen::DisplayText(int x, int y, unsigned char *text, int len, int highlight, int mode, RECT *clip, int flags) {
 	RECT oldClip;
 	if (clip && !(flags & DT_NOCLIP)) {
@@ -696,6 +703,8 @@ void Screen::DisplayText(int x, int y, unsigned char *text, int len, int highlig
 			useTextColor = bgColor;
 			useBgColor = drawColor;
 		}
+		FlipBR(&useTextColor);
+		FlipBR(&useBgColor);
 		useTextColor.val &= 0xFFFFFF;
 		useBgColor.val &= 0xFFFFFF;
 
@@ -866,6 +875,207 @@ __forceinline void Screen::ClearChar(int dstx, int dsty, CharData* c, BitImage *
 
 __forceinline void Screen::InvertChar(int dstx, int dsty, CharData* c, BitImage *img) {
 	InvertImage(dstx+c->abcA, dsty+c->top, c->start, c->top-c->inc, c->abcB, c->bottom - c->top+1, img);
+}
+
+void Screen::DisplayTransformedImageTriangle(DoublePoint *dst, DoublePoint *src, const GenericImage<unsigned char> *img) {
+	DoublePoint d1, d2, d3, s1, s2, s3;
+	int base;
+	if (dst[0].y <= dst[1].y && dst[0].y <= dst[2].y) {
+		base = 0;
+	}
+	else if (dst[1].y <= dst[2].y) {
+		base = 1;
+	}
+	else {
+		base = 2;
+	}
+	d1 = dst[base];
+	s1 = src[base];
+
+	if (dst[(base+1)%3].y <= dst[(base+2)%3].y) {
+		d2 = dst[(base+1)%3];
+		s2 = src[(base+1)%3];
+
+		d3 = dst[(base+2)%3];
+		s3 = src[(base+2)%3];
+	}
+	else {
+		d2 = dst[(base+2)%3];
+		s2 = src[(base+2)%3];
+
+		d3 = dst[(base+1)%3];
+		s3 = src[(base+1)%3];
+	}
+
+	double dx1=0, dx2=0, dx3=0;
+
+	double dsx1 = 0, dsx2 = 0, dsx3 = 0;
+	double dsy1 = 0, dsy2 = 0, dsy3 = 0;
+
+	if (d2.y - d1.y > 0.00001) {
+		dx1 = (d2.x - d1.x)/(d2.y - d1.y);
+
+		dsx1 = (s2.x - s1.x)/(d2.y - d1.y);
+		dsy1 = (s2.y - s1.y)/(d2.y - d1.y);
+	}
+	if (d3.y - d1.y > 0.00001) {
+		dx2 = (d3.x - d1.x)/(d3.y - d1.y);
+
+		dsx2 = (s3.x - s1.x)/(d3.y - d1.y);
+		dsy2 = (s3.y - s1.y)/(d3.y - d1.y);
+	}
+	if (d3.y - d2.y > 0.00001) {
+		dx3 = (d3.x - d2.x)/(d3.y - d2.y);
+
+		dsx3 = (s3.x - s2.x)/(d3.y - d2.y);
+		dsy3 = (s3.y - s2.y)/(d3.y - d2.y);
+	}
+	d1.y -= 0.0000000001;
+	d3.y += 0.0000000001;
+
+	double y0 = ceil(d1.y);
+	if (y0 < 0) y0 = 0;
+
+	double xstart = d1.x + dx2 * (y0 - d1.y);
+	double sxstart = s1.x + dsx2 * (y0 - d1.y);
+	double systart = s1.y + dsy2 * (y0 - d1.y);
+
+	double xstop  = d1.x + dx1 * (y0 - d1.y);
+	double sxstop = s1.x + dsx1 * (y0 - d1.y);
+	double systop = s1.y + dsy1 * (y0 - d1.y);
+
+	if (xstart > xstop) {
+		xstart += 0.0000001;
+		xstop  -= 0.0000001;
+	}
+	else {
+		xstart -= 0.0000001;
+		xstop  += 0.0000001;
+	}
+
+	int y = (int) y0;
+	double endy = min(d2.y, height-1);
+	double endy2 = min(d3.y, height-1);
+	int dx = 1, x0, x1;
+	if (dx1 < dx2) dx = -1;
+	for (;y <= endy; y++, xstart += dx2, sxstart += dsx2, systart += dsy2, xstop += dx1, sxstop += dsx1, systop += dsy1) {
+		if (dx > 0) {
+			x0 = (int)ceil(xstart);
+			x1 = (int)ceil(xstop);
+			if (x0 > x1) continue;
+		}
+		else {
+			x0 = (int)floor(xstart);
+			x1 = (int)floor(xstop);
+			if (x0 < x1) continue;
+		}
+		if (x0<0) {
+			if (x1 <= 0) continue;
+			x0 = 0;
+		}
+		if (x0 >= width) {
+			if (x1 >= width) continue;
+			x0 = width-1;
+		}
+		if (x1 < -1) x1 = -1;
+		if (x1 >= width) x1 = width;
+
+		double dsx = 0, dsy = 0;
+		if (xstop != xstart) {
+			dsx = dx * (sxstop - sxstart) / (xstop-xstart);
+			dsy = dx * (systop - systart) / (xstop-xstart);
+		}
+		double sx = sxstart + dsx * dx * (x0-xstart);
+		double sy = systart + dsy * dx * (x0-xstart);
+
+		for (int x=x0; x!=x1; x+=dx, sx += dsx, sy += dsy) {
+			Color4 c;
+			img->GetPixelBilinear(&c, (float)sx, (float)sy);
+			AlphaColorPixel(width * y + x, c);
+		}
+	}
+
+	xstop = d2.x + (dx3 * (y - d2.y));
+	sxstop = s2.x + (dsx3 * (y - d2.y));
+	systop = s2.y + (dsy3 * (y - d2.y));
+
+	// dx might be wrong in case of flat top, so fix here.
+	if (xstart > xstop) {
+		xstop  -= 0.0000001;
+		dx = -1;
+	}
+	else {
+		xstop  += 0.0000001;
+		dx = 1;
+	}
+
+	for (;y <= endy2; y++, xstart += dx2, sxstart += dsx2, systart += dsy2, xstop += dx3, sxstop += dsx3, systop += dsy3) {
+		if (dx > 0) {
+			x0 = (int)ceil(xstart);
+			x1 = (int)ceil(xstop);
+			if (x0 > x1) continue;
+		}
+		else {
+			x0 = (int)floor(xstart);
+			x1 = (int)floor(xstop);
+			if (x0 < x1) continue;
+		}
+		if (x0<0) {
+			if (x1 <= 0) continue;
+			x0 = 0;
+		}
+		if (x0 >= width) {
+			if (x1 >= width) continue;
+			x0 = width-1;
+		}
+		if (x1 < -1) x1 = -1;
+		if (x1 >= width) x1 = width;
+		double dsx = 0, dsy = 0;
+		if (xstop != xstart) {
+			dsx = dx * (sxstop - sxstart) / (xstop-xstart);
+			dsy = dx * (systop - systart) / (xstop-xstart);
+		}
+		double sx = sxstart + dsx * dx * (x0-xstart);
+		double sy = systart + dsy * dx * (x0-xstart);
+		for (int x=x0; x!=x1; x+=dx, sx += dsx, sy += dsy) {
+			//if (x < 0 || x >= width || y < 0 || y >= height) {
+			//	x=x;
+			//}
+			Color4 c;
+			img->GetPixelBilinear(&c, (float)sx, (float)sy);
+			AlphaColorPixel(width * y + x, c);
+		}
+	}
+}
+
+void Screen::DisplayTransformedImage(DoubleQuad *dst, DoubleQuad *src, const GenericImage<unsigned char> *img) {
+	if (img->width < 2 || img->height < 2) return;
+	{
+		DoublePoint dstPt[3] = {
+			dst->p[0],
+			dst->p[1],
+			dst->p[2]
+		};
+		DoublePoint srcPt[3] = {
+			src->p[0],
+			src->p[1],
+			src->p[2]
+		};
+		DisplayTransformedImageTriangle(dstPt, srcPt, img);
+	}
+	{
+		DoublePoint dstPt[3] = {
+			dst->p[2],
+			dst->p[3],
+			dst->p[0]
+		};
+		DoublePoint srcPt[3] = {
+			src->p[2],
+			src->p[3],
+			src->p[0]
+		};
+		DisplayTransformedImageTriangle(dstPt, srcPt, img);
+	}
 }
 
 void Screen::DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int height, const GenericImage<unsigned char> *img) {

@@ -225,6 +225,8 @@ int RegisterProcs() {
 
 		{C_2ints4strings, SCRIPT_INT, 2, SCRIPT_STRING, 4, 0, 0},
 
+		{C_obj16doubles,SCRIPT_OBJECT, 1, SCRIPT_DOUBLE, 16, 0, 0},
+		{C_obj5doubles,SCRIPT_OBJECT, 1, SCRIPT_DOUBLE, 5, 0, 0},
 		{C_obj6ints,SCRIPT_OBJECT, 1, SCRIPT_INT, 6, 0, 0},
 		{C_string3ints,SCRIPT_STRING, 1, SCRIPT_INT, 3, 0, 0},
 		{C_string2ints,SCRIPT_STRING, 1, SCRIPT_INT, 2, 0, 0},

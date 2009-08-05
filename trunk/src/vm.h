@@ -54,6 +54,8 @@ enum FunctionType {
 	C_5ints,
 	C_stringintstring,
 	C_obj6ints,
+	C_obj16doubles,
+	C_obj5doubles,
 	//C_7ints,
 	C_string5ints,
 	C_string4ints,

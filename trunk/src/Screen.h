@@ -45,6 +45,12 @@ typedef struct tagTEXTMETRICA
 struct OldFont;
 struct CharData;
 
+struct DoublePoint {
+	double x, y;
+};
+struct DoubleQuad {
+	DoublePoint p[4];
+};
 
 class Screen {
 private:
@@ -198,6 +204,9 @@ public:
 	void DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int height, const BitImage *img);
 	void InvertImage(int dstx, int dsty, int srcx, int srcy, int width, int height, const BitImage *img);
 	void ClearImage(int dstx, int dsty, int srcx, int srcy, int width, int height, const BitImage *img);
+
+	void DisplayTransformedImageTriangle(DoublePoint *dst, DoublePoint *src, const GenericImage<unsigned char> *img);
+	void DisplayTransformedImage(DoubleQuad *dst, DoubleQuad *src, const GenericImage<unsigned char> *img);
 
 	int IntersectImage(int dstx, int dsty, int srcx, int srcy, int width, int height, const BitImage *img);
 
