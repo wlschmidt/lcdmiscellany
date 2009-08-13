@@ -173,20 +173,19 @@ int TriggerEventFull(int id, ScriptValue &list, ScriptMode mode) {
 	}
 
 	if (Events.table[id].data.object) Events.table[id].data.object->AddRef();
-	return RunFunction(Events.table[id].data.id, list, mode, Events.table[id].data.object);
+	return RunFunction(Events.table[id].data.id, sv, mode, Events.table[id].data.object);
 }
 
 void PostEvent(ScriptValue &s, ScriptValue *args) {
 	TableEntry<Event> *entry = Events.Find(args[0].stringVal);
 	if (entry && entry->data.id >= 0 && (args[2].type & SCRIPT_LIST)) {
 		ScriptValue sv;
-		int len = 1;
+		int len = 0;
 		if (args[2].type == SCRIPT_LIST) {
 			len += args[2].listVal->numVals;
 		}
 		if (CreateListValue(sv, len)) {
 			args[0].AddRef();
-			sv.listVal->PushBack(args[0]);
 			if (args[2].type == SCRIPT_LIST) {
 				for (int i=0; i<args[2].listVal->numVals; i++) {
 					args[2].listVal->vals[i].AddRef();
