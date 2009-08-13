@@ -244,7 +244,7 @@ int RegisterProcs() {
 		{C_2stringsint,SCRIPT_STRING, 2,SCRIPT_INT,1, 0, 0},
 		{C_2stringsintstring,SCRIPT_STRING, 2,SCRIPT_INT,1, SCRIPT_STRING,1,0, 0},
 
-		{C_stringintobj, SCRIPT_STRING,1,SCRIPT_INT,1,SCRIPT_OBJECT,0,0},
+		{C_stringintobj, SCRIPT_STRING,1,SCRIPT_INT,1,SCRIPT_OBJECT,1,0,0},
 
 		{C_stringobj,SCRIPT_STRING, 1, SCRIPT_OBJECT, 1, 0, 0},
 
