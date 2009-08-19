@@ -295,7 +295,7 @@ void Config::Reload() {
 	Cleanup();
 	wchar_t fileName[MAX_PATH + 20];
 	FileLineReader* in;
-	unsigned char* line;
+	unsigned char* line = 0;
 	for (int i=1; i<3; i++) {
 		App* app = GetApp((unsigned char*)"General");
 		wchar_t *ext = L".ini";

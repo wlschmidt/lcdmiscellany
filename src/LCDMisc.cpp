@@ -748,48 +748,20 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 						TriggerEvent(foregroundWindowChangeEvent, (__int64)foregroundWindow, (__int64)temp);
 					}
 				}
-				//if (EventExists(screenSaverEvent)) {
 				int running = 0;
 				if (SystemParametersInfo(SPI_GETSCREENSAVERRUNNING, 0, &running, 0) && running != screenSaverOn) {
 					screenSaverOn = running;
 					TriggerEvent(screenSaverEvent, running);
 				}
-				//}
 				int w = SystemParametersInfo(SPI_GETPOWEROFFACTIVE, 0, &running, 0);
-				if (SystemParametersInfo(SPI_GETPOWEROFFACTIVE, 0, &running, 0) && running) {
-					w=w;
-				}
 
-				//*/
-				/*if (EventExists(powerSaveEvent)) {
-					SYSTEM_POWER_STATUS power;
-					static int powerSave = 0;
-					if (GetSystemPowerStatus(&power)) {
-						powerSave = powerSave;
-					}
-				}//*/
-				/*if ((ipChangeProc & activeApp->ipChangeProc) >= 0) {
-					CheckRIP();
-				}//*/
 				perfMon.Update();
-				//if (perfMon.updated) {
-				//	perfMon.updated = 0;
 				if (EventExists(counterUpdateEvent)) {
 					TriggerEvent(counterUpdateEvent);
 				}
-				//}
 				Timer::Update();
 				// Makes sure we flush every 5 seconds or so, just in case.
 				Draw();
-				//gTick = GetTickCount();
-				/*if (appManager.Update()) {
-					if (counterUpdateProc >= 0) {
-						RunFunction(counterUpdateProc, CAN_WAIT);
-					}
-					if (activeApp->counterUpdateProc >= 0) {
-						RunFunction(activeApp->counterUpdateProc, CAN_WAIT);
-					}
-				}//*/
 			}
 			else if (wParam == 1) {
 				int needTimer = 0;
