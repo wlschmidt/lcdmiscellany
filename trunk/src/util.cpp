@@ -543,7 +543,9 @@ int FileLineReader::NextLine(unsigned char **line) {
 			if (i == lineStart && buffer[i] == '\n' && lb == '\r') {
 				lb = 0;
 				lineStart++;
-				return NextLine(line);
+				len = 0;
+				i = lineStart;
+				continue;
 			}
 			lb = buffer[i];
 			buffer[j] = 0;
