@@ -115,7 +115,7 @@ There are 7 value types:  null, 64-bit integers, doubles, strings, lists, dictio
 <P>+s and +S to concatenate strings.  There is no difference between the two.
 <P> ==s, >= s, >s, etc are case insensitive string comparison operators.  Using a capital 'S' makes them case sensitive.  Currently, funky characters (vowels with accents and the like) are not handled properly (Treated as their base letter without the accent mark).
 <P>size(string) returns the size of a string.
-<P>[] can be used to extract single bytes of strings.  That is, Sting[2] would create a new string containing the second byte of String.  This is not terribly efficient, at the moment.  As strings cannot be modified, the code "String[2] = 'W'" will compile but will not work as expected.  The resulting value of such an expression will be null.
+<P>[] can be used to extract single bytes of strings.  That is, Sting[2] would create a new string containing the third byte of String.  This is not terribly efficient, at the moment.  As strings cannot be modified, the code "String[2] = 'W'" will compile but will not work as expected.  The resulting value of such an expression will be null.
 <P>
 
 <B>Lists</B><BR>
