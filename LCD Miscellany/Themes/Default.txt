@@ -1,0 +1,56 @@
+// Note:  Every color must be followed by a Bg or a Text.
+// Text colors default to default text color when not found,
+// Bg to default bg color (Or to inverted defaults, depending on situation).
+
+// First line cannot have data, because of how regexps work.
+
+colorDefaultBg = 255,255,255
+colorDefaultText = 0,0,0
+
+colorDefaultInvertedBg = 80, 80, 200, 128
+colorDefaultInvertedText = 255,255,255
+
+colorBg = 255,255,255
+colorText = 0,0,0
+
+colorHighlightBg = 0,0,190
+colorHighlightText = 255,255,255
+
+// Only used on colored screens, so don't need to be careful.
+colorHighlightUnfocusedBg = 148,148,255
+colorHighlightUnfocusedText = 255,255,255
+
+// Only used on colored screens, so don't need to be careful.
+colorHighlightUnfocusedBg = 148,148,255
+colorHighlightUnfocusedText = 255,255,255
+
+// Used in multi-column displays to make columns easier to read.
+colorFirstColumnBg = 240, 240, 255
+// Even/odd column color options.
+colorEvenColumnBg = 240, 240, 255
+colorOddColumnBg = 255, 255, 255
+
+// currently only used by task manager.  May add elsewhere eventually.
+// Not really text, but goes on default bg, so...
+colorScrollBarText = 0,0,190
+
+// Global
+smallHeaderFont = 0;
+bigHeaderFont = Tahoma, 22,0,0,0,5
+
+smallTaskManagerFont = 0;
+smallCalculatorFont = 04b03, 8
+smallUtorrentFont = 04b03, 8
+smallClipboardFont = 04b03, 8
+smallRssFont = 04b03, 8
+smallRssTitleFont = 04b03, 8, 0, 1
+
+// Fonts for large (320 by 160) color LCDs.  Can get rid of these lines to save some
+// memory if you don't have one.
+// Probably have to switch them all to bold, but not sure.
+bigTaskManagerFont = Arial, 18,0,0,0,5
+bigCalculatorFont = Arial, 24,0,0,0,5
+bigUtorrentFont = Arial, 18,0,0,0,5
+bigClipboardFont = Arial, 18,0,0,0,5
+bigRssFont = Arial, 18,0,0,0,5
+bigRssTitleFont = Arial, 18,0,1,0,5

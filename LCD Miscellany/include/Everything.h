@@ -3,6 +3,7 @@
 // removing unused files saves only a small
 // amount of memory and no CPU time.
 
+#requires <framework\Theme.c>
 #requires <framework\framework.c>
 
 #requires <Views\DualView.c>

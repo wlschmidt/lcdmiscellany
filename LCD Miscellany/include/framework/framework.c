@@ -2,6 +2,7 @@
 #requires <util\G15.c>
 #import <list.c>
 #requires <framework\Overlay.c>
+#requires <framework\Theme.c>
 
 struct EventHandler extends ObjectList {
 	var %overlay;
@@ -157,6 +158,7 @@ struct MenuHandler {
 			if ($button & 3) {
 				%RestartHideTimer();
 				%toolbarVisible = 1;
+				%SignalToolbarStateChange();
 				if ($button == 1) {
 					$newViewOffset = size(%views)-1;
 				}
@@ -169,16 +171,19 @@ struct MenuHandler {
 				// Doesn't hurt to call it when not needed.
 				%RestartHideTimer();
 				%toolbarVisible ^= 1;
+				%SignalToolbarStateChange();
 			}
 			else if ($button == G15_OK) {
 				%views[%currentView].Focus();
 				%toolbarVisible = 0;
+				%SignalToolbarStateChange();
 			}
 			else if ($button == G15_CANCEL) {
 				if (!%toolbarVisible) {
 					MessageBoxOverlay(%eventHandler, "Quit LCD Miscellany?|n(" +s GetVersionString(1) +s ")", "Yes", "No", "Quit", null);
 				}
 				%toolbarVisible = 0;
+				%SignalToolbarStateChange();
 			}
 			NeedRedraw();
 			return 1;
@@ -199,11 +204,18 @@ struct MenuHandler {
 		}
 	}
 
+	function SignalToolbarStateChange() {
+		$i = size(%views);
+		while ($i--)
+			%views[$i].Toolbar(%toolbarVisible);
+	}
+
 	function AutoHide($id) {
 		if (GetTickCount() - %hideTimer >= 0 || %hideTimer == 0) {
 			KillTimer($id);
 			%hideTimer = 0;
 			%toolbarVisible = 0;
+			%SignalToolbarStateChange();
 			NeedRedraw();
 		}
 
