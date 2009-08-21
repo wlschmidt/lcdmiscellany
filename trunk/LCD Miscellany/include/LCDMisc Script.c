@@ -8,27 +8,8 @@
 function Init() {
 	/* Global colors.  May move them elsehwere in the future.
 	 */
-	colorBg = RGB(255,255,255);
-	colorText = RGB(0,0,0);
 
-	colorHighlightBg = RGB(0,0,190);
-	colorHighlightText = RGB(255,255,255);
-
-	// Only used on colored screens, so don't need to be careful.
-	colorHighlightUnfocusedBg = RGB(148,148,255);
-	colorHighlightUnfocusedText = RGB(255,255,255);
-
-	// Only used on colored screens, so don't need to be careful.
-	colorHighlightUnfocusedBg = RGB(148,148,255);
-	colorHighlightUnfocusedText = RGB(255,255,255);
-
-	// Used in multi-column displays to make columns easier to read.
-	colorFirstColumnBg = RGB(240, 240, 255);
-	// Even/odd column color options.
-	colorColumnBg = list(RGB(240, 240, 255), RGB(255, 255, 255));
-
-	// currently only use by task manager.  May add elsewhere eventually.
-	colorScrollBar = RGB(0,0,190);
+	LoadTheme("Default.txt");
 
 	/* Fonts list.  Here so it's easier to change them as desired.
 	 * Only fonts used for text-only screens are here.  Other screens have to have item placement
@@ -200,9 +181,6 @@ function Init() {
 	 * already uses smaller increments, so not useful there.
 	 */
 	//VolumeSmoother(eventHandler);
-
-	// Really shouldn't be here.  Left for compatibility with older scripts.
-	emailImage = LoadImage("images\email.png");
 
 	// Tray icons.  Uncomment whichever ones you like.
 	//AddCpuIcon();

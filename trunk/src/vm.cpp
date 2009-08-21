@@ -426,8 +426,13 @@ int Stack::Run() {
 	Op *codePos = code.code + pos;
 	TableEntry<Function> *entry;
 	//SetTop(varTop);
-				static int ct = 0;
+	//static FILE *outf = 0;
+	//if (!outf) outf = fopen("exec log.txt", "ab");
 	while (1) {
+		/*if (outf) {
+			fprintf(outf, "%06X\n", codePos - code.code);
+			fflush(outf);
+		}//*/
 		/*
 		if (codePos - code.code == 0x1013) {
 			codePos = codePos;
@@ -766,7 +771,6 @@ int Stack::Run() {
 					continue;
 				}
 			case CALL_C:
-				ct++;
 				if (codePos->call.list) {
 					//if (!spareList.listVal) {
 						if (!CreateListValue(sv, 255)) {
@@ -790,6 +794,11 @@ int Stack::Run() {
 				}
 				else {
 					sv = Pop();
+					// Assume it's null, though release just in case.
+					if (sv.type != SCRIPT_LIST) {
+						sv.Release();
+						CreateListValue(sv, 1);
+					}
 				}
 				CreateNullValue(sv2);
 				RunNative(sv, codePos->call.function, flags, sv2);
@@ -810,7 +819,7 @@ int Stack::Run() {
 						// Currently never runs, but if I ever decide I want to start keeping lists around,
 						// reduces memory usage.
 						sv.listVal->size = sv.listVal->numVals;
-						srealloc(sv.listVal->vals, sv.listVal->numVals * sizeof(ScriptValue));
+						srealloc(sv.listVal->vals, (1+sv.listVal->numVals) * sizeof(ScriptValue));
 					}
 					sv.Release();
 				//}
@@ -1469,6 +1478,8 @@ int Stack::Run() {
 		//if (done) break;
 		codePos ++;//= OpSize(codePos->op);
 	}
+	//fclose(outf);
+	//outf = 0;
 	//sv.Release();
 	//if (done == -1) return 0;
 	return 1;

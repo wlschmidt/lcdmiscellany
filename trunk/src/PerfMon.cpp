@@ -404,6 +404,12 @@ inline void PerfMon::UpdateNetwork() {
 					//*/
 				Value *v = 0, *v2 = 0;
 				char *name = (char*)ifTable->table[i].bDescr;
+				if (ifTable->table[i].dwDescrLen >= MAXLEN_IFDESCR)
+					ifTable->table[i].dwDescrLen = MAXLEN_IFDESCR-1;
+				else if (ifTable->table[i].dwDescrLen < 0) {
+					ifTable->table[i].dwDescrLen = 0;
+				}
+				ifTable->table[i].bDescr[ifTable->table[i].dwDescrLen] = 0;
 				/*if (ifTable->table[i].dwType != IF_TYPE_ETHERNET_CSMACD) {
 					if (!listed) {
 						errorPrintf(0, "\t%s (Type %i, Removed from list)\r\n", name, ifTable->table[i].dwType);

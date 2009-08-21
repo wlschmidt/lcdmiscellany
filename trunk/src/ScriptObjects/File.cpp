@@ -265,14 +265,13 @@ void FileReaderRead(ScriptValue &s, ScriptValue *args) {
 	void *file = (void*)obj->values[1].intVal;
 	unsigned int bytes = 0;
 	int readLine = 0;
-	if (args[0].intVal == -1 && type == READER_CONVERT_TEXT) {
-		bytes = 1024*1024*10;
-	}
+
 	if (args[0].intVal>>31) {
 		bytes = -1;
 		readLine = 1;
 	}
 	else bytes = args[0].i32;
+
 	int read = 0;
 
 	int usedBytes = 0;
@@ -323,7 +322,7 @@ void FileReaderRead(ScriptValue &s, ScriptValue *args) {
 			break;
 		}
 		if (s.type == SCRIPT_NULL) {
-			if (!AllocateStringValue(s, bytes + buffLen)) return;
+			if (!AllocateStringValue(s, 1024 + buffLen)) return;
 		}
 		else if (buffLen + usedBytes > s.stringVal->len) {
 			if (s.stringVal->len >= 0x30000000 || !ResizeStringValue(s, 2*s.stringVal->len + buffLen)) return;
@@ -344,6 +343,11 @@ void CleanupFileReader(ScriptValue &s, ScriptValue *args) {
 	ObjectValue *obj = s.objectVal;
 	int type = obj->values[0].i32;
 	void *file = (void*)obj->values[1].intVal;
+	if (!file) {
+		// Case if failed to open a file.
+		// Called directly from OpenFileReader.
+		return;
+	}
 	if (type == READER_NORMAL) {
 		fclose((FILE*)file);
 	}
