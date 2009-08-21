@@ -1,4 +1,4 @@
-function GetMaxAudioState($mixer) {
+function GetMaxAudioState($mixer,$src) {
 	// $vol = 0;
 	$vistaVol = GetVistaMasterVolume();
 	if (size($vistaVol) >= 2) {
@@ -9,8 +9,8 @@ function GetMaxAudioState($mixer) {
 	$emute = 1;
 	for (;!IsNull($type = GetAudioType($mixer, $i));$i++) {
 		if ($type != 4 && $type != 5) continue;
-		$vol2 = GetAudioValue($mixer, $i, 0, -0x50030001, 1);
-		$mute2 = GetAudioValue($mixer, $i, 0, -0x20010002, 1);
+		$vol2 = GetAudioValue($mixer, $i, $src, -0x50030001, 1);
+		$mute2 = GetAudioValue($mixer, $i, $src, -0x20010002, 1);
 		if ($mute && !$vol2) continue;
 
 		if (($vol2 >= $vol && $mute2 <= $emute) || ($emute && ($vol2 && !$mute2))) {
