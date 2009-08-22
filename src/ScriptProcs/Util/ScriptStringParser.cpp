@@ -400,8 +400,8 @@ void strreplace(ScriptValue &s, ScriptValue *args) {
 			}
 			if (j == l) {
 				if (replaceSize == replaceCount) {
-					if (!srealloc(replace, sizeof(int) * (replaceSize*2+2))) continue;
-					replaceSize = replaceSize*2+2;
+					if (!srealloc(replace, sizeof(int) * (replaceSize*2+80))) continue;
+					replaceSize = replaceSize*2+80;
 				}
 				replace[replaceCount++] = i;
 				i += sub->len-1;
@@ -482,7 +482,7 @@ void strswap(ScriptValue &s, ScriptValue *args) {
 			}
 			else if (AllocateStringValue(sv, src->len - (end-start) + add->len)) {
 				if (!AllocateStringValue(sv2, end-start)) {
-					s.Release();
+					sv.Release();
 				}
 				else {
 					memcpy(sv2.stringVal->value, src->value+start, end-start);
