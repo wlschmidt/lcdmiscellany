@@ -70,7 +70,7 @@ function Init() {
 		),
 
 		// Change 0 to 1 to disable stealing non-media keys.
-		TaskManager(0, $smallTaskManagerFont, $bigTaskManagerFont),
+		TaskManager(0),
 
 		// Modular chat.  Currently only module is IRC.  If Pidgin leak is ever fixed, I'll modify the pidgin script
 		// to be compatible.

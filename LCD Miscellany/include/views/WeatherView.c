@@ -26,16 +26,14 @@ struct WeatherView extends View {
 
 		%displayLocation,
 
-		%miniFont,
+		%tinyFontId;
 
-		%bigFont;
 
 	function WeatherView ($_url, $_location) {
 		%lastUpdate = Time()-60*60-5;
 
-		%miniFont = Font("6px2bus", 6);
-
-		%bigFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
+		%InitFonts();
+		%tinyFontId = RegisterThemeFont("smallWeatherViewFont2");
 
 		%url = $_url;
 		if (!size(%url))
@@ -158,7 +156,9 @@ struct WeatherView extends View {
 	}
 
 	function DrawG15() {
-		UseFont(0);
+		$font = GetThemeFont(%fontIds[0]);
+		$tinyFont = GetThemeFont(%tinyFontId);
+		UseFont($font);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
 		}
@@ -177,10 +177,10 @@ struct WeatherView extends View {
 
 			if (TextSize(%weatherDescription)[0] > 80) {
 				$voffset = 1;
-				UseFont(%miniFont);
+				UseFont($tinyFont);
 			}
 			DisplayText(%weatherDescription, $voffset, 37);
-			UseFont(0);
+			UseFont($font);
 
 			ClearRect(79,37,159,42);
 
@@ -196,11 +196,11 @@ struct WeatherView extends View {
 				DisplayTextRight($day[2],159,$height);
 				InvertRect(81, $height, 159, $height+6);
 				if (TextSize($day[3])[0] > 79) {
-					UseFont(%miniFont);
+					UseFont($tinyFont);
 					$height++;
 				}
 				DisplayText($day[3],82,$height+7);
-				UseFont(0);
+				UseFont($font);
 			}
 		}
 		if (!%displayLocation)
@@ -213,7 +213,7 @@ struct WeatherView extends View {
 	}
 
 	function DrawG19($event, $param, $name, $res) {
-		UseFont(%bigFont);
+		UseFont(GetThemeFont(%fontIds[1]));
 		DisplayHeader($res);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
