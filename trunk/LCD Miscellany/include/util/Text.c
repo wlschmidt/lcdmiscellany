@@ -4,7 +4,7 @@
  */
 
 function MediaFlip($vk) {
-	if (size(GetG15s(LCD_G15_V2))) {
+	if (!size(GetG15s(LCD_G15_V1))) {
 		if ($vk == VK_VOLUME_DOWN) return VK_VOLUME_UP;
 		if ($vk == VK_VOLUME_UP) return VK_VOLUME_DOWN;
 	}
