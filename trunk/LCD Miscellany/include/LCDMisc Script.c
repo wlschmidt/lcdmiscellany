@@ -69,7 +69,7 @@ function Init() {
 			)
 		),
 
-		// Change 0 to 1 to disable stealing non-media keys.
+		// Change 0 to 1 to disable stealing non-media keys when focused.
 		TaskManager(0),
 
 		// Modular chat.  Currently only module is IRC.  If Pidgin leak is ever fixed, I'll modify the pidgin script
@@ -95,7 +95,7 @@ function Init() {
 		TextEditorView(),
 		ClipboardView($smallClipboardFont, $bigClipboardFont),
 
-		CalculatorView($smallCalculatorFont, $bigCalculatorFont),
+		CalculatorView($smallCalculatorFont),
 
 		// Specify urls like the next line, or modify ini:
 		// RSSView(RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION,RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION,"http://news.google.com/?rss=&output=rss"),
@@ -104,11 +104,7 @@ function Init() {
 			RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION, // Channel title flags
 			RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION, // Item text flags
 			, // URL to use.  Can either be a string or a list of strings.  If left null, uses one in ini.
-			, // Channels to display.  Currently, can only specify one per entry in previous parameter.
-			$smallRssFont,
-			$smallRssTitleFont,
-			$bigRssFont,
-			$bigRssTitleFont
+			 // Channels to display.  Currently, can only specify one per entry in previous parameter.
 		),
 
 		// uTorrent.

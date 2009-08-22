@@ -307,7 +307,7 @@ wchar_t * UTF8toUTF16Alloc(const unsigned char *in, int *slen) {
 		len = (int)strlen(in);
 	wchar_t *out = (wchar_t*) malloc(sizeof(wchar_t)*(1+len));
 	if (!out) return 0;
-	int L = UTF8toUTF16(out, in, -1);
+	int L = UTF8toUTF16(out, in, len);
 	if (L < len)
 		srealloc(out, sizeof(wchar_t)*(L+1));
 	out[L] = 0;

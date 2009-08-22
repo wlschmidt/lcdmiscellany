@@ -1,3 +1,6 @@
+// Functions that have to do with managing/detecting primary display devices,
+// Not just G15s.
+
 #import <constants.h>
 
 function IsG19Installed() {
@@ -12,4 +15,43 @@ function FilterButton($button, $g15id) {
 			return 0;
 	}
 	return $button;
+}
+
+function GetMaxRes() {
+	$devs = GetDeviceState(0);
+	while ($i < size($devs)) {
+		$dev = $devs[$i];
+		if ($w < $dev.width) {
+			$w = $dev.width;
+		}
+		if ($h < $dev.height) {
+			$h = $dev.height;
+		}
+		if ($bpp < $dev.bpp) {
+			$bpp = $dev.bpp;
+		}
+		$i++;
+	}
+	return list($w, $h, $bpp);
+}
+
+function GetMinRes() {
+	$devs = GetDeviceState(0);
+	$w = 1000000;
+	$h = 1000000;
+	$bpp = 32;
+	while ($i < size($devs)) {
+		$dev = $devs[$i];
+		if ($w > $dev.width) {
+			$w = $dev.width;
+		}
+		if ($h > $dev.height) {
+			$h = $dev.height;
+		}
+		if ($bpp > $dev.bpp) {
+			$bpp = $dev.bpp;
+		}
+		$i++;
+	}
+	return list($w, $h, $bpp);
 }

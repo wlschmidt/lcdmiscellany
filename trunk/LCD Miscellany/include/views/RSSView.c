@@ -35,10 +35,6 @@ struct RSSView extends View {
 		%nextItems,
 		%offset,
 		%scrollTimer,
-		%smallFont,
-		%smallTitleFont,
-		%bigFont,
-		%bigTitleFont,
 		%baseFontHeight,
 		%top,
 		%prevTop,
@@ -46,9 +42,12 @@ struct RSSView extends View {
 		%formatWidth,
 		%updating;
 
-	function RSSView($_channelFlags, $_itemFlags, $_feeds, $_channels, $smallRssFont, $smallRssTitleFont, $bigRssFont, $bigRssTitleFont) {
+	function RSSView($_channelFlags, $_itemFlags, $_feeds, $_channels) {
 		%delay = 250;
 		%baseFontHeight = 10;
+
+		%InitFonts();
+		%fontIds = list(@%fontIds, @RegisterThemeFontPair(type($this) +s "TitleFont"));
 
 		%nextUpdate = Time();
 		if (size($_feeds) == 0) {
@@ -65,7 +64,6 @@ struct RSSView extends View {
 			%channels = list($_channels);
 		else
 			%channels = $_channels;
-		%nextUpdate = Time();
 		%nextUpdates = list(%nextUpdate);
 		if (IsList($_feeds)) {
 			%feeds = $_feeds;
@@ -79,27 +77,20 @@ struct RSSView extends View {
 		%noDrawOnCounterUpdate = 1;
 		%noDrawOnAudioChange = 1;
 		%items = list();
-
-		%smallFont = $smallRssFont;
-		%smallTitleFont = $smallRssTitleFont;
-		%bigFont = $bigRssFont;
-		%bigTitleFont = $bigRssTitleFont;
 	}
 
 	function Update() {
+		$res = GetMaxRes();
+		$highRes = IsScreenHighRes(@$res);
 		%updating = 1;
 		$t = Time();
-		$newFormatWidth = 0;
+		$newFormatWidth = $res[0];
+		$font = GetThemeFont(%fontIds[$highRes]);
+		$titleFont = GetThemeFont(%fontIds[2+$highRes]);
 		if (IsG19Installed()) {
-			$font = %bigFont;
-			$titleFont = %bigTitleFont;
-			$newFormatWidth = 320;
 			%delay = 150;
 		}
 		else {
-			$font = %smallFont;
-			$titleFont = %smallTitleFont;
-			$newFormatWidth = 160;
 			%delay = 250;
 		}
 		if (%scrollTimer) ModifyFastTimer(%scrollTimer, %delay);
@@ -241,21 +232,18 @@ struct RSSView extends View {
 	function Draw($event, $param, $name, $res) {
 		$w = $res[0];
 		$h = $res[1]-1;
+		$highRes = IsScreenHighRes(@$res);
 
 		// Force update when new G19 detected.
 		if (%nextUpdate <= Time() || %formatWidth < $w) {
-			%nextUpdate = Time()+60;
-			SpawnThread("Update", $this);
+			if (!%updating) {
+				%nextUpdate = Time()+60;
+				SpawnThread("Update", $this);
+			}
 		}
 
-		if ($w <= 160) {
-			$font = %smallFont;
-			$titleFont = %smallTitleFont;
-		}
-		else {
-			$font = %bigFont;
-			$titleFont = %bigTitleFont;
-		}
+		$font = GetThemeFont(%fontIds[$highRes]);
+		$titleFont = GetThemeFont(%fontIds[2+$highRes]);
 
 		ClearScreen();
 		UseFont($font);
@@ -312,7 +300,7 @@ struct RSSView extends View {
 			UseFont($titleFont);
 		}
 
-		if (%hasFocus || $h < 100) {
+		if (%hasFocus || !$highRes) {
 			SetDrawColor(colorHighlightBg);
 			DrawRect($w,$fh);
 			SetDrawColor(colorHighlightText);

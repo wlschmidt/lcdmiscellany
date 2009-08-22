@@ -175,6 +175,7 @@ int RegisterObjectTypes() {
 		res &= CreateObjectType("FileReader", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), script, sizeof(script)/sizeof(script[0]), dest);
 		FileReaderType = count++;
 	}
+
 	{
 		const char *vals[] = {"&1","&2","&3","&4","&5"};
 		const ProcDescription create[] = {{"FileWriter", OpenFileWriter, C_stringint}};
@@ -320,20 +321,7 @@ int RegisterObjectTypes() {
 		res &= CreateObjectType("IPAddr", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), script, sizeof(script)/sizeof(script[0]));
 		AddrType = count++;
 	}
-/*
-void MediaFile(ScriptValue &s, ScriptValue *args);
-void MediaFilePlay(ScriptValue &s, ScriptValue *args);
-void MediaFilePause(ScriptValue &s, ScriptValue *args);
-void MediaFileStop(ScriptValue &s, ScriptValue *args);
-void MediaFileInfo(ScriptValue &s, ScriptValue *args);
-void MediaFileSet(ScriptValue &s, ScriptValue *args);
-void DestroyMediaFile(ScriptValue &s, ScriptValue *args);
 
-void MediaFileAuthor(ScriptValue &s, ScriptValue *args);
-void MediaFileTitle(ScriptValue &s, ScriptValue *args);
-void MediaFileDescription(ScriptValue &s, ScriptValue *args);
-void MediaFileCopyright(ScriptValue &s, ScriptValue *args);
-//*/
 	{
 		const char *vals[] = {"&1"};
 		const ProcDescription create[] = {{"MediaFile", MediaFile, C_stringint}};
