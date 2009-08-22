@@ -1,4 +1,5 @@
 #requires <framework\header.c>
+#requires <framework\theme.c>
 #requires <util\CPUSaver.c>
 #requires <util\Audio.c>
 #import <constants.h>
@@ -7,11 +8,10 @@
 #requires <Modules\CounterManager.c>
 
 struct G19Status {
-	var %miniFont, %font, %counters;
+	var %fontId, %counters;
 	function G19Status() {
-		%miniFont = Font("6px2bus", 6);
 		%counters = GetCounterManager();
-		%font = Font("Arial", 20,0,0,0,CLEARTYPE_QUALITY);
+		%fontId = RegisterThemeFont("bigStatusViewFont");
     }
 
 	function Draw($event, $param, $name, $res) {
@@ -19,7 +19,7 @@ struct G19Status {
 
 		DisplayHeader($res);
 
-		UseFont(%font);
+		UseFont(GetThemeFont(%fontId));
 
 		/*
 

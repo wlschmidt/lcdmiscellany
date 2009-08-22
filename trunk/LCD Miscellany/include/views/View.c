@@ -1,6 +1,7 @@
 // Needed to use LCD buttons.
 #import <constants.h>
 #requires <util\G15.c>
+#requires <framework\Theme.c>
 
 struct View {
 	// Image used on toolbar.  Must be 12 by 8 pixels.
@@ -19,6 +20,12 @@ struct View {
 	var %noDrawOnCounterUpdate;
 	// Same for audio change.
 	var %noDrawOnAudioChange;
+
+	var %fontIds;
+
+	function InitFonts() {
+		%fontIds = RegisterThemeFontPair(type($this) +s "Font");
+	}
 
 	// Just to prevent a warning.
 	function View() {

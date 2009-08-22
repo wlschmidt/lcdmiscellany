@@ -114,7 +114,9 @@ function Eval($s, $previous) {
 					$vals[size($vals)] = $test[0][0];
 					$s = substring($s, 1, -1);
 		}
-		else if (size($s) == 0) break;
+		else if (size($s) == 0) {
+			break;
+		}
 		else if (IsNull($test = RegExp($s, "^([-+*/^])"))) {
 			return "Error";
 		}
@@ -127,16 +129,15 @@ function Eval($s, $previous) {
 }
 
 struct CalculatorView extends View {
-	var %buffer, %bufferPos, %editor, %smallFont, %bigFont;
+	var %buffer, %bufferPos, %editor;
 	// current editor's width and font.  Minor optimization.
-	var %width, %font;
+	var %width, %activeFont;
 
-	function CalculatorView ($_smallFont, $_bigFont) {
-		%smallFont = $_smallFont;
-		%bigFont = $_bigFont;
+	function CalculatorView () {
+		%InitFonts();
 		%buffer = list();
 		%toolbarImage = LoadImage("Images\Calculator.png");
-		%editor = LineEditor(160, %smallFont);
+		%editor = LineEditor(160, %activeFont=0);
 		%noDrawOnCounterUpdate = 0;
 		%noDrawOnAudioChange = 1;
 	}
@@ -225,32 +226,32 @@ struct CalculatorView extends View {
 		}
 	}
 
-	function UpdateEditorAndFont($_width) {
-		if (%width == $_width) return;
-		%width = $_width;
-		if ($_width > 160) {
-			%font = %bigFont;
-			$_width -= 4;
-		}
-		else {
-			%font = %smallFont;
-		}
-		%editor.ReFormat(%font, $_width);
+	function UpdateEditorAndFont($w, $highRes) {
+		$index = IsScreenHighRes(@$);
+		// Allow more space to right.
+		$w -= 4*$highRes;
+		if (%width == $w) return;
+		%width = $_w;
+		%activeFont = GetThemeFont(%fontIds[$highRes]);
+		%editor.ReFormat(%activeFont, $w);
 	}
 
 	function Draw($event, $param, $name, $res) {
 		$w = $res[0];
 		$h = $res[1]-1;
-		%UpdateEditorAndFont($w);
+
+		$highRes = IsScreenHighRes(@$res);
+		%UpdateEditorAndFont($w, $highRes);
+
 		ClearScreen();
-		UseFont(%font);
+		UseFont(%activeFont);
 		$pos = size(%buffer)-1;
 		$fh = GetFontHeight();
 		$h2 = $h = $h - $fh - 1;
 		DrawRect(0,$h,$w,$h);
 		$L = 0;
 		$R = $w;
-		if ($R > 160) {
+		if ($highRes) {
 			$R -= 3;
 			$L  = 2;
 		}

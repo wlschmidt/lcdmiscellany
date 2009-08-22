@@ -1,3 +1,6 @@
+// Designed to allow changing theme at run time, though currently nothing
+// in the front end that allows it.
+
 function LoadTheme($theme) {
 	$reader = FileReader("themes\" +s $theme, READER_CONVERT_TEXT);//"
 
@@ -88,8 +91,14 @@ function RegisterThemeFont($name) {
 	return $id;
 }
 
+function RegisterThemeFontPair($name) {
+	return list(
+		RegisterThemeFont("small" +s $name),
+		RegisterThemeFont("big" +s $name)
+	);
+}
+
 function GetThemeFont($id) {
-	WriteLogLn($id);
 	if (!size(gLoadedFonts[$id])) {
 		$first = gFontNames[$id][0];
 		// Load all fonts with the same first letter.
@@ -103,4 +112,11 @@ function GetThemeFont($id) {
 		}
 	}
 	return gLoadedFonts[$id];
+}
+
+// Here mostly because it affects choice of theme settings.
+// Currently ignore bpp, though images basically assume color on highres screens.
+function IsScreenHighRes($w, $h, $bpp) {
+	// return ($bpp >= 24 && $w >= 320);
+	return ($w >= 320);
 }

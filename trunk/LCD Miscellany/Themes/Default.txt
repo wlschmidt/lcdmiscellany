@@ -38,19 +38,20 @@ colorScrollBarText = 0,0,190
 smallHeaderFont = 0;
 bigHeaderFont = Tahoma, 22,0,0,0,5
 
-smallTaskManagerFont = 0;
-smallCalculatorFont = 04b03, 8
-smallUtorrentFont = 04b03, 8
-smallClipboardFont = 04b03, 8
-smallRssFont = 04b03, 8
+smallTaskManagerViewFont = 0;
+smallCalculatorViewFont = 04b03, 8
+smallUtorrentViewFont = 04b03, 8
+smallClipboardViewFont = 04b03, 8
+smallRssViewFont = 04b03, 8
 smallRssTitleFont = 04b03, 8, 0, 1
 
 // Fonts for large (320 by 160) color LCDs.  Can get rid of these lines to save some
 // memory if you don't have one.
 // Probably have to switch them all to bold, but not sure.
-bigTaskManagerFont = Arial, 18,0,0,0,5
-bigCalculatorFont = Arial, 24,0,0,0,5
-bigUtorrentFont = Arial, 18,0,0,0,5
-bigClipboardFont = Arial, 18,0,0,0,5
-bigRssFont = Arial, 18,0,0,0,5
+bigStatusViewFont = Arial, 20,0,0,0,5
+bigTaskManagerViewFont = Arial, 18,0,0,0,5
+bigCalculatorViewFont = Arial, 24,0,0,0,5
+bigUtorrentViewFont = Arial, 18,0,0,0,5
+bigClipboardViewFont = Arial, 18,0,0,0,5
+bigRssViewFont = Arial, 18,0,0,0,5
 bigRssTitleFont = Arial, 18,0,1,0,5
