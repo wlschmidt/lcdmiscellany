@@ -4,7 +4,6 @@
 #requires <util\Text.c>
 
 struct TaskManager extends View {
-	var %smallFont, %bigFont;
 	// Counters
 	var %cpu, %mem, %pid;
 	// Cached selected item info.
@@ -34,9 +33,8 @@ struct TaskManager extends View {
 		%selectedHwnd,
 		%selectedHwndIndex;
 
-	function TaskManager($noKeySteal, $_smallFont, $_bigFont) {
-		%smallFont = $_smallFont;
-		%bigFont = $_bigFont;
+	function TaskManager($noKeySteal) {
+		%InitFonts();
 		%selectedHwndIndex = -1;
 		%keySteal = !$noKeySteal;
 		%sort = GetString("Task Manager", "Sort") % 3;
@@ -52,6 +50,75 @@ struct TaskManager extends View {
 		%noDrawOnAudioChange = 1;
 	}
 
+	function NavDown() {
+		%search = "";
+		if (%expandedIndex == %selectedIndex) {
+			$hWnds = %GetWindowDict()[%pidList[2*%indices[%selectedIndex]+1]];
+			%selectedHwndIndex++;
+			if (%selectedHwndIndex == size($hWnds)) {
+				%selectedHwndIndex = -1;
+				%selectedIndex++;
+			}
+		}
+		else {
+			%selectedIndex++;
+		}
+		%selectedHwnd = 0;
+		if (%selectedIndex == size(%indices)) {
+			%selectedIndex = 0;
+		}
+		%selectedPid = -1;
+		%selectedName = "";
+		NeedRedraw();
+	}
+
+	function NavUp() {
+		%search = "";
+		if (%selectedHwndIndex >= 0) {
+			%selectedHwndIndex --;
+		}
+		else {
+			%selectedIndex--;
+			if (%selectedIndex < 0) {
+				%selectedIndex = size(%indices)-1;
+			}
+			if (%expandedIndex == %selectedIndex) {
+				$hWnds = %GetWindowDict()[%pidList[2*%indices[%selectedIndex]+1]];
+				if (size($hWnds)) {
+					%selectedHwndIndex = size($hWnds)-1;
+				}
+			}
+		}
+		%selectedHwnd = 0;
+		%selectedPid = -1;
+		%selectedName = "";
+		NeedRedraw();
+	}
+
+	function PageDown() {
+		for ($i=0; $i<%page; $i++) {
+			$index = %selectedIndex;
+			$hwndIndex = %selectedHwndIndex;
+
+			%NavDown();
+			if ($index > %selectedIndex) {
+				if ($i) {
+					%selectedIndex = $index;
+					%selectedHwndIndex = $hwndIndex;
+				}
+				break;
+			}
+		}
+	}
+
+	function PageUp() {
+		for ($i=0; $i<%page; $i++) {
+			$index = %selectedIndex;
+			%NavUp();
+			if (!%selectedIndex && %selectedHwndIndex < 0) break;
+			if ($index < %selectedIndex) break;
+		}
+	}
 
 	function KeyDown($event, $param, $modifiers, $vk, $string) {
 		$vk = MediaFlip($vk);
@@ -70,16 +137,16 @@ struct TaskManager extends View {
 				%search = "";
 				return 1;
 			}
-			if ($vk >= VK_1 && $vk <= VK_6) {
+			if (GetTickCount() - %searchTime >= 1400) {
+				%search = "";
+			}
+			if ($vk >= VK_1 && $vk <= VK_6 && !size(%search)) {
 				SetProcessPriority(%selectedPid, $vk-VK_1);
 				NeedRedraw();
 				%search = "";
 				return 1;
 			}
 			if (size($string)) {
-				if (GetTickCount() - %searchTime >= 1400) {
-					%search = "";
-				}
 				%searchTime = GetTickCount();
 				%search +=s $string;
 				$index = %selectedIndex;
@@ -97,62 +164,16 @@ struct TaskManager extends View {
 			}
 			%search = "";
 			if ($vk == VK_VOLUME_UP || $vk == VK_DOWN) {
-				if (%expandedIndex == %selectedIndex) {
-					$hWnds = %GetWindowDict()[%pidList[2*%indices[%selectedIndex]+1]];
-					%selectedHwndIndex++;
-					if (%selectedHwndIndex == size($hWnds)) {
-						%selectedHwndIndex = -1;
-						%selectedIndex++;
-					}
-				}
-				else {
-					%selectedIndex++;
-				}
-				%selectedHwnd = 0;
-				if (%selectedIndex == size(%indices)) {
-					%selectedIndex = 0;
-				}
+				%NavDown();
 			}
 			else if ($vk == VK_VOLUME_DOWN || $vk == VK_UP) {
-				if (%selectedHwndIndex >= 0) {
-					%selectedHwndIndex --;
-				}
-				else {
-					%selectedIndex--;
-					if (%selectedIndex < 0) {
-						%selectedIndex = size(%indices)-1;
-					}
-					if (%expandedIndex == %selectedIndex) {
-						$hWnds = %GetWindowDict()[%pidList[2*%indices[%selectedIndex]+1]];
-						if (size($hWnds)) {
-							%selectedHwndIndex = size($hWnds)-1;
-						}
-					}
-				}
-				%selectedHwnd = 0;
+				%NavUp();
 			}
 			else if ($vk == VK_PRIOR) {
-				for ($i=0; $i<%page; $i++) {
-					$index = %selectedIndex;
-					%KeyDown($event,,, VK_UP);
-					if (!%selectedIndex && %selectedHwndIndex < 0) break;
-					if ($index < %selectedIndex) break;
-				}
+				%PageUp();
 			}
 			else if ($vk == VK_NEXT) {
-				for ($i=0; $i<%page; $i++) {
-					$index = %selectedIndex;
-					$hwndIndex = %selectedHwndIndex;
-
-					%KeyDown($event,,, VK_DOWN);
-					if ($index > %selectedIndex) {
-						if ($i) {
-							%selectedIndex = $index;
-							%selectedHwndIndex = $hwndIndex;
-						}
-						break;
-					}
-				}
+				%PageDown();
 			}
 			else if ($vk == 0xB2) {
 				%selectedIndex = 0;
@@ -298,39 +319,35 @@ struct TaskManager extends View {
 		NeedRedraw();
 	}
 
-	function G15ButtonDown($event, $param, $buttons) {
+	function G15ButtonDown($event, $param, $button) {
 		%search = "";
-		if ($buttons & 0x3F) {
-			$state = G15GetButtonsState();
-			if ($buttons & 3) {
-				if (!($state & ($buttons^3))) {
-					if ($buttons == 1) {
-						%KeyDown(0,0,0, VK_PRIOR);
-					}
-					else {
-						%KeyDown(0,0,0, VK_NEXT);
-					}
-				}
+		$button = FilterButton($button);
+		if ($button & 0x3F) {
+			if ($button == G15_LEFT) {
+				if (%page >= 8)
+					%KeyDown(0,0,0, VK_PRIOR);
+				else
+					%NavUp();
 			}
-			else if ($buttons & 0x30) {
-				if (!($state & ($buttons^0x30))) {
-					if ($buttons == 0x10) {
-						%KeyDown(0,0,0, VK_UP);
-					}
-					else {
-						%KeyDown(0,0,0, VK_DOWN);
-					}
-				}
+			else if ($button == G15_RIGHT) {
+				if (%page >= 8)
+					%KeyDown(0,0,0, VK_NEXT);
+				else
+					%NavDown();
 			}
-			else {
-				if ($buttons & 8) {
-					%Unfocus();
-				}
-				else {
-					// Don't try to kill idle, system, or invalid pids.
-					if (%selectedPid > 4) {
-						%KeyDown(0, 0, 0, VK_DELETE);
-					}
+			else if ($button == G15_UP) {
+				%NavUp();
+			}
+			else if ($button == G15_DOWN) {
+				%NavDown();
+			}
+			else if ($button == G15_CANCEL) {
+				%Unfocus();
+			}
+			else if ($button == G15_OK) {
+				// Don't try to kill idle, system, or invalid pids.
+				if (%selectedPid > 4) {
+					%KeyDown(0, 0, 0, VK_DELETE);
 				}
 			}
 			NeedRedraw();
@@ -358,17 +375,17 @@ struct TaskManager extends View {
 		$farRight = $right = $res[0]-1;
 		$bottom = $res[1]-1;
 		$bpp = $res[2];
-		if ($right <= 160) {
-			UseFont(%smallFont);
-			$prefix = TextSize("2")[0];
-			$prefix2 = 2*$prefix;
-		}
-		else {
-			UseFont(%bigFont);
+		$highRes = IsScreenHighRes(@$res);
+		UseFont(GetThemeFont(%fontIds[$highRes]));
+		$prefix = TextSize("2")[0];
+		$prefix2 = 2*$prefix;
+		if ($highRes) {
+			// extra space for position indicator
 			$farRight --;
 			$right -= 4;
-			$prefix = 1+TextSize("2")[0];
-			$prefix2 = 2*$prefix;
+			// Extra space for + and priority indicator.
+			$prefix += 1;
+			$prefix2 += 2;
 		}
 
 		ClearScreen();
@@ -376,8 +393,11 @@ struct TaskManager extends View {
 		$width = $height[0];
 		$width2 = $right-(TextSize("2.22 M")[0] + $width+$prefix);
 		$height = $height[1];
-		// ???
+
+		// Should never happen, used to when no devices were detected.
 		if ($height <= 0) return;
+
+		// Nasty sorting stuff. Done this way to be fairly fast.
 		%page = $bottom/$height;
 		if (%cpu.IsUpdated() || !IsList(%indices)) {
 			%cpuList = %cpu.GetValueList();
@@ -546,7 +566,7 @@ struct TaskManager extends View {
 		}
 		else $inv = -1;
 		if ($inv >= 0) {
-			if ($right > 160)
+			if ($highRes)
 				ColorRect(0,$inv,$right-1,$inv+$height, $bgColor);
 			else
 				ColorRect(0,$inv,$right-2,$inv+$height, $bgColor);
