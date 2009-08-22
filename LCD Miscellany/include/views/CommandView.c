@@ -93,7 +93,6 @@ struct CommandView extends View {
 					$temp2 = RegExp($item, "(.*\\).*");
 					if (size($temp2)) {
 						$item2 = $temp2[0][0];
-						WriteLogLn($item2);
 					}
 					$item2 +=s $items[$index].name;
 					if (!IsNull(strstr($item2, " "))) {
@@ -127,7 +126,6 @@ struct CommandView extends View {
 			else {
 				%screens[%current].searchString = "";
 				if ($vk == VK_RETURN) {
-					WriteLogLn("Goat?");
 					$text = strreplace($editor.text[size($editor.text)-1], "|n");
 					$[2] = 0;
 					$[4] = "";

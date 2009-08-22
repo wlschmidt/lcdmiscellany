@@ -1,5 +1,7 @@
 #import <Views\View.c>
+#import <constants.h>
 
+#requires <util\G15.c>
 #requires <util\time.c>
 #requires <util\Text.c>
 
@@ -144,34 +146,38 @@ struct MediaView extends View {
 		}
 	}
 
-	function G15ButtonDown($event, $param, $buttons) {
-		if (%players[%player].state < 0) %selected = -1;
-		if ($buttons & 0xF) {
-			$state = G15GetButtonsState();
-			if ($buttons & 3) {
-				if (!($state & ($buttons^3))) {
-					$p = %players[%player];
-					$delta = 2*$buttons-3;
-					if (%selected == -1) {
-						%player = (%player + size(%players)+$delta) % size(%players);
-					}
-					else {
+	function G15ButtonDown($event, $param, $button) {
+		$button = FilterButton($button);
+		if ($button & 0x3F) {
+			if ($button & (G15_LEFT | G15_RIGHT)) {
+				$p = %players[%player];
+				$delta = 1;
+				if ($button == G15_LEFT)
+					$delta = -1;
+				if (%selected == -1) {
+					%player = (%player + size(%players)+$delta) % size(%players);
+				}
+				else {
+					%selected = (%selected + $delta + 3)%3;
+					if ($p.noBalance && %selected == 2)
 						%selected = (%selected + $delta + 3)%3;
-						if ($p.noBalance && %selected == 2)
-							%selected = (%selected + $delta + 3)%3;
-					}
 				}
 			}
-			else {
-				if (!($state & ($buttons^12))) {
-					if ($buttons & 8) {
-						if (%selected >= 0) %selected = -1;
-						else %Unfocus();
-					}
-					else {
-						if (%selected < 0) %selected = 0;
-					}
-				}
+			else if ($button == G15_OK) {
+				if (%selected < 0)
+					%selected = 0;
+			}
+			else if ($button == G15_CANCEL) {
+				if (%selected >= 0)
+					%selected = -1;
+				else
+					%Unfocus();
+			}
+			else if ($button & (G15_UP | G15_DOWN)) {
+				$delta = 1;
+				if ($button == G15_UP)
+					$delta = -1;
+				%player = (%player + size(%players)+$delta) % size(%players);
 			}
 			NeedRedraw();
 			return 1;
@@ -391,7 +397,7 @@ struct MediaView extends View {
 				%bigTitleScroller.DisplayText(1, 20);
 			}
 			else {
-				UseFont(%titleFont);
+				UseFont(%bigTitleFont);
 				%bigTitleScroller.SetText($p.title);
 				%bigTitleScroller.DisplayText(1, 10);
 
