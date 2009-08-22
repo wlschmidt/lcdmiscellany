@@ -1,6 +1,7 @@
 #import <Views\View.c>
 #requires <framework\header.c>
 #requires <util\XML.c>
+#requires <util\G15.c>
 
 struct WeatherView extends View {
 	var %weatherImage,
@@ -11,20 +12,18 @@ struct WeatherView extends View {
 		%humidity,
 		%temperature,
 		%units,
-
 		%forecast,
-
-		%offset,
-
-		%scrollTimer,
-
-		%url,
-
 		%location,
 
+		%offset,
+		%scrollTimer,
 		%lastUpdate,
 
+		%url,
 		%displayLocation,
+
+		%imgUrl,
+		%needImages,
 
 		%tinyFontId;
 
@@ -76,6 +75,29 @@ struct WeatherView extends View {
 			if (%offset < 28*3) return;
 		}
 		%offset = 0;
+	}
+
+	function GetHighResImage() {
+		%needImages &= ~2;
+		$img = %imgUrl;
+		$str = strsplit($img,"/",0,0,0);
+		$str = strsplit($str[size($str)-1],".",0,0,0);
+		if (!IsNull($str[0]))
+			$img = "http://l.yimg.com/a/i/us/nws/weather/gr/" +s $str[0] +s "d.png";
+		$img = HttpGetWait($img);
+		if (!IsNull($img)) {
+			%colorWeatherImage = LoadMemoryImage32($img);
+			NeedRedraw();
+		}
+	}
+
+	function GetLowResImage() {
+		%needImages &= ~1;
+		$img = HttpGetWait(%imgUrl);
+		if (!IsNull($img)) {
+			%weatherImage = LoadMemoryImage($img, 0.6);
+			NeedRedraw();
+		}
 	}
 
 	// Update using Yahoo Weather.
@@ -134,28 +156,33 @@ struct WeatherView extends View {
 				);
 			}
 
-			// Call before getting image, so can redraw while getting img.
-			NeedRedraw();
-
 			$html = SimpleXML($item, list("description"))[3];
 			if (size($html)) {
 				$html = ParseXML($html);
 				if (!IsNull($html)) {
 					$img = SimpleXML($html, ("img", ,"src"));
 					if (!IsNull($img)) {
-						$img = HttpGetWait($img);
-						if (!IsNull($img)) {
-							%weatherImage = LoadMemoryImage($img, 0.6);
-							%colorWeatherImage = LoadMemoryImage32($img);
-							NeedRedraw();
+						if (%imgUrl !=s $img) {
+							%needImages = 3;
 						}
+						else {
+							if (IsNull(%weatherImage)) {
+								%needImages = 1;
+							}
+							if (IsNull(%colorWeatherImage)) {
+								%needImages |= 2;
+							}
+						}
+						%imgUrl = $img;
 					}
 				}
 			}
+			NeedRedraw();
 		}
 	}
 
 	function DrawG15() {
+		if (%needImages&1) SpawnThread("GetLowResImage", $this);
 		$font = GetThemeFont(%fontIds[0]);
 		$tinyFont = GetThemeFont(%tinyFontId);
 		UseFont($font);
@@ -213,75 +240,39 @@ struct WeatherView extends View {
 	}
 
 	function DrawG19($event, $param, $name, $res) {
+		if (%needImages&2) SpawnThread("GetHighResImage", $this);
+		$w = $res[0];
+		$halfw = $w/2;
 		UseFont(GetThemeFont(%fontIds[1]));
-		DisplayHeader($res);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
 		}
 		else {
 			$deg = "°" +s %units;
-			DisplayText(%location +s " weather", 1, 20);
-			ColorRect(0,44,319,46, colorHighlightBg);
+			DisplayText(%location, 1, 20);
+			// ColorRect(0,44,319,46, colorHighlightBg);
 			DisplayText("Temp: " +s %temperature +s $deg, 1, 46);
 			DisplayText("Index: " +s %windChill +s $deg, 1, 66);
 			DisplayText(%wind, 1, 86);
 			DisplayText("Humidity: " +s %humidity, 1, 106);
 
-			DrawImage(%colorWeatherImage, 180, 53);
+			DrawImage(%colorWeatherImage, 120, 15);
 			DisplayTextCentered(%weatherDescription, 206, 103);
 
 			ColorRect(0,129,319,150, colorHighlightBg);
 			SetDrawColor(colorHighlightText);
-			DisplayText("Forecast", 4, 129);
+			DisplayTextCentered("Forecast", $halfw, 129);
 			SetDrawColor(colorText);
 
 			for ($i=0; $i<2; $i++) {
-				$x = 160*$i+2;
+				$x = $halfw*$i + $halfw/2;
 				$day = %forecast[$i];
-				DisplayText($day[0],$x,151);
-				DisplayText($day[1] +s $deg +s " - " +s $day[2] +s $deg,$x, 171);
-				DisplayText($day[3],$x,191);
+				DisplayTextCentered($day[0],$x,151);
+				DisplayTextCentered($day[1] +s $deg +s " - " +s $day[2] +s $deg,$x, 171);
+				DisplayTextCentered(FormatText($day[3], $halfw-2),$x,191);
 			}
-/*
-			DisplayText("Temp: " +s %temperature, 0, 8);
-			DisplayText("Index: " +s %windChill, 0, 15);
-			DisplayText(%wind, 0, 22);
-
-
-			DrawImage(%weatherImage, 49, 8);
-
-			// Clear pixels jsut about description.
-			ClearRect(49,37,79,42);
-
-			if (TextSize(%weatherDescription)[0] > 80) {
-				$voffset = 1;
-				UseFont(%miniFont);
-			}
-			DisplayText(%weatherDescription, $voffset, 37);
-			UseFont(0);
-
-			ClearRect(79,37,159,42);
-
-			DrawRect(80, 7, 80, 42);
-
-			$realOffset = %offset;
-
-			for (; $i<size(%forecast); $i++) {
-				$height = 8 + 14 * $i - $realOffset;
-				$day = %forecast[$i];
-				DisplayText($day[0],82,$height);
-				DisplayTextRight($day[1] +s " -",135,$height);
-				DisplayTextRight($day[2],159,$height);
-				InvertRect(81, $height, 159, $height+6);
-				if (TextSize($day[3])[0] > 79) {
-					UseFont(%miniFont);
-					$height++;
-				}
-				DisplayText($day[3],82,$height+7);
-				UseFont(0);
-			}
-			//*/
 		}
+		DisplayHeader($res);
 	}
 
 	function Draw($event, $param, $name, $res) {
@@ -292,7 +283,7 @@ struct WeatherView extends View {
 			SpawnThread("Update", $this);
 		}
 
-		if ($res[0] >= 320) %DrawG19(@$);
+		if (IsScreenHighRes(@$res)) %DrawG19(@$);
 		else %DrawG15();
 
 	}
