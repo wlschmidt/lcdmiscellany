@@ -259,16 +259,6 @@ int DictValue::Add(ScriptValue &key, ScriptValue &val) {
 }
 
 void DictValue::Release() {
-	/*
-#ifdef _DEBUG
-	for (i=0; i<Functions.numValues; i++) {
-		Functions.table[i].sv->refCount++;
-	}
-	for (i=0; i<Functions.numValues; i++) {
-		Functions.table[i].sv->refCount--;
-	}
-#endif
-	//*/
 	if (0 == --refCount) {
 		for (int i=0; i<numEntries; i++) {
 			entries[i].key.Release();

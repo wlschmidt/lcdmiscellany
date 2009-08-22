@@ -346,9 +346,7 @@ static int ParseXMLSub(unsigned char * &buffer, int &len, ScriptValue &s, int fl
 					return 0;
 				if (!CreateListValue(sv2, 2))
 					return 0;
-				sv.type = -1;
-				sv.intVal = 0;
-				if (!sv2.listVal->PushBack(sv) || !CreateListValue(sv, 2) || !sv2.listVal->PushBack(sv)) {
+				if (!sv2.listVal->PushBack() || !CreateListValue(sv, 2) || !sv2.listVal->PushBack(sv)) {
 					sv2.Release();
 					return 0;
 				}
@@ -568,8 +566,7 @@ void FindNextXML(ScriptValue &s, ScriptValue *args) {
 			CoerceString(args->listVal->vals[1], sv);
 		}
 		else {
-			CreateNullValue(sv);
-			CoerceString(sv, sv);
+			CreateStringValue(sv);
 		}
 		while (first >= 0 && first < list->numVals) {
 			if (list->vals[first].type == -1) {

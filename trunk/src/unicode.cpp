@@ -435,7 +435,7 @@ BSTR UTF8toBSTR(unsigned char *in, const int *slen) {
 		len = (int)strlen(in);
 	wchar_t *out = (wchar_t*) malloc(sizeof(wchar_t)*(1+len+4));
 	if (!out) return 0;
-	int L = UTF8toUTF16(out+2, in, -1);
+	int L = UTF8toUTF16(out+2, in, len);
 	if (L < len)
 		srealloc(out, 4 + sizeof(wchar_t)*(L+1));
 	out[2+L] = 0;

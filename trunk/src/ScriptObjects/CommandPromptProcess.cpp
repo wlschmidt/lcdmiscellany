@@ -16,7 +16,7 @@ struct ConnectedProcess {
 	};
 };
 
-void CoommandPromptProcess(ScriptValue &s, ScriptValue* args) {
+void CommandPromptProcess(ScriptValue &s, ScriptValue* args) {
 if (0)
 {
   char buf[1024];           //i/o buffer
