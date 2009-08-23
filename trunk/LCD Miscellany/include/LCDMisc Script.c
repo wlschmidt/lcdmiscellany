@@ -35,10 +35,6 @@ function Init() {
 	$bigRssFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
 	$bigRssTitleFont = Font("Arial", 18,0,1,0,CLEARTYPE_QUALITY);
 
-	// Global
-	smallHeaderFont = 0;
-	bigHeaderFont = Font("Tahoma", 22,0,0,0,CLEARTYPE_QUALITY);
-
 	/* Uncomment to use US english day/month strings instead of whatever Windows
 	 * is configured to use.
 	 */
@@ -73,7 +69,7 @@ function Init() {
 		TaskManager(0),
 
 		// Modular chat.  Currently only module is IRC.  If Pidgin leak is ever fixed, I'll modify the pidgin script
-		// to be compatible.
+		// to be compatible.  Designed for small 2-color LCDs only.
 		/*
 		ChatView(
 			IRCChatService(list("irc.goatcheese.cx:7000", "CheeseLover", "#CheeseChat", "#CheeseWarehousing", "#YouGetTheIdea")),
@@ -93,9 +89,9 @@ function Init() {
 		),
 
 		TextEditorView(),
-		ClipboardView($smallClipboardFont, $bigClipboardFont),
+		ClipboardView(),
 
-		CalculatorView($smallCalculatorFont),
+		CalculatorView(),
 
 		// Specify urls like the next line, or modify ini:
 		// RSSView(RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION,RSS_DISPLAY_TITLE | RSS_DISPLAY_DESCRIPTION,"http://news.google.com/?rss=&output=rss"),
@@ -111,6 +107,7 @@ function Init() {
 		DownloadView($smallUtorrentFont, $bigUtorrentFont),
 
 		// SABnzbdView 0.1.7 by 4wd:
+		// Designed for small 2-color LCDs only.
 		// Parameters are: SABnzbdView(URL, header, subview),
 		// Where: URL = "http://ip:port/sabnzbd/"
 		//     header = 0 if you want the TIME/DATE header
@@ -123,7 +120,7 @@ function Init() {
 		//
 		// If you are only interested in one SABnzbd+ daemon, you can leave the
 		// URL empty and place it in the LCDMisc.ini under [URLs].  See the example.
-		SABnzbdView(, 0, 0),
+		// SABnzbdView(, 0, 0),
 
 		// The sample below shows using StatusView to monitor more than one SABnzbd+
 		// Switching between screens is done by pressing the LCDMisc 'OK' button,
@@ -161,8 +158,8 @@ function Init() {
 		),
 		//*/
 
+		// Probably will never get around to getting this working, due to threading issues.
 		//CommandView(),
-
 	);
 
 	// Turn off lights during screensaver.  Delete the "//" to enable.

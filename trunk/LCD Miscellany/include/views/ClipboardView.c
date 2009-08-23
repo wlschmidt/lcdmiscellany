@@ -8,17 +8,14 @@ struct ClipboardView extends View {
 	// every second.
 	var %redrawTimer;
 
-	var %bigFont, %smallFont;
-
 	// Don't zoom when can't.
 	var %minZoom;
 
-	// formatting dimensions.  Changed for the V2.
-	var %w, %h, %g19;
+	// formatting dimensions.
+	var %w, %h, %bpp;
 
-	function ClipboardView($_smallFont, $_bigFont) {
-		%smallFont = $_smallFont;
-		%bigFont = $_bigFont;
+	function ClipboardView() {
+		%InitFonts();
 		%toolbarImage = LoadImage("Images\Clipboard.png");
 
 		%noDrawOnCounterUpdate = 1;
@@ -29,53 +26,47 @@ struct ClipboardView extends View {
 	function Draw($event, $param, $name, $res) {
 		$farRight = $right = $res[0]-1;
 		$bottom = $res[1]-1;
-		$bpp = $res[2];
+		$bp = $res[2];
+		$highRes = IsScreenHighRes(@$res);
+
 		if (!%happy) %Update();
 		ClearScreen();
 		if (IsString(%data)) {
-			if ($bpp == 32)
-				UseFont(%bigFont);
-			else
-				UseFont(%smallFont);
-			DisplayText(%data,%w>300,%offset * GetFontHeight());
+			UseFont(GetThemeFont(%fontIds[$highRes]));
+			DisplayText(%data, $highRes, %offset * GetFontHeight());
 		}
 		else if (type(%data) ==S "Image") {
 			DrawImage(%data, %x, %y);
 		}
 		else if (type(%data) ==S "Image32") {
-			if ($bpp > 1)
+			if ($highRes) {
 				DrawImage(%data, %x, %y);
+			}
 			else {
-				$s = %data.Size();
-				$x2 = %x/2;//($s[0]-160)/2+80;
-				$y2 = %y/2-39;//($s[1]-120)/2+21;
+				// Making some assumptions here about relative size.
+				// May go through the math to do it right later.  Or not.
+				// $s = %data.Size();
+				$x2 = (%x - %w/2)/2 + $res[0]/2;
+				$y2 = (%y - %h/2)/2 + $res[1]/2;
 				DrawImage(%data2, $x2, $y2);
 			}
 		}
 	}
 
 	function UpdateDimensions() {
-		if (IsG19Installed()) {
-			%w = 318;
-			%h = 240;
-			%g19 = 1;
-		}
-		else {
-			%w = 160;
-			%h = 43;
-			%g19 = 0;
-		}
-
+		$res = GetMaxRes();
+		%w = $res[0];
+		%h = $res[1];
+		%bpp = $res[2];
+		return $res;
 	}
 
 	function KeyDown($event, $param, $modifiers, $vk) {
 		$vk = MediaFlip($vk);
+		$highRes = IsScreenHighRes(@GetMaxRes());
 		if (%hasFocus || IsNull($event)) {
 			if (IsString(%data)) {
-				if (%g19)
-					UseFont(%bigFont);
-				else
-					UseFont(%smallFont);
+				UseFont(GetThemeFont(%fontIds[$highRes]));
 				$height = GetFontHeight();
 				// Volume up.
 				if ($vk == 0xAE || $vk == VK_UP) {
@@ -148,22 +139,37 @@ struct ClipboardView extends View {
 	function G15ButtonDown($event, $param, $button) {
 		$button = FilterButton($button);
 		if ($button & 0x3F) {
-			if ($button == G15_LEFT) {
-				%KeyDown(,,,VK_LEFT);
-			}
-			else if ($button == G15_RIGHT) {
-				%KeyDown(,,,VK_RIGHT);
-			}
-			else if ($button == G15_UP) {
-				%KeyDown(,,,VK_UP);
-			}
-			else if ($button == G15_DOWN) {
-				%KeyDown(,,,VK_DOWN);
+			if ($button & 0x33) {
+
+				if ($button == G15_LEFT) {
+					$key = VK_LEFT;
+				}
+				else if ($button == G15_RIGHT) {
+					$key = VK_RIGHT;
+				}
+				else if ($button == G15_UP) {
+					$key = VK_UP;
+				}
+				else if ($button == G15_DOWN) {
+					$key = VK_DOWN;
+				}
+				$hp = 1;
+				if (!IsString(%data)) {
+					$hp = %h;
+				}
+				while ($hp >= 0) {
+					%KeyDown(,,,$key);
+					$hp -= 30;
+				}
 			}
 			else if ($button == G15_CANCEL) {
 				%Unfocus();
-				NeedRedraw();
 			}
+			else if ($button == G15_OK) {
+				if (%zoom != 1)
+					%ReZoom(%zoom * 2.0);
+			}
+			NeedRedraw();
 			return 1;
 		}
 	}
@@ -186,7 +192,8 @@ struct ClipboardView extends View {
 		if ($newZoom > 1 || $newZoom <= 0) $newZoom = 1;
 
 		%zoom = $newZoom;
-		if (%g19) {
+		$highRes = IsScreenHighRes(@GetMaxRes());
+		if ($highRes) {
 			%data = $image.Zoom(%zoom);
 			%data2 = %data.ToImage(0.5, -1);
 		}
@@ -234,11 +241,9 @@ struct ClipboardView extends View {
 		%happy = 0;
 		%data = null;
 		%data2 = null;
-		%UpdateDimensions();
-		if (%g19)
-			UseFont(%bigFont);
-		else
-			UseFont(%smallFont);
+		$highRes = IsScreenHighRes(@%UpdateDimensions());
+		UseFont(GetThemeFont(%fontIds[$highRes]));
+
 		for ($i=0; $i<3; $i++) {
 			$temp = GetClipboardData();
 			if (IsList($temp)) {
