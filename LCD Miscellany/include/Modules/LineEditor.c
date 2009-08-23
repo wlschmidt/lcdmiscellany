@@ -51,9 +51,11 @@ struct LineEditor {
 	}
 
 	function ReFormat($_font, $_width) {
-		%font = $_font;
-		%width = $_width;
-		%Update();
+		if (%width != $_width || !Equals($_font, %font)) {
+			%font = $_font;
+			%width = $_width;
+			%Update();
+		}
 	}
 
 	function GetText() {

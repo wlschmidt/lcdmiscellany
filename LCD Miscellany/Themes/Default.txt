@@ -30,9 +30,15 @@ colorFirstColumnBg = 240, 240, 255
 colorEvenColumnBg = 240, 240, 255
 colorOddColumnBg = 255, 255, 255
 
+colorDriveText = 0, 160, 0
+colorDirectoryText = 160, 0, 0
+
 // currently only used by task manager.  May add elsewhere eventually.
 // Not really text, but goes on default bg, so...
 colorScrollBarText = 0,0,190
+
+smallDefaultFont = 04b03, 8;
+bigDefaultFont = Arial, 18,0,0,0,5
 
 // Global
 smallHeaderFont = 0;
@@ -46,6 +52,7 @@ smallRSSViewFont = 04b03, 8
 smallRSSViewTitleFont = 04b03, 8, 0, 1
 smallWeatherViewFont = 0
 smallWeatherViewFont2 = 6px2bus, 6
+smallFileBrowserFont = 04b03, 8
 
 // Fonts for large (320 by 160) color LCDs.  Can get rid of these lines to save some
 // memory if you don't have one.
@@ -58,3 +65,4 @@ bigClipboardViewFont = Arial, 18,0,0,0,5
 bigRSSViewFont = Arial, 18,0,0,0,5
 bigRSSViewTitleFont = Arial, 18,0,1,0,5
 bigWeatherViewFont = Arial, 18,0,0,0,5
+bigFileBrowserFont = Lucida Sans Unicode, 16,0,0,0,5

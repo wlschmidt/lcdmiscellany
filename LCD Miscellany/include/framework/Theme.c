@@ -26,6 +26,9 @@ function LoadTheme($theme) {
 						GetThemeColor("colorOddColumn", 0, 0)
 	);
 
+	colorDriveText = GetThemeColor("colorDrive", 1, 0);
+	colorDirectoryText = GetThemeColor("colorDirectory", 1, 0);
+
 	// currently only used by task manager.  May add elsewhere eventually.
 	colorScrollBar = GetThemeColor("colorScrollBar", 1, 0);
 }
@@ -72,6 +75,15 @@ function GetThemeColor($name, $text, $inverted) {
 function LoadThemeFont($name) {
 	$string = GetThemeString($name);
 
+	// Not found
+	if (size($string) == 0) {
+		if ($string[0] ==s "b") {
+			$string = GetThemeString("bigDefaultFont");
+		}
+		else {
+			$string = GetThemeString("smallDefaultFont");
+		}
+	}
 	// Internal font, hopefully
 	if (size($string) == 1) {
 		return $string + 0;

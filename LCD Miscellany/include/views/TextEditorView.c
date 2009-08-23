@@ -89,6 +89,9 @@ struct TextEditorView extends View {
 
 	function KeyDown($event, $param, $modifiers, $vk) {
 		if ($vk == VK_ESCAPE) {
+			if (%current == size(%files)) {
+				if (%browser.KeyDown(@$)) return 1;
+			}
 			%Unfocus();
 			NeedRedraw();
 			return 1;
@@ -149,7 +152,7 @@ struct TextEditorView extends View {
 	}
 
 	function G15ButtonDown($event, $param, $buttons) {
-		if ($buttons & 0xF) {
+		if ($buttons & 0x3F) {
 			if (%current == size(%files) && %browser.G15ButtonDown(@$)) {
 				return 1;
 			}
@@ -204,11 +207,11 @@ struct TextEditorView extends View {
 		}
 	}
 
-	function Draw() {
+	function Draw($event, $param, $name, $res) {
 		ClearScreen();
 
 		if (%current == size(%files)) {
-			%browser.Draw();
+			%browser.Draw(@$);
 		}
 		else {
 			UseFont(%font);
