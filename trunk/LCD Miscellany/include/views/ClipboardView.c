@@ -1,5 +1,6 @@
 #import <Views\View.c>
 #requires <util\Text.c>
+#requires <framework\Theme.c>
 
 struct ClipboardView extends View {
 	var %data, %data2, %lines, %offset, %happy, %zoom, %x, %y;
@@ -27,12 +28,12 @@ struct ClipboardView extends View {
 		$farRight = $right = $res[0]-1;
 		$bottom = $res[1]-1;
 		$bp = $res[2];
-		$highRes = IsScreenHighRes(@$res);
+		$highRes = IsHighRes(@$res);
 
 		if (!%happy) %Update();
 		ClearScreen();
 		if (IsString(%data)) {
-			UseFont(GetThemeFont(%fontIds[$highRes]));
+			UseThemeFont(%fontIds[$highRes]);
 			DisplayText(%data, $highRes, %offset * GetFontHeight());
 		}
 		else if (type(%data) ==S "Image") {
@@ -63,10 +64,10 @@ struct ClipboardView extends View {
 
 	function KeyDown($event, $param, $modifiers, $vk) {
 		$vk = MediaFlip($vk);
-		$highRes = IsScreenHighRes(@GetMaxRes());
+		$highRes = IsHighRes(@GetMaxRes());
 		if (%hasFocus || IsNull($event)) {
 			if (IsString(%data)) {
-				UseFont(GetThemeFont(%fontIds[$highRes]));
+				UseThemeFont(%fontIds[$highRes]);
 				$height = GetFontHeight();
 				// Volume up.
 				if ($vk == 0xAE || $vk == VK_UP) {
@@ -192,7 +193,7 @@ struct ClipboardView extends View {
 		if ($newZoom > 1 || $newZoom <= 0) $newZoom = 1;
 
 		%zoom = $newZoom;
-		$highRes = IsScreenHighRes(@GetMaxRes());
+		$highRes = IsHighRes(@GetMaxRes());
 		if ($highRes) {
 			%data = $image.Zoom(%zoom);
 			%data2 = %data.ToImage(0.5, -1);
@@ -241,8 +242,8 @@ struct ClipboardView extends View {
 		%happy = 0;
 		%data = null;
 		%data2 = null;
-		$highRes = IsScreenHighRes(@%UpdateDimensions());
-		UseFont(GetThemeFont(%fontIds[$highRes]));
+		$highRes = IsHighRes(@%UpdateDimensions());
+		UseThemeFont(%fontIds[$highRes]);
 
 		for ($i=0; $i<3; $i++) {
 			$temp = GetClipboardData();

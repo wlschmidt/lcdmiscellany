@@ -19,7 +19,7 @@ struct G19Status {
 
 		DisplayHeader($res);
 
-		UseFont(GetThemeFont(%fontId));
+		UseThemeFont(%fontId);
 
 		/*
 

@@ -8,7 +8,7 @@ function DisplayHeader($res) {
 		gEmailImage = LoadImage("images\email.png");
 	}
 	if ($width <= 160) {
-		UseFont(GetThemeFont(gSmallHeaderFont));
+		UseThemeFont(gSmallHeaderFont);
 		ClearRect(0,0,159,6);
 		DisplayTextRight(FormatTime("DDD M.DD.YY"),160,0);
 		DisplayTextRight(FormatTime("hh:NN:SS TT"), 57);
@@ -22,7 +22,7 @@ function DisplayHeader($res) {
 		DrawRect(0, 7, 159, 7);
 	}
 	else {
-		UseFont(GetThemeFont(gBigHeaderFont));
+		UseThemeFont(gBigHeaderFont);
 		if (IsNull(titleBarImage)) titleBarImage = LoadImage32("images\TitleBar.png");
 		//ColorRect(0, 0, $width, 20, colorHighlightBg);
 		DrawImage(titleBarImage);

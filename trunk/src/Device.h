@@ -42,11 +42,16 @@ public:
 	// Only used by hids, but got really, really sick of casting them.
 	G15 *g15;
 	// Exact type, values given to 
-	HID_DEVICE_TYPE hidType;
-
 	StringValue *id;
 
+	// Only used by sdk devices.
+	int priority;
+	__int64 priorityTimer;
+
+	HID_DEVICE_TYPE hidType;
+
 	ConnectionType cType;
+
 
 	// Need to call redraw script.
 	char needRedraw;

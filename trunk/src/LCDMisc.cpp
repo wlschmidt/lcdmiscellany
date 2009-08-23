@@ -44,6 +44,10 @@ HWND nextClipboardHwnd = 0;
 
 PerfMon perfMon;
 
+void QueueRedraw() {
+	PostMessage(ghWnd, WM_APP, 2, 2);
+}
+
 void RedrawNow(StringValue *dev) {
 	((Device*)dummyScreen)->needRedraw = 1;
 	for (int i=0; i<numDevices; i++) {
@@ -64,7 +68,7 @@ void Redraw(StringValue *dev) {
 		devices[i]->needRedraw = 1;
 	}
 	if (changed) {
-		PostMessage(ghWnd, WM_APP, 2, 2);
+		QueueRedraw();
 	}
 }
 
@@ -568,7 +572,7 @@ static int FlushImage(int drawn) {
 	unsigned __int64 t = GetTickCountNoOverflow();
 	// Reenumerate if errors or if not connected to the 3.01 SDK or it's been a while.
 	// 3.01 SDK tells me when to enumerate.
-	if (errors || (t - lastDeviceEnum >= 5000 && (sdkType != CONNECTION_SDK301 || t - lastDeviceEnum >= 10000))) {
+	if (errors || (t - lastDeviceEnum >= 5000 && (sdkType != CONNECTION_SDK301 || t - lastDeviceEnum >= 20000))) {
 		lastDeviceEnum = t;
 		UpdateSDKDevices();
 	}

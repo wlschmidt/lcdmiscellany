@@ -16,7 +16,7 @@ struct HTTPFile {
 	char *data;
 	inline void Cleanup() {
 		free(data);
-		nfree(this);
+		free(this);
 	}
 };
 

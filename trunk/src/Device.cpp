@@ -5,6 +5,7 @@
 #include "sdk/v3.01/lgLcd.h"
 #include "sdk/v1.03/lgLcd.h"
 #include "StringUtil.h"
+#include "timer.h"
 
 Device::Device(int width, int height, int bpp, ConnectionType cType, HID_DEVICE_TYPE hidType, char *id) : Screen(width, height, bpp) {
 	this->bpp = bpp;
@@ -17,6 +18,9 @@ Device::Device(int width, int height, int bpp, ConnectionType cType, HID_DEVICE_
 	g15 = 0;
 	CreateStringValue(string, id);
 	this->id = string.stringVal;
+
+	priority = LGLCD_PRIORITY_NORMAL;
+	priorityTimer = 0;
 }
 
 Device::~Device() {
@@ -54,26 +58,33 @@ public:
 				bmp.bmp_mono.pixels[p] = (((short)image[p].r + (short)image[p].g + (short)image[p].b)<128*3-1)<<7;
 			}
 			if (sdkType == CONNECTION_SDK301) {
-				res = lgLcdUpdateBitmap(deviceID, &bmp.hdr, LGLCD_PRIORITY_NORMAL);
+				res = lgLcdUpdateBitmap(deviceID, &bmp.hdr, priority);
 			}
 			else if (sdkType == CONNECTION_SDK103) {
-				res = loLcdUpdateBitmap(deviceID, (loLcdBitmapHeader*)&bmp.hdr, LGLCD_PRIORITY_NORMAL);
+				res = loLcdUpdateBitmap(deviceID, (loLcdBitmapHeader*)&bmp.hdr, priority);
 			}
 			if (res != ERROR_SUCCESS) {
 				return -1;
 			}
-			return 1;
 		}
 		else if (width == 320 && height == 240 && bpp == 32) {
 			memcpy(bmp.bmp_qvga32.pixels, image, sizeof(bmp.bmp_qvga32.pixels));
 			bmp.hdr.Format = LGLCD_BMP_FORMAT_QVGAx32;
-			res = lgLcdUpdateBitmap(deviceID, &bmp.hdr, LGLCD_PRIORITY_NORMAL);
+			res = lgLcdUpdateBitmap(deviceID, &bmp.hdr, priority);
 			if (res != ERROR_SUCCESS) {
 				return -1;
 			}
-			return 1;
 		}
-		return 0;
+		else {
+			return 0;
+		}
+		if (priorityTimer) {
+			if (priorityTimer < 0 || priorityTimer >= time64i()) {
+				priorityTimer = 0;
+				priority = LGLCD_PRIORITY_NORMAL;
+			}
+		}
+		return 1;
 	}
 };
 

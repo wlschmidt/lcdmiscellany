@@ -1,5 +1,6 @@
 #import <constants.h>
 #requires <util\Text.c>
+#requires <util\G15.c>
 #requires <Modules\LineEditor.c>
 #requires <framework\Overlay.c>
 
@@ -75,19 +76,18 @@ struct FileBrowser {
 		NeedRedraw();
 		if ($vk == VK_ESCAPE) {
 			// Takes care of rename and run dialogs.
-			%G15ButtonDown(, , 0x8);
+			%G15ButtonDown(, , G15_CANCEL);
 			return 1;
 		}
 		if (!IsNull(%rename)) {
 			if ($vk == VK_RETURN) {
 				$text = %rename.GetText();
+				%G15ButtonDown(, , G15_CANCEL);
 				if (size($text)) {
 					if (MoveFile(%path +s %renameName, %path +s $text)) {
-						%G15ButtonDown(, , 0x8);
 						KeyDown(, , , $vk, $string);
 					}
 				}
-				%G15ButtonDown(, , 0x8);
 			}
 			else
 				%rename.KeyDown(@$);
@@ -95,14 +95,19 @@ struct FileBrowser {
 		}
 		if (!IsNull(%run)) {
 			if ($vk == VK_RETURN) {
+				// Have to do this first.  Run can act like a wait function, unfortunately,
+				// as windows messages can be processed in the mean time.
+				// MSDN does not seem to mention this.  :(
 				$text = %run.GetText();
+				%G15ButtonDown(, , G15_CANCEL);
 				if (size($text)) {
 					$temp = RegExp($text, "^\w*|"([^|"]*)|"\w*(.*)$");//"
 					if (!size($temp[0][0])) {
 						$temp = RegExp($text, "^\w*([^\w]*)\w*(.*)$");
 					}
 					if (size($temp[0][0])) {
-						Run($temp[0][0], $temp[1][0], 2);
+						if (!Run($temp[0][0], $temp[1][0], 2))
+							RunSimple($temp[0][0], $temp[1][0], 2);
 						%runHistory = GetString("File Browser", "Run History", "le");
 						if (IsString(%runHistory) && IsList(%runHistory = Bedecode(%runHistory))) {
 							%runHistory[size(%runHistory)] = $text;
@@ -113,7 +118,6 @@ struct FileBrowser {
 						}
 					}
 				}
-				%G15ButtonDown(, , 0x8);
 			}
 			else if ($vk == VK_UP) {
 				if (%runHistoryItem) {
@@ -265,9 +269,18 @@ struct FileBrowser {
 		return 1;
 	}
 
-	function G15ButtonDown($event, $param, $buttons) {
+	function G15ButtonDown($event, $param, $button) {
 		%search = "";
-		if ($buttons & 0xF) {
+		$button = FilterButton($button);
+		if ($button & 0x3F) {
+			if ($button == G15_UP) {
+				%KeyDown(,,,VK_UP);
+				return 1;
+			}
+			else if ($button == G15_DOWN) {
+				%KeyDown(,,,VK_DOWN);
+				return 1;
+			}
 
 			if (!IsNull(%run)) {
 				%run.Unfocus();
@@ -280,13 +293,8 @@ struct FileBrowser {
 				%rename.Unfocus();
 				%rename = null;
 				%renameName = null;
+				NeedRedraw();
 				return 1;
-			}
-
-			$state = G15GetButtonsState();
-			if ($buttons & 3) {
-				if (!($state & ($buttons^3))) {
-				}
 			}
 		}
 	}

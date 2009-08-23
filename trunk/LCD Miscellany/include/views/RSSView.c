@@ -81,7 +81,7 @@ struct RSSView extends View {
 
 	function Update() {
 		$res = GetMaxRes();
-		$highRes = IsScreenHighRes(@$res);
+		$highRes = IsHighRes(@$res);
 		%updating = 1;
 		$t = Time();
 		$newFormatWidth = $res[0];
@@ -232,7 +232,7 @@ struct RSSView extends View {
 	function Draw($event, $param, $name, $res) {
 		$w = $res[0];
 		$h = $res[1]-1;
-		$highRes = IsScreenHighRes(@$res);
+		$highRes = IsHighRes(@$res);
 
 		// Force update when new G19 detected.
 		if (%nextUpdate <= Time() || %formatWidth < $w) {
@@ -301,13 +301,11 @@ struct RSSView extends View {
 		}
 
 		if (%hasFocus || !$highRes) {
-			SetDrawColor(colorHighlightBg);
-			DrawRect($w,$fh);
+			ColorRect(0,0,$w,$fh,colorHighlightBg);
 			SetDrawColor(colorHighlightText);
 		}
 		else {
-			SetDrawColor(colorHighlightUnfocusedBg);
-			DrawRect($w,$fh);
+			ColorRect(0,0,$w,$fh,colorHighlightUnfocusedBg);
 			SetDrawColor(colorHighlightUnfocusedText);
 		}
 
@@ -320,7 +318,7 @@ struct RSSView extends View {
 			DisplayText($lst[%prevTop].title, 0, $topOffset-$fh);
 			DrawClippedText($topTitle, 0, $topOffset, $w, $fh+1);
 		}
-			SetDrawColor(colorText);
+		SetDrawColor(colorText);
 
 		//DrawRect(0,$fh-1,$w,$fh-1);
 

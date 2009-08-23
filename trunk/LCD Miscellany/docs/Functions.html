@@ -699,6 +699,11 @@ Supports G15s.
 <P>
 Gets the state of the lights on the specified keyboard.  Keyboard works as in the previous function, except a value of 0 will return the state of the first G15 HID keyboard and if it's the identifier of a non-HID attached keyboard, it returns null.  The return value is a 4-element list consisting of (Light, LCDLight, MLights, keyboard) for G15s.  For G15s, each value is the input you'd pass to the next 3 functions to set the current state of the keyboard, except for keyboard, which is the HID identifier string of the keyboard you changed the value of.  Returns null on failure.<BR>
 
+<SPAN class="FXN">G15SetPriority</SPAN> (value, duration, keyboard)<BR>
+Sets the priority for drawing to specified keyboard with the Logitech SDK.  Only works on SDK connections.  Priority value should be one of: LGLCD_PRIORITY_IDLE_NO_SHOW, LGLCD_PRIORITY_BACKGROUND, LGLCD_PRIORITY_NORMAL, LGLCD_PRIORITY_ALERT.
+
+<P> Duration is roughly how long, in seconds, the elevated priority will be used until its returned to normal priority.  Note that priority is a very rough estimate.  Subsequent calls for a given keyboard clear the old priority/duration completely, even if the duration is shorter.  A duration of 0 will affect only a single device update.  A duration of -1 will last until the next call to G15SetPriority() for that keyboard.  Keyboard works as in GetDeviceState(), except 0 will set the priority for all SDK connected keyboards.  Return value is the number of keyboards whose priorities were set.
+
 <P> <SPAN class="FXN">G15SetMLights</SPAN> (mask, keyboard)<BR>
 Supports G15s and G19s.
 <P>

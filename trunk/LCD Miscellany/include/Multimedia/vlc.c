@@ -79,7 +79,7 @@ struct VLCController extends MediaPlayerController {
 	}
 
 	function UpdateAndRefresh($param) {
-		// Significantly speeds responsiveness.
+		// Spawning response significantly increases responsiveness.
 		SpawnHttpRequest(%statusUrl +s $param);
 		%UpdateWait($param);
 		NeedRedraw();
