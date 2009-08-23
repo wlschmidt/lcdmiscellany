@@ -227,11 +227,9 @@ struct CalculatorView extends View {
 	}
 
 	function UpdateEditorAndFont($w, $highRes) {
-		$index = IsHighRes(@$);
 		// Allow more space to right.
 		$w -= 4*$highRes;
-		if (%width == $w) return;
-		%width = $_w;
+		%width = $w;
 		%activeFont = GetThemeFont(%fontIds[$highRes]);
 		%editor.ReFormat(%activeFont, $w);
 	}

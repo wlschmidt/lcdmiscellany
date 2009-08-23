@@ -58,6 +58,7 @@ function Init() {
 	/* Change order (or comment out) to change order of views (or hide them)
 	 */
 	menuHandler = MenuHandler(eventHandler,
+		TextEditorView(),
 		DualView (
 			StatusView(
 				//DefaultStatus(),
@@ -95,7 +96,6 @@ function Init() {
 			// AMIPController(),
 		),
 
-		TextEditorView(),
 		ClipboardView(),
 
 		CalculatorView(),

@@ -5,7 +5,10 @@
 #requires <framework\Overlay.c>
 
 struct FileBrowser {
-	var %path, %sel, %hasFocus, %stealArrows, %font, %selInfo, %pathName;
+	var %path, %sel, %hasFocus, %stealArrows, %fontIds, %selInfo, %pathName;
+
+	var %run, %runHistory, %runHistoryItem;
+	var %rename, %renameName, %pageHeight;
 
 	var %search, %searchTime;
 	function FileBrowser($_path, $_stealArrows, $_pathName) {
@@ -26,7 +29,7 @@ struct FileBrowser {
 			}
 		}
 		%stealArrows = $_stealArrows;
-		%font = Font("04b03", 8);
+		%fontIds = list(RegisterThemeFont("smallFileBrowserFont"), RegisterThemeFont("bigFileBrowserFont"));
 	}
 
 	function Focus() {
@@ -68,23 +71,23 @@ struct FileBrowser {
 		}
 	}
 
-	var %run, %runHistory, %runHistoryItem;
-	var %rename, %renameName;
-
 	function KeyDown($event, $param, $modifiers, $vk, $string) {
 		$vk = MediaFlip($vk);
 		NeedRedraw();
 		if ($vk == VK_ESCAPE) {
 			// Takes care of rename and run dialogs.
-			%G15ButtonDown(, , G15_CANCEL);
-			return 1;
+			if (%G15ButtonDown(, , G15_CANCEL)) {
+				return 1;
+			}
+			return 0;
 		}
 		if (!IsNull(%rename)) {
 			if ($vk == VK_RETURN) {
 				$text = %rename.GetText();
+				$oldName = %renameName;
 				%G15ButtonDown(, , G15_CANCEL);
 				if (size($text)) {
-					if (MoveFile(%path +s %renameName, %path +s $text)) {
+					if (MoveFile(%path +s $oldName, %path +s $text)) {
 						KeyDown(, , , $vk, $string);
 					}
 				}
@@ -161,14 +164,14 @@ struct FileBrowser {
 					}
 					%runHistoryItem = size(%runHistory);
 
-					%run = LineEditor(144, %font);
+					%run = LineEditor(144, 0);
 					%run.Focus();
 					$text = %path +s %selInfo.name;
 					if (strstr($text, " ")) $text = "|"" +s $text +s "|"";
 					%run.SetText($text);
 				}
 				else if ($vk == VK_F2) {
-					%rename = LineEditor(160, %font);
+					%rename = LineEditor(160, 0);
 					%rename.SetText(%selInfo.name);
 					%rename.Focus();
 					%renameName = %selInfo.name;
@@ -214,15 +217,15 @@ struct FileBrowser {
 		}
 		else if ($vk == VK_NEXT || $vk == VK_RIGHT) {
 			$count = size(FileInfo(%path +s "*")) + size(DriveList());
-			%sel+=5;
-			if (%sel >= $count && %sel < $count + 4) %sel = $count - 1;
+			%sel += %pageHeight;
+			if (%sel >= $count) %sel = $count - 1;
 		}
 		else if ($vk == VK_PRIOR || $vk == VK_LEFT) {
-			if (%sel && %sel < 5) {
+			if (%sel < %pageHeight) {
 				%sel = 0;
 			}
 			else {
-				%sel -= 5;
+				%sel -= %pageHeight;
 			}
 		}
 		else if ($vk == VK_HOME) {
@@ -269,10 +272,10 @@ struct FileBrowser {
 		return 1;
 	}
 
-	function G15ButtonDown($event, $param, $button) {
+	function G15ButtonDown($event, $param, $button, $keyboard) {
 		%search = "";
-		$button = FilterButton($button);
 		if ($button & 0x3F) {
+			$button = FilterButton($button);
 			if ($button == G15_UP) {
 				%KeyDown(,,,VK_UP);
 				return 1;
@@ -281,26 +284,57 @@ struct FileBrowser {
 				%KeyDown(,,,VK_DOWN);
 				return 1;
 			}
-
-			if (!IsNull(%run)) {
-				%run.Unfocus();
-				%run = null;
-				NeedRedraw();
-				%runHistory = null;
+			else if ($button & 0x3) {
+				$state = GetDeviceState($keyboard);
+				if ($state.type == SDK_320_240_32 || $state.type == LCD_G19) {
+					if ($button == G15_LEFT) {
+						%KeyDown(,,,VK_LEFT);
+					}
+					else if ($button == G15_RIGHT) {
+						%KeyDown(,,,VK_RIGHT);
+					}
+				}
+				else {
+					if ($button == G15_LEFT) {
+						%KeyDown(,,,VK_UP);
+					}
+					else if ($button == G15_RIGHT) {
+						%KeyDown(,,,VK_DOWN);
+					}
+				}
 				return 1;
 			}
-			if (!IsNull(%rename)) {
-				%rename.Unfocus();
-				%rename = null;
-				%renameName = null;
-				NeedRedraw();
-				return 1;
+			else if ($button == G15_CANCEL) {
+				if (!IsNull(%run)) {
+					%run.Unfocus();
+					%run = null;
+					NeedRedraw();
+					%runHistory = null;
+					return 1;
+				}
+				if (!IsNull(%rename)) {
+					WriteLogLn("here");
+					%rename.Unfocus();
+					%rename = null;
+					%renameName = null;
+					NeedRedraw();
+					return 1;
+				}
 			}
 		}
 	}
 
-	function Draw() {
+	function Draw($event, $param, $name, $res) {
+		$highRes = IsHighRes(@$res);
+
+		$w = $res[0];
+		$h = $res[1];
+
+		$font = GetThemeFont(%fontIds[$highRes]);
+		UseFont($font);
+
 		$files = list(@FileInfo(%path +s "*"), @DriveList());
+
 		if (!IsNull(%rename)) {
 			for ($i=0; $i<size($files); $i++) {
 				if (%renameName ==s $files[$i].name) {
@@ -309,7 +343,10 @@ struct FileBrowser {
 				}
 			}
 			if ($i == size($files)) {
-				%G15ButtonDown(, , 0x8);
+				%G15ButtonDown(, , G15_CANCEL);
+			}
+			else {
+				%rename.ReFormat($font, $w);
 			}
 		}
 		if (%sel >= size($files)) {
@@ -318,45 +355,99 @@ struct FileBrowser {
 		else if (%sel < 0) {
 			%sel = size($files)-1;
 		}
-		$index = %sel-(%sel % 5);
 		$pos = 0;
-		$height = GetFontHeight(%font);
-		UseFont(%font);
-		while ($pos < 43 && $index < size($files)) {
-			if (!IsNull(%rename) && $index == %sel) {
-				%rename.Draw(0, $pos);
-			}
-			else {
-				if (IsString($files[$index])) {
-					$name = $files[$index];
-					if ($name[0] >s "B") {
-						$info = VolumeInformation($name);
-						$name = "|2" +s $name;
-						if (size($info.volumeName)) {
-							$name = $name +s " (|2" +s $info.volumeName +s "|2)";
-						}
-					}
-					DisplayText($name, 1, $pos);
+		$height = GetFontHeight();
+		%pageHeight = $h/$height;
+		$index = %sel-(%sel % %pageHeight);
+		$rightEdge = $w - 1 - 4*$highRes;
+		$clearStart = $rightEdge - TextSize(" 0.00 M")[0];
+		if ($highRes) {
+			while ($pos < $h && $index < size($files)) {
+				if ($index == %sel && %hasFocus) {
+					SetDrawColor(colorHighlightText);
+					SetBgColor(colorHighlightBg);
+					ClearRect(0, $pos, $w, $pos+$height);
 				}
-				else if ($files[$index].attributes & FILE_ATTRIBUTE_DIRECTORY) {
-					DisplayText("|2" +s $files[$index].name,1, $pos);
+				else if ($index == %sel) {
+					SetDrawColor(colorHighlightUnfocusedText);
+					SetBgColor(colorHighlightUnfocusedBg);
+					ClearRect(0, $pos, $w, $pos+$height);
 				}
 				else {
-					DisplayText($files[$index].name,1, $pos);
-					ClearRect(128, $pos, 159, $pos+$height);
-					DisplayTextRight(FormatSize($files[$index].bytes,,,3), 159, $pos);
+					SetBgColor(colorBg);
 				}
-				if ($index == %sel && %hasFocus) {
-					if (IsNull(%run)) {
-						InvertRect(0, $pos, 159, $pos+$height-1);
+				if (!IsNull(%rename) && $index == %sel) {
+					%rename.Draw(0, $pos);
+				}
+				else {
+					if (IsString($files[$index])) {
+						if ($index != %sel) SetDrawColor(colorDriveText);
+						$name = $files[$index];
+						if ($name[0] >s "B") {
+							$info = VolumeInformation($name);
+							if (size($info.volumeName)) {
+								$name = $name +s "|t[" +s $info.volumeName +s "]";
+							}
+						}
+						DisplayText($name, 1, $pos);
+					}
+					else if ($files[$index].attributes & FILE_ATTRIBUTE_DIRECTORY) {
+						if ($index != %sel) SetDrawColor(colorDirectoryText);
+						DisplayText($files[$index].name,1, $pos);
+					}
+					else {
+						if ($index != %sel) SetDrawColor(colorText);
+						DisplayText($files[$index].name,1, $pos);
+						ClearRect($clearStart, $pos, $w, $pos+$height);
+						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
 					}
 				}
+				$pos += $height;
+				$index++;
 			}
-			$pos += $height;
-			$index++;
 		}
+		else {
+			while ($pos < $h && $index < size($files)) {
+				if ($index == %sel && %hasFocus) {
+					SetDrawColor(colorHighlightText);
+					SetBgColor(colorHighlightBg);
+					ClearRect(0, $pos, $w, $pos+$height);
+				}
+				else {
+					SetDrawColor(colorText);
+					SetBgColor(colorBg);
+				}
+				if (!IsNull(%rename) && $index == %sel) {
+					%rename.Draw(0, $pos);
+				}
+				else {
+					if (IsString($files[$index])) {
+						$name = $files[$index];
+						if ($name[0] >s "B") {
+							$info = VolumeInformation($name);
+							if (size($info.volumeName)) {
+								$name = $name +s " [|2" +s $info.volumeName +s "|2]";
+							}
+						}
+						DisplayText("|2" +s $name, 1, $pos);
+					}
+					else if ($files[$index].attributes & FILE_ATTRIBUTE_DIRECTORY) {
+						DisplayText("|2" +s $files[$index].name,1, $pos);
+					}
+					else {
+						DisplayText($files[$index].name,1, $pos);
+						ClearRect($clearStart, $pos, $w, $pos+$height);
+						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
+					}
+				}
+				$pos += $height;
+				$index++;
+			}
+		}
+		SetDrawColor(colorText);
 		%selInfo = $files[%sel];
 		if (!IsNull(%run)) {
+			%run.ReFormat($font, $w-144);
 			%run.DrawBox("Run:");
 		}
 	}
