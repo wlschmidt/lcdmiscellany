@@ -80,6 +80,7 @@ enum FunctionType {
 	C_string2objs,
 	C_2stringsint,
 	C_2stringsintstring,
+	C_2intsstring,
 	C_int,
 	C_stringintobj,
 	C_string,

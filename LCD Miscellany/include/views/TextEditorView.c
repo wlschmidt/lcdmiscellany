@@ -40,7 +40,7 @@ struct TextEditorView extends View {
 
 	function %MakeLoadBrowser() {
 		if (IsNull(%browser)) {
-			%browser = FileBrowser(, 1, "Text Editor");//"
+			%browser = FileBrowser(, 1, "Text Editor");
 		}
 	}
 

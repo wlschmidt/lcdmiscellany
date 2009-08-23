@@ -439,7 +439,7 @@ void ObjectValue::Release() {
 		for (int i=types[type].numValues-1; i>=0; i--) {
 			values[i].Release();
 		}
-		nfree(this);
+		free(this);
 	}
 }
 

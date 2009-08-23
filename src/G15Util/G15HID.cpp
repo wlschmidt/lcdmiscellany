@@ -62,7 +62,7 @@ struct G15 {
 	Buffer buffer;
 	void Cleanup() {
 		name.stringVal->Release();
-		nfree(this);
+		free(this);
 	}
 };
 
@@ -624,7 +624,7 @@ int ListG15s() {
 						if (!SetupDiGetDeviceInterfaceDetail(hdev, &devInterfaceData, devInterfaceDetails, memSize, 0, &devInfoData)) continue;
 					}
 					HANDLE hfile = CreateFile(devInterfaceDetails->DevicePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
-					if (hfile) {
+					if (hfile != INVALID_HANDLE_VALUE) {
 						HIDD_ATTRIBUTES attributes;
 						attributes.Size = sizeof(attributes);
 						if (HidD_GetAttributes(hfile, &attributes)) {

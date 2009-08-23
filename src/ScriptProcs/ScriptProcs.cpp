@@ -312,6 +312,8 @@ int RegisterProcs2() {
 		{"G15GetState", G15GetState, C_string},
 		{"G15GetButtonsState", G15GetButtonsState, C_string},
 
+		{"G15SetPriority", G15SetPriority, C_2intsstring},
+
 		{"G15EnableHID", G15EnableHID, C_noArgs},
 		{"G15DisableHID", G15DisableHID, C_noArgs},
 		{"GetG15s", GetG15s, C_int},

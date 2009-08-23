@@ -27,9 +27,7 @@ struct WinampController extends MediaPlayerController {
 	}
 
 	function Pause() {
-		if (%state != 2) {
-			PostMessage(%handle, 0x0111, 40046, 0);
-		}
+		PostMessage(%handle, 0x0111, 40046, 0);
 	}
 
 	function ChangeMode($v) {

@@ -227,7 +227,7 @@ struct CalculatorView extends View {
 	}
 
 	function UpdateEditorAndFont($w, $highRes) {
-		$index = IsScreenHighRes(@$);
+		$index = IsHighRes(@$);
 		// Allow more space to right.
 		$w -= 4*$highRes;
 		if (%width == $w) return;
@@ -240,7 +240,7 @@ struct CalculatorView extends View {
 		$w = $res[0];
 		$h = $res[1]-1;
 
-		$highRes = IsScreenHighRes(@$res);
+		$highRes = IsHighRes(@$res);
 		%UpdateEditorAndFont($w, $highRes);
 
 		ClearScreen();

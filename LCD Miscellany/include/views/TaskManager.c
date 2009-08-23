@@ -375,8 +375,8 @@ struct TaskManager extends View {
 		$farRight = $right = $res[0]-1;
 		$bottom = $res[1]-1;
 		$bpp = $res[2];
-		$highRes = IsScreenHighRes(@$res);
-		UseFont(GetThemeFont(%fontIds[$highRes]));
+		$highRes = IsHighRes(@$res);
+		UseThemeFont(%fontIds[$highRes]);
 		$prefix = TextSize("2")[0];
 		$prefix2 = 2*$prefix;
 		if ($highRes) {

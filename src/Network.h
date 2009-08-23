@@ -87,7 +87,7 @@ struct NetworkName {
 	int family;
 	char dns[4];
 	inline void Cleanup() {
-		nfree(this);
+		free(this);
 	}
 };
 
@@ -100,7 +100,7 @@ struct NetworkNames {
 		remote->Cleanup();
 		for (int i=0; i<numLocals; i++) locals[i]->Cleanup();
 		free(locals);
-		nfree(this);
+		free(this);
 	}
 };
 

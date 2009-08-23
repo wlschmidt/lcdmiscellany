@@ -58,7 +58,7 @@ void BufferedHttpSocket::Cleanup() {
 	if (userName) free(userName);
 	if (pass) free(pass);
 	//if (sock != INVALID_SOCKET) closesocket(sock);
-	nfree(this);
+	free(this);
 }
 
 void BufferedHttpSocket::Try() {

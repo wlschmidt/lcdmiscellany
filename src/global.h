@@ -125,6 +125,7 @@ extern HWND nextClipboardListener;
 
 #include "resource.h"
 
+/*
 #ifdef free
 #undef free
 #endif
@@ -142,3 +143,6 @@ __forceinline void nfree(void *x) {
 }
 
 //#define free(x) goatfree((void**)&x)
+//*/
+
+void QueueRedraw();

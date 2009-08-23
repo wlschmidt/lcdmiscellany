@@ -245,3 +245,9 @@
 #define WM_MBUTTONDOWN                  0x0207
 #define WM_MBUTTONUP                    0x0208
 #define WM_MBUTTONDBLCLK                0x0209
+
+
+#define LGLCD_PRIORITY_IDLE_NO_SHOW                 (0)
+#define LGLCD_PRIORITY_BACKGROUND                   (64)
+#define LGLCD_PRIORITY_NORMAL                       (128)
+#define LGLCD_PRIORITY_ALERT                        (255)

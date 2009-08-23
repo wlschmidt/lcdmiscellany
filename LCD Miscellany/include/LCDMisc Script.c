@@ -46,6 +46,13 @@ function Init() {
 	 * running.
 	 */
 	G15EnableHID();
+
+	/* Will steal LCD when started.  Remove/comment out line to change that.
+	 * Was added in the hope that it would cause the G19 to display LCD Miscellany instead
+	 * of the app list.  Unfortunately, doesn't do that.  Note that this will make the first
+	 * update only high priority.  Will return to normal afterwards.
+	 */
+	G15SetPriority(LGLCD_PRIORITY_ALERT);
 	eventHandler = EventHandler();
 
 	/* Change order (or comment out) to change order of views (or hide them)

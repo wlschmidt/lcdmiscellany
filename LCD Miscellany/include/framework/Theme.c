@@ -114,9 +114,13 @@ function GetThemeFont($id) {
 	return gLoadedFonts[$id];
 }
 
+function UseThemeFont($id) {
+	return UseFont(GetThemeFont($id));
+}
+
 // Here mostly because it affects choice of theme settings.
 // Currently ignore bpp, though images basically assume color on highres screens.
-function IsScreenHighRes($w, $h, $bpp) {
+function IsHighRes($w, $h, $bpp) {
 	// return ($bpp >= 24 && $w >= 320);
 	return ($w >= 320);
 }

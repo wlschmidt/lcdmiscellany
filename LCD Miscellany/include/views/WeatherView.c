@@ -243,7 +243,7 @@ struct WeatherView extends View {
 		if (%needImages&2) SpawnThread("GetHighResImage", $this);
 		$w = $res[0];
 		$halfw = $w/2;
-		UseFont(GetThemeFont(%fontIds[1]));
+		UseThemeFont(%fontIds[1]);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
 		}
@@ -283,7 +283,7 @@ struct WeatherView extends View {
 			SpawnThread("Update", $this);
 		}
 
-		if (IsScreenHighRes(@$res)) %DrawG19(@$);
+		if (IsHighRes(@$res)) %DrawG19(@$);
 		else %DrawG15();
 
 	}
