@@ -25,10 +25,12 @@ colorHighlightUnfocusedBg = 148,148,255
 colorHighlightUnfocusedText = 255,255,255
 
 // Used in multi-column displays to make columns easier to read.
-colorFirstColumnBg = 240, 240, 255
+colorFirstColumnBg = 230, 230, 255
 // Even/odd column color options.
-colorEvenColumnBg = 240, 240, 255
+colorEvenColumnBg = 230, 230, 255
 colorOddColumnBg = 255, 255, 255
+
+colorWindowBg = 230,255,230
 
 colorDriveText = 0, 160, 0
 colorDirectoryText = 160, 0, 0
@@ -54,9 +56,10 @@ smallWeatherViewFont = 0
 smallWeatherViewFont2 = 6px2bus, 6
 smallFileBrowserFont = 04b03, 8
 
-// Fonts for large (320 by 160) color LCDs.  Can get rid of these lines to save some
-// memory if you don't have one.
-// Probably have to switch them all to bold, but not sure.
+// Fonts for large (320 by 160) color LCDs.
+// The final 5 signals to use cleartype with Window's font-drawing code
+// instead of the internal 1-bit fonts.
+
 bigStatusViewFont = Arial, 20,0,0,0,5
 bigTaskManagerFont = Arial, 18,0,0,0,5
 bigCalculatorViewFont = Arial, 24,0,0,0,5

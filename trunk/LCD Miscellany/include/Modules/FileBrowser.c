@@ -286,7 +286,7 @@ struct FileBrowser {
 			}
 			else if ($button & 0x3) {
 				$state = GetDeviceState($keyboard);
-				if ($state.type == SDK_320_240_32 || $state.type == LCD_G19) {
+				if (HasAllDirections($keyboard)) {
 					if ($button == G15_LEFT) {
 						%KeyDown(,,,VK_LEFT);
 					}
@@ -363,15 +363,15 @@ struct FileBrowser {
 		$clearStart = $rightEdge - TextSize(" 0.00 M")[0];
 		if ($highRes) {
 			while ($pos < $h && $index < size($files)) {
-				if ($index == %sel && %hasFocus) {
-					SetDrawColor(colorHighlightText);
-					SetBgColor(colorHighlightBg);
-					ClearRect(0, $pos, $w, $pos+$height);
-				}
-				else if ($index == %sel) {
-					SetDrawColor(colorHighlightUnfocusedText);
-					SetBgColor(colorHighlightUnfocusedBg);
-					ClearRect(0, $pos, $w, $pos+$height);
+				if ($index == %sel) {
+					if (%hasFocus) {
+						SetDrawColor(colorHighlightText);
+						ColorRect(0, $pos, $w, $pos+$height-1, colorHighlightBg);
+					}
+					else {
+						SetDrawColor(colorHighlightUnfocusedText);
+						ColorRect(0, $pos, $w, $pos+$height-1, colorHighlightUnfocusedBg);
+					}
 				}
 				else {
 					SetBgColor(colorBg);
@@ -397,8 +397,7 @@ struct FileBrowser {
 					}
 					else {
 						if ($index != %sel) SetDrawColor(colorText);
-						DisplayText($files[$index].name,1, $pos);
-						ClearRect($clearStart, $pos, $w, $pos+$height);
+						DisplayText(Elipsisify($files[$index].name, $clearStart-2), 2, $pos);
 						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
 					}
 				}
@@ -410,12 +409,10 @@ struct FileBrowser {
 			while ($pos < $h && $index < size($files)) {
 				if ($index == %sel && %hasFocus) {
 					SetDrawColor(colorHighlightText);
-					SetBgColor(colorHighlightBg);
-					ClearRect(0, $pos, $w, $pos+$height);
+					ColorRect(0, $pos, $w, $pos+$height-1, colorHighlightBg);
 				}
 				else {
 					SetDrawColor(colorText);
-					SetBgColor(colorBg);
 				}
 				if (!IsNull(%rename) && $index == %sel) {
 					%rename.Draw(0, $pos);
@@ -435,8 +432,7 @@ struct FileBrowser {
 						DisplayText("|2" +s $files[$index].name,1, $pos);
 					}
 					else {
-						DisplayText($files[$index].name,1, $pos);
-						ClearRect($clearStart, $pos, $w, $pos+$height);
+						DisplayText(Elipsisify($files[$index].name, $clearStart-1), 1, $pos);
 						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
 					}
 				}
