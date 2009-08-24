@@ -2,6 +2,7 @@
 #requires <list.c>
 #requires <framework\Overlay.c>
 #requires <util\Text.c>
+#requires <util\G15.c>
 
 struct TaskManager extends View {
 	// Counters
@@ -102,10 +103,8 @@ struct TaskManager extends View {
 
 			%NavDown();
 			if ($index > %selectedIndex) {
-				if ($i) {
-					%selectedIndex = $index;
-					%selectedHwndIndex = $hwndIndex;
-				}
+				%selectedIndex = $index;
+				%selectedHwndIndex = $hwndIndex;
 				break;
 			}
 		}
@@ -113,10 +112,8 @@ struct TaskManager extends View {
 
 	function PageUp() {
 		for ($i=0; $i<%page; $i++) {
-			$index = %selectedIndex;
+			if (!%selectedIndex && %selectedHwndIndex<0) break;
 			%NavUp();
-			if (!%selectedIndex && %selectedHwndIndex < 0) break;
-			if ($index < %selectedIndex) break;
 		}
 	}
 
@@ -319,15 +316,25 @@ struct TaskManager extends View {
 		NeedRedraw();
 	}
 
-	function G15ButtonDown($event, $param, $button) {
+	function G15ButtonDown($event, $param, $button, $keyboard) {
 		%search = "";
 		$button = FilterButton($button);
 		if ($button & 0x3F) {
 			if ($button == G15_LEFT) {
-				if (%page >= 8)
-					%KeyDown(0,0,0, VK_PRIOR);
-				else
+				if (HasAllDirections($keyboard)) {
+					%KeyDown(0,0,0, VK_LEFT);
+				}
+				else {
 					%NavUp();
+				}
+			}
+			else if ($button == G15_RIGHT) {
+				if (HasAllDirections($keyboard)) {
+					%KeyDown(0,0,0, VK_RIGHT);
+				}
+				else {
+					%NavDown();
+				}
 			}
 			else if ($button == G15_RIGHT) {
 				if (%page >= 8)
@@ -335,7 +342,7 @@ struct TaskManager extends View {
 				else
 					%NavDown();
 			}
-			else if ($button == G15_UP) {
+			if ($button == G15_UP) {
 				%NavUp();
 			}
 			else if ($button == G15_DOWN) {
@@ -348,6 +355,12 @@ struct TaskManager extends View {
 				// Don't try to kill idle, system, or invalid pids.
 				if (%selectedPid > 4) {
 					%KeyDown(0, 0, 0, VK_DELETE);
+				}
+			}
+			else {
+				if (HasAllDirections($keyboard)) {
+				}
+				else {
 				}
 			}
 			NeedRedraw();
@@ -549,10 +562,7 @@ struct TaskManager extends View {
 			}
 		}
 
-		if ($bpp>1) {
-			ColorRect($right-$width-$prefix, 0, $right-1, $bottom, colorColumnBg[0]);
-			ColorRect($width2-3, 0, $right-$width-$prefix+4, $bottom, colorColumnBg[1]);
-			ColorRect($prefix2, 0, $width2-3, $bottom, colorFirstColumnBg);
+		if ($highRes) {
 			$width2-=2;
 			$prefix2++;
 		}
@@ -565,11 +575,12 @@ struct TaskManager extends View {
 			$bgColor = colorHighlightUnfocusedBg;
 		}
 		else $inv = -1;
+		$height1 = $height-1;
 		if ($inv >= 0) {
 			if ($highRes)
-				ColorRect(0,$inv,$right-1,$inv+$height, $bgColor);
+				ColorRect(0,$inv,$right-1,$inv+$height1, $bgColor);
 			else
-				ColorRect(0,$inv,$right-2,$inv+$height, $bgColor);
+				ColorRect(0,$inv,$right-2,$inv+$height1, $bgColor);
 		}
 
 		for (;$i<$bottom && $pos < size(%indices); $i+=$height, $pos++) {
@@ -580,6 +591,12 @@ struct TaskManager extends View {
 					SetDrawColor(colorHighlightUnfocusedText);
 			}
 			else {
+				if ($highRes) {
+					$ih = $i+$height1;
+					ColorRect($right-$width-$prefix, $i, $right-1, $ih, colorColumnBg[0]);
+					ColorRect($width2-1, $i, $right-$width-$prefix+4, $ih, colorColumnBg[1]);
+					ColorRect($prefix2-1, $i, $width2-1, $ih, colorFirstColumnBg);
+				}
 				SetDrawColor(colorText);
 			}
 			$index = %indices[$pos];
@@ -613,6 +630,9 @@ struct TaskManager extends View {
 								SetDrawColor(colorHighlightText);
 							}
 							else {
+								if ($highRes) {
+									ColorRect(3*$prefix-3, $i, $right-1, $i+$height1, colorWindowBg);
+								}
 								SetDrawColor(colorText);
 							}
 							$text = GetWindowText($expandedHwnds[$w]);
@@ -626,17 +646,11 @@ struct TaskManager extends View {
 			}
 		}
 
-		SetDrawColor(colorScrollBar);
-
 		$listPos = $listPos * ($bottom-$bottom/20.0) / ($listLen-1);
-		DrawRect($farRight, $listPos, $farRight+4, $listPos+$bottom/20.0);
+		ColorRect($farRight, $listPos, $farRight+4, $listPos+$bottom/20.0, colorScrollBar);
 
 		SetDrawColor(colorText);
 
-		if (%hasFocus) {
-			$i = (($realIndex) % %page) * $height;
-			//InvertRect(0,$i,$right-2, $i+$height);
-		}
 		%selectedName = %nameList[%indices[%selectedIndex]];
 		%selectedPid = %pidList[2*%indices[%selectedIndex]+1];
 	}

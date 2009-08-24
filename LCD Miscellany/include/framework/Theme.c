@@ -25,6 +25,7 @@ function LoadTheme($theme) {
 						GetThemeColor("colorEvenColumn", 0, 0),
 						GetThemeColor("colorOddColumn", 0, 0)
 	);
+	colorWindowBg = GetThemeColor("colorWindow", 0, 0);
 
 	colorDriveText = GetThemeColor("colorDrive", 1, 0);
 	colorDirectoryText = GetThemeColor("colorDirectory", 1, 0);

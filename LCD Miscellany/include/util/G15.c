@@ -7,6 +7,11 @@ function IsG19Installed() {
 	return size(GetG15s(SDK_320_240_32));
 }
 
+function HasAllDirections($keyboard) {
+	$state = GetDeviceState($keyboard);
+	return ($state.type == SDK_320_240_32 || $state.type == LCD_G19);
+}
+
 // If left/right or up/down are both pressed, returns 0.
 // Can specify individual keyboard to check, if so desired.
 function FilterButton($button, $g15id) {
@@ -55,3 +60,4 @@ function GetMinRes() {
 	}
 	return list($w, $h, $bpp);
 }
+
