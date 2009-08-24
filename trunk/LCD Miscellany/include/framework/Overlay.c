@@ -1,16 +1,18 @@
 #import <constants.h>
 #requires <util\graphics.c>
 #requires <util\text.c>
+#requires <util\G15.c>
+#requires <framework\theme.c>
 
 struct MessageBoxOverlay {
 	// Note:  Option 2 is cancel, and is automatically selected when a new message box is openned.
-	var %font, %prompt, %option1, %option2, %fxn1, %fxn2, %obj1, %obj2, %arg1, %arg2, %selected, %handler;
+	var %prompt, %option1, %option2, %fxn1, %fxn2, %obj1, %obj2, %arg1, %arg2, %selected, %handler;
+	var %fontIds;
 	function MessageBoxOverlay($_handler, $_prompt, $_option1, $_option2, $_fxn1, $_fxn2, $_obj1, $_obj2, $_arg1, $_arg2) {
-		%font = Font("04b03", 8);
+		%fontIds = RegisterThemeFontPair("OverlayFont");
 		%handler = $_handler;
-		UseFont(%font);
 
-		%prompt = Elipsisify($_prompt, 150);
+		%prompt = $_prompt;
 		%option1 = $_option1;
 		%option2 = $_option2;
 		%fxn1 = $_fxn1;
@@ -23,8 +25,9 @@ struct MessageBoxOverlay {
 		$_handler.SetOverlay($this);
 	}
 
-	function G15ButtonDown($event, $param, $buttons) {
-		if ($buttons & 3) {
+	function G15ButtonDown($event, $param, $button) {
+		$button = FilterButton($button);
+		if ($button & 3) {
 			if (size(%option2) && 3 != (G15GetButtonsState() & 3)) {
 				if ($buttons & 1) {
 					%selected ^= 1;
@@ -35,10 +38,10 @@ struct MessageBoxOverlay {
 				NeedRedraw();
 			}
 		}
-		else if ($buttons & 8) {
+		else if ($button == G15_CANCEL) {
 			%Option2();
 		}
-		else if ($buttons & 4) {
+		else if ($button == G15_OK) {
 			if (%selected == 1)
 				%Option2();
 			else
@@ -88,48 +91,72 @@ struct MessageBoxOverlay {
 		%Option2();
 	}
 
-	function Draw() {
-		UseFont(%font);
-		$box2 = TextSize(%option1);
-		$maxHeight = $height2 = $box2[1];
-		$width2 = $box2[0];
-		$box = TextSize(%prompt);
-		$fullWidth = $width = $box[0];
-		if (size(%option2)) {
-			$box3 = TextSize(%option2);
-			$height3 = $box3[1];
-			if ($height3 > $maxHeight) $maxHeight = $height3;
-			$width3 = $box3[0];
-			$width4 = $width3;
-			if ($width4 < $width2) $width4 = $width2;
-			$width4 += 6;
-			$temp = $width4 * 2;
-			if ($temp > $fullWidth) $fullWidth = $temp;
+	function Draw($event, $param, $name, $res) {
+		$highRes = IsHighRes(@$res);
+		UseThemeFont(%fontIds[$highRes]);
+
+		$w = $res[0];
+		$h = $res[1]-1;
+
+		$cx = $w/2;
+		$cy = $h/2;
+
+		if ($highRes) {
+			$vmargins = 4;
+			$hmargins = 4;
+			$bmargins = 4;
 		}
 		else {
-			if ($width < $width2 + 2) {
-				$width = $width2 + 4;
-			}
+			$vmargins = 2;
+			$hmargins = 4;
+			$bmargins = 2;
 		}
-		$height = $maxHeight + 4 + $box[1];
-		$left = 80-$fullWidth/2-4;
-		$top = 21-$height/2-4;
-		$right = 80+$fullWidth/2+4;
-		$bottom = 21+$height/2+4;
-		DoubleBox($left, $top, $right, $bottom);
-		DisplayText(%prompt, 80-($box[0]-1)/2, $top+2);
 
-		if (size(%option2)) {
-			DoubleBox(80-($width4 + $width2)/2-2, $bottom - $box2[1]-7, 80-($width4 - $width2)/2+2, $bottom - 3);
-			DoubleBox(80+($width4 - $width3)/2-2, $bottom - $box3[1]-7, 80+($width4 + $width3)/2+2, $bottom - 3);
-			DisplayText(%option1, 80-($width4 + $width2)/2+1, $bottom - $box2[1]-5);
-			DisplayText(%option2, 80+($width4 - $width3)/2+1, $bottom - $box3[1]-5);
-			if (%selected == 0) {
-				InvertRect(80-($width4 + $width2)/2-1, $bottom - $box2[1]-6, 80-($width4 - $width2)/2+1, $bottom - 4);
-			}
-			else {
-				InvertRect(80+($width4 - $width3)/2-1, $bottom - $box3[1]-6, 80+($width4 + $width3)/2+1, $bottom - 4);
-			}
+		$fh = GetFontHeight();
+		$middleGap = $fh/2;
+
+		$fixedPrompt = Elipsisify(%prompt, $w - 2 * ($fh + $hmargins));
+		$box = TextSize($fixedPrompt);
+		$tw = $box[0];
+		$th = $box[1];
+
+		$bodyHeight = 2*$bmargins + $middleGap + $th + $fh;
+		$bodyWidth = $tw;
+
+		$o1w = TextSize(%option1)[0];
+		$o2w = TextSize(%option2)[0];
+
+		if (2*($o1w + 5*$bmargins/2) > $bodyWidth) {
+			$bodyWidth = 2*($o1w + 5*$bmargins/2);
+		}
+		if ($o2w + 5*$bmargins/2 > $bodyWidth) {
+			$bodyWidth = 2*($o2w + 5*$bmargins/2);
+		}
+
+		$top = $cy - $bodyHeight/2;
+		$bottom = $top + $bodyHeight;
+		$left = $cx - $bodyWidth/2;
+		$right = $left + $bodyWidth;
+
+		DoubleBox($left-$hmargins, $top-$vmargins, $right+$hmargins, $bottom+$vmargins);
+		DisplayText($fixedPrompt, $cx - $tw/2, $top);
+
+		$x1 = ($cx+$left-$o1w)/2;
+		$y1 = ($bottom-$bmargins-$fh);
+
+		DoubleBox($x1-$bmargins-1, $y1-$bmargins, $x1+$o1w+$bmargins-1, $y1+$fh+$vmargins-1);
+		DisplayText(%option1, $x1, $y1);
+
+		$x2 = ($cx+$right-$o2w)/2;
+
+		DoubleBox($x2-$bmargins-1, $y1-$bmargins, $x2+$o2w+$bmargins-1, $y1+$fh+$vmargins-1);
+		DisplayText(%option2, $x2, $y1);
+
+		if (%selected == 0) {
+			InvertRect($x1-$bmargins, $y1-$bmargins+1, $x1+$o1w+$bmargins-2, $y1+$fh+$vmargins-2);
+		}
+		else {
+			InvertRect($x2-$bmargins, $y1-$bmargins+1, $x2+$o2w+$bmargins-2, $y1+$fh+$vmargins-2);
 		}
 	}
 };

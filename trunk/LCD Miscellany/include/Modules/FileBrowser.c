@@ -29,7 +29,7 @@ struct FileBrowser {
 			}
 		}
 		%stealArrows = $_stealArrows;
-		%fontIds = list(RegisterThemeFont("smallFileBrowserFont"), RegisterThemeFont("bigFileBrowserFont"));
+		%fontIds = RegisterThemeFontPair("FileBrowserFont");
 	}
 
 	function Focus() {
@@ -313,7 +313,6 @@ struct FileBrowser {
 					return 1;
 				}
 				if (!IsNull(%rename)) {
-					WriteLogLn("here");
 					%rename.Unfocus();
 					%rename = null;
 					%renameName = null;
@@ -359,7 +358,7 @@ struct FileBrowser {
 		$height = GetFontHeight();
 		%pageHeight = $h/$height;
 		$index = %sel-(%sel % %pageHeight);
-		$rightEdge = $w - 1 - 4*$highRes;
+		$rightEdge = $w - 1 - 2*$highRes;
 		$clearStart = $rightEdge - TextSize(" 0.00 M")[0];
 		if ($highRes) {
 			while ($pos < $h && $index < size($files)) {
