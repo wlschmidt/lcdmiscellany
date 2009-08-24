@@ -1,5 +1,6 @@
 #import <constants.h>
 #requires <util\Text.c>
+#requires <util\G15.c>
 
 struct UndoInfo {
 	var %start, %end, %string, %next;
@@ -18,7 +19,7 @@ struct UndoInfo {
 struct LineEditor {
 	var %text, %cursorPos, %selStart, %hasFocus, %flashTimer, %cursor, %textSize, %offset,
 		%font, %width,
-		%cursorPx, %selPx, %height, %startPx,
+		%cursorPx, %selPx, %startPx,
 		%undo, %redo, %splitUndo;
 
 	function LineEditor($_width, $_font) {
@@ -38,7 +39,6 @@ struct LineEditor {
 		UseFont(%font);
 		$temp = TextSize(substring(%text, 0, %cursorPos));
 		%cursorPx = $temp[0]-1;
-		%height = $temp[1];
 		if (%cursorPos != %selStart) {
 			%selPx = TextSize(substring(%text, 0, %selStart))[0]-1;
 		}
@@ -46,6 +46,14 @@ struct LineEditor {
 			%startPx = %cursorPx;
 		else if (%cursorPx >= %startPx + %width) {
 			%startPx = %cursorPx - %width+1;
+		}
+		$rightWidth = TextSize(substring(%text, %cursorPos))[0];
+		$test = $rightWidth + %cursorPx - %startPx;
+		WriteLogLn(%startPx);
+		if ($test < %width && %startPx >= 0) {
+			$delta = %width - $test;
+			if ($delta > %startPx) %startPx = -1;
+			else %startPx -= $delta;
 		}
 
 	}
@@ -299,6 +307,8 @@ struct LineEditor {
 	function Draw($x, $y) {
 		UseFont(%font);
 		$pos = $x-%startPx;
+		$fh = GetFontHeight();
+
 		DisplayText(%text, $pos, $y);
 		if (%selStart != %cursorPos) {
 			$first = %selStart;
@@ -312,34 +322,39 @@ struct LineEditor {
 
 			SetDrawColor(colorHighlightText);
 			SetBgColor(colorHighlightBg);
-			ClearRect(%cursorPx+$pos, $y, $pos + %selPx, $y+%height-1);
+			ClearRect(%cursorPx+$pos, $y, $pos + %selPx, $y+$fh-1);
 			DisplayText(substring(%text, $first, $last), $pos + $firstPx, $y);
 			if (%cursor) {
-				XorRect(%cursorPx+$pos, $y, %cursorPx+$pos, $y+%height-1, colorHighlightText^colorHighlightBg);
+				XorRect(%cursorPx+$pos, $y, %cursorPx+$pos, $y+$fh-1, colorHighlightText^colorHighlightBg);
 			}
 			SetDrawColor(colorText);
 			SetBgColor(colorBg);
 		}
 		else {
 			if (%cursor)
-				DrawRect(%cursorPx+$pos, $y, %cursorPx+$pos, $y+%height-1);
+				DrawRect(%cursorPx+$pos, $y, %cursorPx+$pos, $y+$fh-1);
 		}
 	}
 
-	// currently only work with widths <= 154 or so
-	function DrawBox($_text) {
+	// currently only must occupy entire screen.
+	function DrawBox($_text, $res) {
+		$right = $res[0]-1;
+		$height = $res[1];
 		$s = FormatText($_text);
 		$h = $s[1];
 		UseFont(%font);
 		$fh = GetFontHeight();
 		$totalH = $fh + $h + 23;
-		$top = 21-$totalH/2;
-		DrawRect(0, $top, 159, $top);
+		if (IsHighRes(@$res)) {
+			$totalH += $fh;
+		}
+		$top = $height/2-$totalH/2;
+		DrawRect(0, $top, $right, $top);
 		$bottom = $totalH+$top-1;
-		ClearRect(0, $top+1, 159, $bottom-1);
-		DrawRect(0, $bottom, 159, $bottom);
+		ClearRect(0, $top+1, $right, $bottom-1);
+		DrawRect(0, $bottom, $right, $bottom);
 
-		$start = 80-%width/2;
+		$start = $right/2-%width/2;
 		$end = $start + %width-1;
 
 		$bottom -= 2;
@@ -347,15 +362,15 @@ struct LineEditor {
 		DrawRect($start-2, $bottom-$fh-5, $end+2, $bottom-$fh-5);
 		DrawRect($start-2, $bottom-2, $end+2, $bottom-2);
 
-		DisplayTextCentered($_text, 80, $top+3);
+		DisplayTextCentered($_text, $right/2, $top+3);
 		%Draw($start, $bottom-$fh-3);
 		ClearRect(0, $bottom-$fh-3, $start-1, $bottom-3);
-		ClearRect($end+1, $bottom-$fh-3, 159, $bottom-3);
+		ClearRect($end+1, $bottom-$fh-3, $right, $bottom-3);
 
 		DrawRect($end+2, $bottom-$fh-4, $end+2, $bottom-3);
 		DrawRect($start-2, $bottom-$fh-4, $start-2, $bottom-3);
 		DrawRect(0, $top, 0, $bottom);
-		DrawRect(159, $top, 159, $bottom);
+		DrawRect($right, $top, $right, $bottom);
 	}
 };
 

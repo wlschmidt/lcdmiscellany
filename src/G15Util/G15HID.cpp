@@ -475,6 +475,8 @@ DWORD WINAPI ThreadProc(void* lpParameter) {
 				g15->writing = 0;
 			}
 			if (g15->hFile) {
+				// No idea if this is needed.
+				CancelIo(g15->hFile);
 				CloseHandle(g15->hFile);
 				g15->hFile = 0;
 			}
@@ -534,6 +536,8 @@ DWORD WINAPI ThreadProc(void* lpParameter) {
 			g15->writing = 0;
 		}
 		if (g15->hFile) {
+			// No idea if this is needed.
+			CancelIo(g15->hFile);
 			CloseHandle(g15->hFile);
 			g15->hFile = 0;
 		}

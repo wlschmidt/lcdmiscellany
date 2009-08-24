@@ -431,8 +431,8 @@ void GetDeviceState(ScriptValue &s, ScriptValue *args) {
 			ScriptValue *vals = out->objectVal->values;
 			out++;
 			dev->id->AddRef();
-			CreateStringValue(vals[0], dev->id);
-			CreateIntValue(vals[1], dev->hidType);
+			CreateStringValue(vals[1], dev->id);
+			CreateIntValue(vals[0], dev->hidType);
 			CreateIntValue(vals[2], dev->width);
 			CreateIntValue(vals[3], dev->height);
 			CreateIntValue(vals[4], dev->bpp);
