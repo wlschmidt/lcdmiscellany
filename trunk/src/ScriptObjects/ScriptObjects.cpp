@@ -121,6 +121,14 @@ int RegisterObjectTypes() {
 	int res = 1;
 	// Value order matters...have to be careful.
 	{
+		// Type must be first.
+		const char *vals[] = {"type", "name", "width", "height", "bpp", "mkeys", "light", "LCDLight", "LCDColor"};
+		const ProcDescription create[] = {{"GetDeviceState", GetDeviceState, C_string}};
+		res &= CreateObjectType("DeviceState", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), 0, 0, 0);
+		DeviceStateType = count++;
+	}
+
+	{
 		const char *vals[] = {"coreTemp", "ambientTemp", "tempLimit"};
 		const ProcDescription create[] = {{"NvThermalSettings", MyNvCplGetThermalSettings, C_int}
 		};
@@ -356,13 +364,6 @@ int RegisterObjectTypes() {
 		const ProcDescription create[] = {{"SystemState", GetSystemState, C_noArgs}};
 		res &= CreateObjectType("SystemState", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), 0, 0, 0);
 		SystemStateType = count++;
-	}
-
-	{
-		const char *vals[] = {"name", "type", "width", "height", "bpp", "mkeys", "light", "LCDLight", "LCDColor"};
-		const ProcDescription create[] = {{"GetDeviceState", GetDeviceState, C_string}};
-		res &= CreateObjectType("DeviceState", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), 0, 0, 0);
-		DeviceStateType = count++;
 	}
 	return res && InitFonts();
 }

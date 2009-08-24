@@ -23,16 +23,14 @@ struct WeatherView extends View {
 		%displayLocation,
 
 		%imgUrl,
-		%needImages,
-
-		%tinyFontId;
+		%needImages;
 
 
 	function WeatherView ($_url, $_location) {
 		%lastUpdate = Time()-60*60-5;
 
 		%InitFonts();
-		%tinyFontId = RegisterThemeFont("smallWeatherViewFont2");
+		%fontIds = list(@%fontIds, @RegisterThemeFontPair("WeatherViewFont2"));
 
 		%url = $_url;
 		if (!size(%url))
@@ -184,7 +182,7 @@ struct WeatherView extends View {
 	function DrawG15() {
 		if (%needImages&1) SpawnThread("GetLowResImage", $this);
 		$font = GetThemeFont(%fontIds[0]);
-		$tinyFont = GetThemeFont(%tinyFontId);
+		$tinyFont = GetThemeFont(%fontIds[2]);
 		UseFont($font);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
@@ -244,24 +242,24 @@ struct WeatherView extends View {
 		$w = $res[0];
 		$halfw = $w/2;
 		UseThemeFont(%fontIds[1]);
+		SetDrawColor(colorText);
 		if (IsNull(%temperature)) {
 			DisplayText("No weather data.", 0, 8);
 		}
 		else {
 			$deg = "°" +s %units;
-			DisplayText(%location, 1, 20);
+			DisplayText(%location, 1, 24);
 			// ColorRect(0,44,319,46, colorHighlightBg);
 			DisplayText("Temp: " +s %temperature +s $deg, 1, 46);
 			DisplayText("Index: " +s %windChill +s $deg, 1, 66);
 			DisplayText(%wind, 1, 86);
 			DisplayText("Humidity: " +s %humidity, 1, 106);
 
-			DrawImage(%colorWeatherImage, 120, 15);
-			DisplayTextCentered(%weatherDescription, 206, 103);
+			DrawImage(%colorWeatherImage, 130, 10);
 
 			ColorRect(0,129,319,150, colorHighlightBg);
 			SetDrawColor(colorHighlightText);
-			DisplayTextCentered("Forecast", $halfw, 129);
+			DisplayTextCentered("Forecast", $halfw, 130);
 			SetDrawColor(colorText);
 
 			for ($i=0; $i<2; $i++) {
@@ -271,6 +269,15 @@ struct WeatherView extends View {
 				DisplayTextCentered($day[1] +s $deg +s " - " +s $day[2] +s $deg,$x, 171);
 				DisplayTextCentered(FormatText($day[3], $halfw-2),$x,191);
 			}
+
+			UseThemeFont(%fontIds[3]);
+			SetDrawColor(colorBg);
+			DisplayTextCentered(%weatherDescription, 215, 108);
+			DisplayTextCentered(%weatherDescription, 217, 108);
+			DisplayTextCentered(%weatherDescription, 216, 107);
+			DisplayTextCentered(%weatherDescription, 216, 109);
+			SetDrawColor(colorText);
+			DisplayTextCentered(%weatherDescription, 216, 108);
 		}
 		DisplayHeader($res);
 	}

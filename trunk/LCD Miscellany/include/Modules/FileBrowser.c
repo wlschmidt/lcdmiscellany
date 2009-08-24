@@ -443,8 +443,8 @@ struct FileBrowser {
 		SetDrawColor(colorText);
 		%selInfo = $files[%sel];
 		if (!IsNull(%run)) {
-			%run.ReFormat($font, $w-144);
-			%run.DrawBox("Run:");
+			%run.ReFormat($font, $w-14);
+			%run.DrawBox("Run:", $res);
 		}
 	}
 };

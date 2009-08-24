@@ -13,7 +13,7 @@ colorDefaultInvertedText = 255,255,255
 colorBg = 255,255,255
 colorText = 0,0,0
 
-colorHighlightBg = 0,0,190
+colorHighlightBg = 0,0,212
 colorHighlightText = 255,255,255
 
 // Only used on colored screens, so don't need to be careful.
@@ -53,6 +53,7 @@ smallClipboardViewFont = 04b03, 8
 smallRSSViewFont = 04b03, 8
 smallRSSViewTitleFont = 04b03, 8, 0, 1
 smallWeatherViewFont = 0
+// Used for forecasts when low on space
 smallWeatherViewFont2 = 6px2bus, 6
 smallFileBrowserFont = 04b03, 8
 
@@ -68,4 +69,6 @@ bigClipboardViewFont = Arial, 18,0,0,0,5
 bigRSSViewFont = Arial, 18,0,0,0,5
 bigRSSViewTitleFont = Arial, 18,0,1,0,5
 bigWeatherViewFont = Arial, 18,0,0,0,5
+// Used for primary forecast, on top ofimage
+bigWeatherViewFont2 = Arial, 20,0,1,0,5
 bigFileBrowserFont = Lucida Sans Unicode, 16,0,0,0,5
