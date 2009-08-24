@@ -49,7 +49,6 @@ struct LineEditor {
 		}
 		$rightWidth = TextSize(substring(%text, %cursorPos))[0];
 		$test = $rightWidth + %cursorPx - %startPx;
-		WriteLogLn(%startPx);
 		if ($test < %width && %startPx >= 0) {
 			$delta = %width - $test;
 			if ($delta > %startPx) %startPx = -1;
