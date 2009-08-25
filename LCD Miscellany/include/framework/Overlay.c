@@ -9,7 +9,7 @@ struct MessageBoxOverlay {
 	var %prompt, %option1, %option2, %fxn1, %fxn2, %obj1, %obj2, %arg1, %arg2, %selected, %handler;
 	var %fontIds;
 	function MessageBoxOverlay($_handler, $_prompt, $_option1, $_option2, $_fxn1, $_fxn2, $_obj1, $_obj2, $_arg1, $_arg2) {
-		%fontIds = RegisterThemeFontPair("OverlayFont");
+		%fontIds = RegisterThemeFontPair("Overlay");
 		%handler = $_handler;
 
 		%prompt = $_prompt;
@@ -102,8 +102,8 @@ struct MessageBoxOverlay {
 		$cy = $h/2;
 
 		if ($highRes) {
-			$vmargins = 4;
-			$hmargins = 4;
+			$vmargins = 7;
+			$hmargins = 22;
 			$bmargins = 4;
 		}
 		else {
@@ -115,7 +115,7 @@ struct MessageBoxOverlay {
 		$fh = GetFontHeight();
 		$middleGap = $fh/2;
 
-		$fixedPrompt = Elipsisify(%prompt, $w - 2 * ($fh + $hmargins));
+		$fixedPrompt = Elipsisify(%prompt, $w - 2 * (2 + $hmargins));
 		$box = TextSize($fixedPrompt);
 		$tw = $box[0];
 		$th = $box[1];
@@ -163,10 +163,11 @@ struct MessageBoxOverlay {
 
 
 struct TimedOverlay {
-	var %font, %prompt, %handler, %time, %timer;
+	var %prompt, %handler, %time, %timer;
+	var %fontIds;
 	function TimedOverlay($_handler, $_prompt, $_time) {
+		%fontIds = RegisterThemeFontPair("Overlay");
 		%time = $_time;
-		%font = Font("04b03", 8);
 		%handler = $_handler;
 		$_handler.SetOverlay($this);
 		%prompt = $_prompt;
@@ -187,17 +188,25 @@ struct TimedOverlay {
 	}
 
 
-	function Draw() {
-		UseFont(%font);
+	function Draw($event, $param, $name, $res) {
+		$highRes = IsHighRes(@$res);
+		UseThemeFont(%fontIds[$highRes]);
+
+		$w = $res[0];
+		$h = $res[1]-1;
+
+		$cx = $w/2;
+		$cy = $h/2;
+
 		$box = TextSize(%prompt);
 		$width = $box[0];
 		$height = $box[1];
-		$left = 80-$width/2-4;
-		$top = 21-$height/2-1;
-		$right = 80+$width/2+4;
-		$bottom = 21+$height/2+1;
+		$left = $cx-$width/2-4;
+		$top = $cy-$height/2-1;
+		$right = $cx+$width/2+4;
+		$bottom = $cy+$height/2+1;
 		DoubleBox($left, $top, $right, $bottom);
-		DisplayText(%prompt, 80-($width-1)/2, $top+2);
+		DisplayText(%prompt, $cx-($width-1)/2, $top+2);
 	}
 };
 

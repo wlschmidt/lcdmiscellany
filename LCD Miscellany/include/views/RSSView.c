@@ -47,7 +47,7 @@ struct RSSView extends View {
 		%baseFontHeight = 10;
 
 		%InitFonts();
-		%fontIds = list(@%fontIds, @RegisterThemeFontPair(type($this) +s "TitleFont"));
+		%fontIds = list(@%fontIds, @RegisterThemeFontPair(type($this) +s "Title"));
 
 		%nextUpdate = Time();
 		if (size($_feeds) == 0) {

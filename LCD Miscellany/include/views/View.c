@@ -4,8 +4,6 @@
 #requires <framework\Theme.c>
 
 struct View {
-	// Image used on toolbar.  Must be 12 by 8 pixels.
-	var %toolbarImage;
 
 	// 0 if the view doesn't have focus, 1 if it does.
 	// Only used by the MenuHandler, to determine if it
@@ -22,9 +20,18 @@ struct View {
 	var %noDrawOnAudioChange;
 
 	var %fontIds;
+	var %imageIds, %toolbarImage;
 
 	function InitFonts() {
-		%fontIds = RegisterThemeFontPair(type($this) +s "Font");
+		%fontIds = RegisterThemeFontPair(type($this));
+	}
+
+	function InitImages() {
+		%imageIds = RegisterImagePair(type($this) +s "Image");
+	}
+
+	function %GetIcon($highRes) {
+		return GetThemeImage(%imageIds[$highRes]);
 	}
 
 	// Just to prevent a warning.
