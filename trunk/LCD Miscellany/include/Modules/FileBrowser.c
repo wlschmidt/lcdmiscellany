@@ -29,7 +29,7 @@ struct FileBrowser {
 			}
 		}
 		%stealArrows = $_stealArrows;
-		%fontIds = RegisterThemeFontPair("FileBrowserFont");
+		%fontIds = RegisterThemeFontPair("FileBrowser");
 	}
 
 	function Focus() {

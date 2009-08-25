@@ -30,7 +30,7 @@ struct WeatherView extends View {
 		%lastUpdate = Time()-60*60-5;
 
 		%InitFonts();
-		%fontIds = list(@%fontIds, @RegisterThemeFontPair("WeatherViewFont2"));
+		%fontIds = list(@%fontIds, @RegisterThemeFontPair("WeatherViewCurrent"));
 
 		%url = $_url;
 		if (!size(%url))

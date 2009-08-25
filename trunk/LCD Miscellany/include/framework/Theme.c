@@ -5,6 +5,7 @@ function LoadTheme($theme) {
 	$reader = FileReader("themes\" +s $theme, READER_CONVERT_TEXT);//"
 
 	gLoadedFonts = list();
+	gLoadedImages = list();
 
 	gThemeData = $reader.Read(100*1024);
 
@@ -74,11 +75,11 @@ function GetThemeColor($name, $text, $inverted) {
 }
 
 function LoadThemeFont($name) {
-	$string = GetThemeString($name);
+	$string = GetThemeString($name +s "Font");
 
 	// Not found
-	if (size($string) == 0) {
-		if ($string[0] ==s "b") {
+	if (size($name) == 0) {
+		if ($name[0] ==s "b") {
 			$string = GetThemeString("bigDefaultFont");
 		}
 		else {
@@ -112,14 +113,14 @@ function RegisterThemeFontPair($name) {
 }
 
 function GetThemeFont($id) {
-	if (!size(gLoadedFonts[$id])) {
+	if (IsNull(gLoadedFonts[$id])) {
 		$first = gFontNames[$id][0];
 		// Load all fonts with the same first letter.
 		// Result is that will load all big/small fonts when only need one,
 		// so when change screen, won't have to load more fonts, which would cause annoying
 		// delays later on.
 		for ($i = size(gFontNames)-1; $i>=0; $i--) {
-			if (!size(gLoadedFonts[$i]) && gFontNames[$i][0] ==S $first) {
+			if (IsNull(gLoadedFonts[$i]) && gFontNames[$i][0] ==S $first) {
 				gLoadedFonts[$i] = LoadThemeFont(gFontNames[$i]);
 			}
 		}
@@ -137,3 +138,52 @@ function IsHighRes($w, $h, $bpp) {
 	// return ($bpp >= 24 && $w >= 320);
 	return ($w >= 320);
 }
+
+
+
+function LoadThemeImage($name) {
+	$string = GetThemeString($name +s "Image");
+
+	if ($name[0] ==s "s") {
+		return LoadImage(@strsplit($string, ",", 0, 0, 0));
+	}
+	else {
+		return LoadImage32(@strsplit($string, ",", 0, 0, 0));
+	}
+}
+function GetThemeImage($id) {
+	if (IsNull(gLoadedImages[$id])) {
+		$first = gImageNames[$id][0];
+		// Load all images with the same first letter.
+		// Result is that will load all big/small fonts when only need one,
+		// so when change screen, won't have to load more fonts, which would cause annoying
+		// delays later on.
+		for ($i = size(gFontNames)-1; $i>=0; $i--) {
+			if (IsNull(gLoadedFonts[$i]) && gFontNames[$i][0] ==S $first) {
+				gLoadedImages[$i] = LoadThemeImage(gImageNames[$i]);
+			}
+		}
+	}
+	return gLoadedFonts[$id];
+}
+
+
+function RegisterThemeImage($name) {
+	if (!size(gImageNames)) {
+		gImageNames = list();
+	}
+	for ($id = 0; $id<size(gImageNames); $id++) {
+		if (gImageNames[$id] ==S $name)
+			return $id;
+	}
+	gImageNames[$id] = $name;
+	return $id;
+}
+
+function RegisterImagePair($name) {
+	return list(
+		RegisterThemeImage("small" +s $name),
+		RegisterThemeImage("big" +s $name)
+	);
+}
+

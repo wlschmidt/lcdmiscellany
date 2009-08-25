@@ -11,7 +11,7 @@ struct G19Status {
 	var %fontId, %counters;
 	function G19Status() {
 		%counters = GetCounterManager();
-		%fontId = RegisterThemeFont("bigStatusViewFont");
+		%fontId = RegisterThemeFont("bigStatusView");
     }
 
 	function Draw($event, $param, $name, $res) {

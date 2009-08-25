@@ -2,9 +2,9 @@
 
 function DisplayHeader($res) {
 	$width = $res[0];
-	if (!gBigHeaderFont) {
-		gSmallHeaderFont = RegisterThemeFont("smallHeaderFont");
-		gBigHeaderFont = RegisterThemeFont("bigHeaderFont");
+	if (IsNull(gBigHeaderFont)) {
+		gSmallHeaderFont = RegisterThemeFont("smallHeader");
+		gBigHeaderFont = RegisterThemeFont("bigHeader");
 		gEmailImage = LoadImage("images\email.png");
 	}
 	if ($width <= 160) {
