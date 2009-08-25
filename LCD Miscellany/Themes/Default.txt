@@ -48,7 +48,7 @@ bigHeaderFont = Tahoma, 22,0,0,0,5
 
 smallTaskManagerFont = 0;
 smallCalculatorViewFont = 04b03, 8
-smallUtorrentViewFont = 04b03, 8
+smallDownloadViewFont = 04b03, 8
 smallClipboardViewFont = 04b03, 8
 smallRSSViewFont = 04b03, 8
 smallRSSViewTitleFont = 04b03, 8, 0, 1
@@ -66,7 +66,7 @@ smallTextEditorViewFont = 04b03, 8
 bigStatusViewFont = Arial, 20,0,0,0,5
 bigTaskManagerFont = Arial, 18,0,0,0,5
 bigCalculatorViewFont = Arial, 24,0,0,0,5
-bigUtorrentViewFont = Arial, 18,0,0,0,5
+bigDownloadViewFont = Arial, 18,0,0,0,5
 bigClipboardViewFont = Arial, 18,0,0,0,5
 bigRSSViewFont = Arial, 18,0,0,0,5
 bigRSSViewTitleFont = Arial, 18,0,1,0,5

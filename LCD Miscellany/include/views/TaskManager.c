@@ -336,12 +336,6 @@ struct TaskManager extends View {
 					%NavDown();
 				}
 			}
-			else if ($button == G15_RIGHT) {
-				if (%page >= 8)
-					%KeyDown(0,0,0, VK_NEXT);
-				else
-					%NavDown();
-			}
 			if ($button == G15_UP) {
 				%NavUp();
 			}
