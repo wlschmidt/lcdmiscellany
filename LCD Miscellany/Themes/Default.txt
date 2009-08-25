@@ -57,6 +57,7 @@ smallWeatherViewFont = 0
 smallWeatherViewCurrentFont = 6px2bus, 6
 smallFileBrowserFont = 04b03, 8
 smallOverlayFont = 04b03, 8
+smallTextEditorViewFont = 04b03, 8
 
 // Fonts for large (320 by 160) color LCDs.
 // The final 5 signals to use cleartype with Window's font-drawing code
@@ -74,3 +75,4 @@ bigWeatherViewFont = Arial, 18,0,0,0,5
 bigWeatherViewCurrentFont = Arial, 20,0,1,0,5
 bigFileBrowserFont = Lucida Sans Unicode, 16,0,0,0,5
 bigOverlayFont = Arial, 18,0,0,0,5
+bigTextEditorViewFont = Arial, 18,0,0,0,5

@@ -105,15 +105,21 @@ struct TextEditor {
 		UseFont(%font);
 
 		while (IsString($line = $reader.Read(-1))) {
-			%text[size(%text)] = FormatText($line, 160);
+			%text[size(%text)] = FormatText($line, %width);
 		}
 		%Update();
 		return 1;
 	}
 
 	function ChangeFormat($_width, $_font) {
+		if ($_width == %width && Equals($_font, %font)) {
+			return;
+		}
 		%font = $_font;
 		%width = $_width;
+		for ($i=size(%text)-1; $i>=0; $i--) {
+			%text[$i] = FormatText(strreplace(%text[$i], "|n", ""), $_width);
+		}
 		%Update();
 	}
 
@@ -492,11 +498,14 @@ struct TextEditor {
 		return 1;
 	}
 
-	function Draw($x, $y) {
+	function Draw($x, $y, $res) {
+		$w = $res[0];
+		$h = $res[1];
+
 		UseFont(%font);
 		$height = GetFontHeight();
 		$pos = $y - %offsetHeight;
-		for ($i=%offset.line; $i<size(%text) && $pos < 43; $i++) {
+		for ($i=%offset.line; $i<size(%text) && $pos < $h; $i++) {
 			DisplayText(%text[$i],$x,$pos);
 			$pos += TextSize(%text[$i])[1];
 		}

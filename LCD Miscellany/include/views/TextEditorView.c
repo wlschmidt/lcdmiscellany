@@ -1,16 +1,18 @@
 #import <Views\View.c>
 #requires <Modules\FileBrowser.c>
 #requires <Modules\TextEditor.c>
+#requires <Framework\Theme.c>
+#requires <util\G15.c>
 
 struct FileTextEdit {
 	var %editor,
 		%path,
 		%file,
 		%error;
-	function FileTextEdit($_path, $_file, $_font) {
+	function FileTextEdit($_path, $_file, $_font, $_width) {
 		%path = $_path;
 		%file = $_file;
-		%editor = TextEditor(160, $_font);
+		%editor = TextEditor($_width, $_font);
 		if (!%editor.Load($_file)) {
 			%error = 1;
 		}
@@ -23,18 +25,17 @@ struct TextEditorView extends View {
 		%files,
 		%current,
 		%blinkTimer,
-		%font,
 		%lastPath,
 		%displayFileName,
 		%displayFileCounter;
 
 	function TextEditorView () {
+		%InitFonts();
 		%toolbarImage = LoadImage("Images\TextEdit.png");
 		%noDrawOnCounterUpdate = 1;
 		%noDrawOnAudioChange = 1;
 		%current = 0;
 		%files = list();
-		%font = Font("04b03", 8);
 		%SetFocus();
 	}
 
@@ -138,7 +139,11 @@ struct TextEditorView extends View {
 
 	function LoadFile($path, $file) {
 		%lastPath = $path;
-		$file = FileTextEdit($path, $file, %font);
+
+		$res = GetMaxRes();
+		$font = GetThemeFont(%fontIds[IsHighRes(@$res)]);
+
+		$file = FileTextEdit($path, $file, $font, $res[0]);
 		if (!$file.error) {
 			%current = size(%files);
 			%files[%current] = $file;
@@ -214,8 +219,16 @@ struct TextEditorView extends View {
 			%browser.Draw(@$);
 		}
 		else {
-			UseFont(%font);
-			%files[%current].editor.Draw();
+			$highRes = IsHighRes(@$res);
+
+			$font = GetThemeFont(%fontIds[$highRes]);
+			WriteLogLn($highRes);
+			WriteLogLn(%fontIds[$highRes]);
+
+			UseFont($font);
+			%files[%current].editor.ChangeFormat($res[0], $font);
+			%files[%current].editor.Draw(0, 0, $res);
+
 			if (size(%displayFileName)) {
 				$box = TextSize(%displayFileName);
 				$width = $box[0];
