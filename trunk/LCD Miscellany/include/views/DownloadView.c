@@ -1,8 +1,9 @@
-// uTorrent view.
+// uTorrent view.  Had planned on adding data from other sources, initially.
 
 #import <Views\View.c>
 #import <constants.h>
 #requires <util\Text.c>
+#requires <util\G15.c>
 
 struct DownloadInfo {
 	var %hash,
@@ -35,20 +36,16 @@ struct DownloadInfo {
 
 struct DownloadView extends View {
 	var %url, %downloads, %sel, %talking, %queuedTalk;
-	var %bigFont, %smallFont;
 	var %pageHeight;
 
 	function DownloadView ($_url) {
-		$fontIndex = 0;
+		%InitFonts();
 		if (!IsString($_url)) {
 			%url = GetString("URLs", "uTorrent");
 		}
 		else {
 			%url = $_url;
-			$fontIndex++;
 		}
-		%smallFont = $[$fontIndex];
-		%bigFont = $[1+$fontIndex];
 		%toolbarImage = LoadImage("Images\utorrent.png");
 		%noDrawOnAudioChange = 1;
 
@@ -198,22 +195,12 @@ struct DownloadView extends View {
 			%sel = $last;
 		}
 		else if ($vk == VK_PRIOR) {
-			if (%sel == 0) {
-				%sel = $last;
-			}
-			else {
-				%sel -= %pageHeight;
-				if (%sel < 0) %sel = 0;
-			}
+			%sel -= %pageHeight;
+			if (%sel < 0) %sel = 0;
 		}
 		else if ($vk == VK_NEXT) {
-			if (%sel == $last) {
-				%sel = 0;
-			}
-			else {
-				%sel += %pageHeight;
-				if (%sel > $last) %sel = $last;
-			}
+			%sel += %pageHeight;
+			if (%sel > $last) %sel = $last;
 		}
 		else return 0;
 
@@ -235,10 +222,26 @@ struct DownloadView extends View {
 		}
 	}
 
-	function G15ButtonDown($event, $param, $button) {
+	function G15ButtonDown($event, $param, $button, $keyboard) {
 		$button = FilterButton($button);
 		if ($button & 0x3F) {
-			if ($button == G15_UP || $button == G15_LEFT) {
+			if ($button == G15_LEFT) {
+				if (HasAllDirections($keyboard)) {
+					%KeyDown(0,0,0, VK_PRIOR);
+				}
+				else {
+					%KeyDown(,,, VK_UP);
+				}
+			}
+			else if ($button == G15_RIGHT) {
+				if (HasAllDirections($keyboard)) {
+					%KeyDown(0,0,0, VK_NEXT);
+				}
+				else {
+					%KeyDown(,,, VK_DOWN);
+				}
+			}
+			else if ($button == G15_UP || $button == G15_LEFT) {
 				%KeyDown(,,, VK_UP);
 			}
 			else if ($button == G15_DOWN || $button == G15_RIGHT) {
@@ -261,12 +264,8 @@ struct DownloadView extends View {
 		$bottom = $res[1]-1;
 		$bpp = $res[2];
 
-		if ($right > 160) {
-			UseFont(%bigFont);
-		}
-		else {
-			UseFont(%smallFont);
-		}
+		$highRes = IsHighRes(@$res);
+		UseThemeFont(%fontIds[$highRes]);
 
 		$fh = GetFontHeight();
 		%pageHeight = $bottom / $fh;

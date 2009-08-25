@@ -11,30 +11,6 @@ function Init() {
 
 	LoadTheme("Default.txt");
 
-	/* Fonts list.  Here so it's easier to change them as desired.
-	 * Only fonts used for text-only screens are here.  Other screens have to have item placement
-	 * modified when changing font, so they're not here.
-	 */
-
-	// Fonts for small (160 by 43 monochrome LCDs
-	// Primary internal font.  It's the larger of the two small all caps fonts.
-	$smallTaskManagerFont = 0;
-	$smallCalculatorFont = Font("04b03", 8);
-	$smallUtorrentFont = Font("04b03", 8);
-	$smallClipboardFont = Font("04b03", 8);
-	$smallRssFont = Font("04b03", 8);
-	$smallRssTitleFont = Font("04b03", 8, 0, 1);
-
-	// Fonts for large (320 by 160) color LCDs.  Can get rid of these lines to save some
-	// memory if you don't have one.
-	// Probably have to switch them all to bold, but not sure.
-	$bigTaskManagerFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
-	$bigCalculatorFont = Font("Arial", 24,0,0,0,CLEARTYPE_QUALITY);
-	$bigUtorrentFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
-	$bigClipboardFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
-	$bigRssFont = Font("Arial", 18,0,0,0,CLEARTYPE_QUALITY);
-	$bigRssTitleFont = Font("Arial", 18,0,1,0,CLEARTYPE_QUALITY);
-
 	/* Uncomment to use US english day/month strings instead of whatever Windows
 	 * is configured to use.
 	 */
@@ -111,7 +87,7 @@ function Init() {
 		),
 
 		// uTorrent.
-		DownloadView($smallUtorrentFont, $bigUtorrentFont),
+		DownloadView(),
 
 		// SABnzbdView 0.1.7 by 4wd:
 		// Designed for small 2-color LCDs only.
