@@ -801,8 +801,12 @@ void Screen::DisplayText(int x, int y, unsigned char *text, int len, int highlig
 					if (l == 2) {
 						bold ^= 1;
 					}
-
-					x += c->width;
+					else if (l == '\t') {
+						x += c->width - (x-xstart) % c->width;
+					}
+					else {
+						x += c->width;
+					}
 					//do {
 						text += charLen;
 						len -= charLen;
@@ -814,6 +818,9 @@ void Screen::DisplayText(int x, int y, unsigned char *text, int len, int highlig
 				while (len > 0 && l != '\n' && l != '\r') {
 					if (l == 2) {
 						bold ^= 1;
+					}
+					else if (l == '\t') {
+						x += c->width - (x-xstart) % c->width;
 					}
 					else {
 						if (mode == 0)
