@@ -210,12 +210,18 @@ int GetWidth(ObjectValue *o, unsigned char *s, int length, int *height) {
 			length--;
 			continue;
 		}
+
 		if (!start) start = l;
 		last = l;
 		CharData *data;
 		data = GetCharData(f, l, b, bold);
 		if (data) {
-			tout += data->width;
+			if (l == '\t') {
+				tout += data->width - (tout % data->width);
+			}
+			else {
+				tout += data->width;
+			}
 		}
 		s += c;
 		length -= c;
@@ -336,8 +342,13 @@ int CharBlock::Init(int rangeStart, DynamicFont *tm, HDC hDC) {
 			chars['\t'].abcB = 0;
 			chars['\t'].abcC = 0;
 			RECT r = {0,0,0,0};
-			DrawTextW(hDC, L"\t", -1, &r, DT_NOCLIP | DT_EXPANDTABS | DT_CALCRECT);
+			// Extra call here probably isn't necessary, but some MS draw functions
+			// can leave trailing whitespace out of reported width, so best to be
+			// careful.
+			DrawTextW(hDC, L"\t1", -1, &r, DT_NOCLIP | DT_EXPANDTABS | DT_CALCRECT);
 			chars['\t'].width = (char)r.right;
+			DrawTextW(hDC, L"1", -1, &r, DT_NOCLIP | DT_EXPANDTABS | DT_CALCRECT);
+			chars['\t'].width -= (char)r.right;
 		}
 
 		len+=gm.gmBlackBoxX;

@@ -171,7 +171,10 @@ int *FormatText(unsigned char *s, int len, int width, int &count) {
 		CharData *d = GetCharData(f, c, b, bold);
 		if (c == ' ' || c == '\t') {
 			if (d) {
-				lineLen += d->width + wordLen;
+				if (c == ' ')
+					lineLen += d->width + wordLen;
+				else
+					lineLen += d->width - (lineLen % d->width);
 			}
 			lineChars += wordChars + l;
 			wordLen = 0;
