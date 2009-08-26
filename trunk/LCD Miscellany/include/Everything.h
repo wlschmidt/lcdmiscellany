@@ -12,15 +12,15 @@
 #requires <Views\TaskManager.c>
 #requires <Views\MediaView.c>
 #requires <Views\ClipboardView.c>
-#requires <Views\CommandView.c>
 #requires <Views\CalculatorView.c>
 #requires <Views\DownloadView.c>
 #requires <Views\SABnzbdView.c>
 #requires <Views\TextEditorView.c>
-#requires <Views\JabberView.c>
-#requires <Views\PidginView.c>
 
-#requires <Views\ChatView.c>
+//#requires <Views\JabberView.c>
+//#requires <Views\PidginView.c>
+//#requires <Views\CommandView.c>
+//#requires <Views\ChatView.c>
 
 // Has constants in it, so needs #import
 #import <Views\RSSView.c>

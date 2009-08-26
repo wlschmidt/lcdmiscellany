@@ -44,16 +44,18 @@ struct RSSView extends View {
 
 	function RSSView($_channelFlags, $_itemFlags, $_feeds, $_channels) {
 		%delay = 250;
+		// Temporary, will be fixed later.
 		%baseFontHeight = 10;
 
 		%InitFonts();
+		%InitImages();
+
 		%fontIds = list(@%fontIds, @RegisterThemeFontPair(type($this) +s "Title"));
 
 		%nextUpdate = Time();
 		if (size($_feeds) == 0) {
 			$_feeds = GetString("URLs", "RSS");
 		}
-		%toolbarImage = LoadImage("Images\RSS.png");
 		%channelFlags = $_channelFlags;
 		%itemFlags = $_itemFlags;
 		if (!IsList($_feeds))

@@ -135,8 +135,8 @@ struct CalculatorView extends View {
 
 	function CalculatorView () {
 		%InitFonts();
+		%InitImages();
 		%buffer = list();
-		%toolbarImage = LoadImage("Images\Calculator.png");
 		%editor = LineEditor(160, %activeFont=0);
 		%noDrawOnCounterUpdate = 0;
 		%noDrawOnAudioChange = 1;

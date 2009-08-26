@@ -17,7 +17,7 @@ struct ClipboardView extends View {
 
 	function ClipboardView() {
 		%InitFonts();
-		%toolbarImage = LoadImage("Images\Clipboard.png");
+		%InitImages();
 
 		%noDrawOnCounterUpdate = 1;
 		%noDrawOnAudioChange = 1;

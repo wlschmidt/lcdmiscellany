@@ -40,13 +40,13 @@ struct DownloadView extends View {
 
 	function DownloadView ($_url) {
 		%InitFonts();
+		%InitImages();
 		if (!IsString($_url)) {
 			%url = GetString("URLs", "uTorrent");
 		}
 		else {
 			%url = $_url;
 		}
-		%toolbarImage = LoadImage("Images\utorrent.png");
 		%noDrawOnAudioChange = 1;
 
 		// Actually do draw, but handles the message itself.

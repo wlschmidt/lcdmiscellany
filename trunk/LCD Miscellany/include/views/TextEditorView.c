@@ -31,7 +31,8 @@ struct TextEditorView extends View {
 
 	function TextEditorView () {
 		%InitFonts();
-		%toolbarImage = LoadImage("Images\TextEdit.png");
+		%InitImages();
+
 		%noDrawOnCounterUpdate = 1;
 		%noDrawOnAudioChange = 1;
 		%current = 0;
@@ -222,8 +223,6 @@ struct TextEditorView extends View {
 			$highRes = IsHighRes(@$res);
 
 			$font = GetThemeFont(%fontIds[$highRes]);
-			WriteLogLn($highRes);
-			WriteLogLn(%fontIds[$highRes]);
 
 			UseFont($font);
 			%files[%current].editor.ChangeFormat($res[0], $font);
