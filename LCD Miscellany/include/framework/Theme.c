@@ -144,11 +144,16 @@ function IsHighRes($w, $h, $bpp) {
 function LoadThemeImage($name) {
 	$string = GetThemeString($name +s "Image");
 
-	if ($name[0] ==s "s") {
-		return LoadImage(@strsplit($string, ",", 0, 0, 0));
-	}
-	else {
-		return LoadImage32(@strsplit($string, ",", 0, 0, 0));
+	$paths = list("Override\images\", "images\", "");
+	for ($i=0; $i<3; $i++) {
+
+		if ($name[0] ==s "s") {
+			$image = LoadImage($paths[$i] +s $string);
+		}
+		else {
+			$image = LoadImage32($paths[$i] +s $string);
+		}
+		if (!IsNull($image)) return $image;
 	}
 }
 function GetThemeImage($id) {
@@ -158,13 +163,13 @@ function GetThemeImage($id) {
 		// Result is that will load all big/small fonts when only need one,
 		// so when change screen, won't have to load more fonts, which would cause annoying
 		// delays later on.
-		for ($i = size(gFontNames)-1; $i>=0; $i--) {
-			if (IsNull(gLoadedFonts[$i]) && gFontNames[$i][0] ==S $first) {
+		for ($i = size(gImageNames)-1; $i>=0; $i--) {
+			if (IsNull(gLoadedImages[$i]) && gImageNames[$i][0] ==S $first) {
 				gLoadedImages[$i] = LoadThemeImage(gImageNames[$i]);
 			}
 		}
 	}
-	return gLoadedFonts[$id];
+	return gLoadedImages[$id];
 }
 
 

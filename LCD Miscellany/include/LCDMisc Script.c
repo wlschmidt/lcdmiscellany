@@ -52,17 +52,6 @@ function Init() {
 		// Change 0 to 1 to disable stealing non-media keys when focused.
 		TaskManager(0),
 
-		// Modular chat.  Currently only module is IRC.  If Pidgin leak is ever fixed, I'll modify the pidgin script
-		// to be compatible.  Designed for small 2-color LCDs only.
-		/*
-		ChatView(
-			IRCChatService(list("irc.goatcheese.cx:7000", "CheeseLover", "#CheeseChat", "#CheeseWarehousing", "#YouGetTheIdea")),
-		),
-		//*/
-
-		// Doesn't add anything unless Pidgin is configured in the ini.
-		GetPidginView(),
-
 		MediaView(
 			MPCController(),
 			VLCController(),
@@ -110,7 +99,7 @@ function Init() {
 		// (third LCD button).  URL is required when using StatusView.
 		// You can mix URLs for SABnzbd+ versions.
 		/*
-			StatusView("Images\SABnzbd.png",
+			StatusView(,
 			  SABnzbdView("http://1.2.3.4:8080/sabnzbd/",1, 1),
 			  SABnzbdView("http://5.6.7.8:8080/sabnzbd/api?apikey=77e45017",1, 1)
 			),
@@ -126,23 +115,16 @@ function Init() {
 		 */
 		WeatherView(,0),
 
-		// Doesn't work yet...  Some day...
-		// May already exist, so don't call constructor.
-		// GetConfigView(),
-
 		// Sample showing how to use a StatusView to let you switch between
 		// weather screens.  Note that the first is in Fahrenheit and second
 		// is in Celsuis.  Just uncomment (Delete  the "/*") and change/add
 		// urls as needed.
 		/*
-		StatusView("Images\Weather.png",
+		StatusView(
 			WeatherView("http://xml.weather.yahoo.com/forecastrss?p=usma0066&u=f", 1),
 			WeatherView("http://xml.weather.yahoo.com/forecastrss?p=CAXX0487&u=c", 1)
 		),
 		//*/
-
-		// Probably will never get around to getting this working, due to threading issues.
-		//CommandView(),
 	);
 
 	// Turn off lights during screensaver.  Delete the "//" to enable.
@@ -164,3 +146,28 @@ function Init() {
 	//AddNetIcon();
 }
 
+
+
+
+
+// Founr views that are currently not functional.  Chat only requires a few modifications to work, may revive it later.
+// Pidgin was discontinued due to memory leaks (In Pidgin or webpidgin).  CommandView and ConfigView each need a ton
+// of work.
+
+// Modular chat.  Currently only module is IRC.  If Pidgin leak is ever fixed, I'll modify the pidgin script
+// to be compatible.  Designed for small 2-color LCDs only.
+/*
+ChatView(
+	IRCChatService(list("irc.goatcheese.cx:7000", "CheeseLover", "#CheeseChat", "#CheeseWarehousing", "#YouGetTheIdea")),
+),
+//*/
+
+// Doesn't add anything unless Pidgin is configured in the ini.
+// GetPidginView(),
+
+// Probably will never get around to getting this working, due to threading issues.
+//CommandView(),
+
+// Doesn't work yet...  Some day...
+// May already exist, so don't call constructor.
+// GetConfigView(),

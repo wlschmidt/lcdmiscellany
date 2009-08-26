@@ -72,10 +72,10 @@ struct MediaView extends View {
 	function MediaView () {
 		%specCache = list();
 		%players = list();
+		%InitImages();
 		for ($i=0; $i<size($); $i++) {
 			if (!IsNull($[$i])) %players[size(%players)] = $[$i];
 		}
-		%toolbarImage = LoadImage("Images\MediaPlayer.png");
 		%bigFont = Font("Arial", 20,0,0,0,CLEARTYPE_QUALITY);
 		%bigTitleFont = Font("Arial", 26,0,0,0,CLEARTYPE_QUALITY);
 		%titleFont = Font("Arial", 13);

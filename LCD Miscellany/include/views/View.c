@@ -20,17 +20,18 @@ struct View {
 	var %noDrawOnAudioChange;
 
 	var %fontIds;
-	var %imageIds, %toolbarImage;
+	var %imageIds;
 
 	function InitFonts() {
 		%fontIds = RegisterThemeFontPair(type($this));
 	}
 
 	function InitImages() {
-		%imageIds = RegisterImagePair(type($this) +s "Image");
+		%imageIds = RegisterImagePair(type($this));
 	}
 
 	function %GetIcon($highRes) {
+		if (!size(%imageIds)) return;
 		return GetThemeImage(%imageIds[$highRes]);
 	}
 

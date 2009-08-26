@@ -223,29 +223,53 @@ struct MenuHandler {
 
 	function Draw($event, $param, $name, $res) {
 		if (%toolbarVisible) {
+			$highRes = IsHighRes(@$res);
+
 			$width = $res[0];
 			$height = $res[1]-1;
-			$iconHeight = $height-7;
+
+			if ($highRes) {
+				$iconHeight = $height-32;
+				$iconWidth = 32;
+			}
+			else {
+				$iconHeight = $height-7;
+				$iconWidth = 9;
+			}
+			$formatWidth = $iconWidth+4;
 
 			SetBgColor(colorBg);
 			SetDrawColor(colorText);
 
 			ClearRect(0,$iconHeight-2, $width, $height);
 			DrawRect(0,$iconHeight-2,$width,$iconHeight-2);
-			$len = 13 * size(%views);
-			if ($len <= $width)
+			$len = $formatWidth * size(%views);
+			if ($len < $width)
 				$pos = $width/2 - $len/2;
 			else {
-				$pos = $width/2-6 - 13*%currentView;
+				$pos = $width/2-$formatWidth/2 - $formatWidth*%currentView;
 				if ($pos > 0) $pos = 0;
 				else if ($pos < $width-$len) $pos = $width-$len;
 			}
-			for (; $i<size(%views); $i++) {
-				DrawImage(%views[$i].toolbarImage, $pos, $iconHeight);
-				if (%currentView == $i) {
-					InvertRect($pos, $iconHeight, $pos+11, $height);
+			if ($highRes) {
+				for (; $i<size(%views); $i++) {
+					$image = %views[$i].GetIcon(1);
+					if (%currentView == $i) {
+						ColorRect($pos, $iconHeight, $pos + $formatWidth-2, $height, colorHighlightBg);
+					}
+					DrawImage($image, $pos+1, $iconHeight);
+					$pos+=$formatWidth;
 				}
-				$pos+=13;
+			}
+			else {
+				for (; $i<size(%views); $i++) {
+					$image = %views[$i].GetIcon($highRes);
+					DrawImage($image, $pos, $iconHeight);
+					if (%currentView == $i) {
+						InvertRect($pos, $iconHeight, $pos + $formatWidth - 2, $height);
+					}
+					$pos+=$formatWidth;
+				}
 			}
 		}
 	}

@@ -36,12 +36,15 @@ struct WeatherView extends View {
 		if (!size(%url))
 			%url = GetString("URLs", "Weather");
 		//%url = "http://127.0.0.1/forecastrss.xhtml";
+
+		%imageIds = RegisterImagePair(type($this));
+
 		if (IsNull(stristr(%url, "u=c"))) {
-			%toolbarImage = LoadImage("Images\Weather.png");
+			%imageIds = RegisterImagePair("WeatherView");
 		}
 		else {
-			%toolbarImage = LoadImage("Images\Weatherc.png");
-		}
+			%imageIds = RegisterImagePair("WeatherViewC");
+		}//*/
 
 		// Draw on counter updates and after 6 second intervals for scrolling.
 		// Means more redraws than are really needed, but scrolling is too fast at 1 second,

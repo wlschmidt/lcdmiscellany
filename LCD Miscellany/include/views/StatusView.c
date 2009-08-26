@@ -11,17 +11,9 @@ struct StatusView extends View {
 	var %visible;
 
 	function StatusView($image) {
-		if (IsString($image)) {
-			%toolbarImage = LoadImage($image);
-			pop($,0);
-		}
-		else {
-			%toolbarImage = LoadImage("images\Eye.png");
-		}
-
+		%InitImages();
 
 		RemoveNulls($);
-
 		%views = $;
     }
 

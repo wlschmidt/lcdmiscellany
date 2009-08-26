@@ -8,17 +8,8 @@ struct DualView extends View {
 	var %visible;
 
 	function DualView($image) {
-		if (IsString($image)) {
-			%toolbarImage = LoadImage($image);
-			pop($,0);
-		}
-		else {
-			%toolbarImage = LoadImage("images\Eye.png");
-		}
-
-
+		%imageIds = RegisterImagePair("StatusView");
 		RemoveNulls($);
-
 		%views = $;
     }
 

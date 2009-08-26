@@ -36,11 +36,12 @@ struct TaskManager extends View {
 
 	function TaskManager($noKeySteal) {
 		%InitFonts();
+		%InitImages();
+
 		%selectedHwndIndex = -1;
 		%keySteal = !$noKeySteal;
 		%sort = GetString("Task Manager", "Sort") % 3;
 		%dir = GetString("Task Manager", "Direction");
-		%toolbarImage = LoadImage("Images\Computer.png");
 		%cpu = PerformanceCounter("Process", "*", "% Processor Time", 1);
 		%mem = PerformanceCounter("Process", "*", "Working Set", 1);
 		%pid = PerformanceCounter("Process", "*", "ID Process", 1);
@@ -640,7 +641,7 @@ struct TaskManager extends View {
 			}
 		}
 
-		$listPos = $listPos * ($bottom-$bottom/20.0) / ($listLen-1);
+		$listPos = 0.5 + $listPos * ($bottom-$bottom/20.0) / ($listLen-1);
 		ColorRect($farRight, $listPos, $farRight+4, $listPos+$bottom/20.0, colorScrollBar);
 
 		SetDrawColor(colorText);
