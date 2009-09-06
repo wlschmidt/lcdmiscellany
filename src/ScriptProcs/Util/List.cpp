@@ -41,9 +41,10 @@ void resize(ScriptValue &s, ScriptValue *args) {
 	args->listVal->vals[1].AddRef();
 	ScriptValue sv;
 	CoerceIntNoRelease(args->listVal->vals[1], sv);
-	if (sv.intVal < 0) i = 0;
+	if (sv.intVal < 0 || sv.i32 < 0) i = 0;
+	else i = sv.i32;
 	if (args->listVal->vals[0].type == SCRIPT_LIST) {
-		if (args->listVal->vals[0].listVal->Resize(i, i|2)) {
+		if (args->listVal->vals[0].listVal->Resize(i, i)) {
 			s = args->listVal->vals[0];
 			s.AddRef();
 		}
