@@ -34,7 +34,6 @@ function Init() {
 	/* Change order (or comment out) to change order of views (or hide them)
 	 */
 	menuHandler = MenuHandler(eventHandler,
-		TextEditorView(),
 		DualView (
 			StatusView(
 				//DefaultStatus(),
@@ -61,6 +60,8 @@ function Init() {
 			// AMIPController(),
 		),
 
+		TextEditorView(),
+
 		ClipboardView(),
 
 		CalculatorView(),
@@ -78,6 +79,9 @@ function Init() {
 		// uTorrent.
 		DownloadView(),
 
+		// Note:  SABnzbdView works fine, but is currently only formatted for G15s.
+		// Delete the first "/*" to show it.
+
 		// SABnzbdView 0.1.7 by 4wd:
 		// Designed for small 2-color LCDs only.
 		// Parameters are: SABnzbdView(URL, header, subview),
@@ -92,7 +96,9 @@ function Init() {
 		//
 		// If you are only interested in one SABnzbd+ daemon, you can leave the
 		// URL empty and place it in the LCDMisc.ini under [URLs].  See the example.
-		// SABnzbdView(, 0, 0),
+
+		/* SABnzbdView(, 0, 0), //*/
+
 
 		// The sample below shows using StatusView to monitor more than one SABnzbd+
 		// Switching between screens is done by pressing the LCDMisc 'OK' button,
@@ -128,7 +134,7 @@ function Init() {
 	);
 
 	// Turn off lights during screensaver.  Delete the "//" to enable.
-	ScreenSaverLightToggle(eventHandler);
+	// ScreenSaverLightToggle(eventHandler);
 
 	/* Smoothes out system volume changes.  Note that it doesn't steal the
 	 * volume wheel.  Instead, it monitors the system volume setting.
