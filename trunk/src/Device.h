@@ -21,7 +21,7 @@ enum ConnectionType : unsigned short {
 
 // Display device type.
 enum HID_DEVICE_TYPE {
-	HID_LCD_G11,
+	HID_LCD_G11 = 1,
 	HID_LCD_G15_V1,
 	HID_LCD_G15_V2,
 	HID_LCD_Z10,

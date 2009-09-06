@@ -422,7 +422,7 @@ void GetDeviceState(ScriptValue &s, ScriptValue *args) {
 	ScriptValue *out = &s;
 	if (index == 0) {
 		if (!CreateListValue(s, numDevices)) return;
-		s.listVal->Resize(numDevices, 1);
+		s.listVal->Resize(numDevices, numDevices);
 		out = s.listVal->vals;
 	}
 	for (int i=0; i<numDevices; i++) {
