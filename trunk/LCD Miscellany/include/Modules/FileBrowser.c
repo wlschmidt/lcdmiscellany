@@ -3,12 +3,14 @@
 #requires <util\G15.c>
 #requires <Modules\LineEditor.c>
 #requires <framework\Overlay.c>
+#requires <framework\header.c>
 
 struct FileBrowser {
 	var %path, %sel, %hasFocus, %stealArrows, %fontIds, %selInfo, %pathName;
 
 	var %run, %runHistory, %runHistoryItem;
 	var %rename, %renameName, %pageHeight;
+	var %lastUpdate, %cachedList;
 
 	var %search, %searchTime;
 	function FileBrowser($_path, $_stealArrows, $_pathName) {
@@ -20,7 +22,7 @@ struct FileBrowser {
 		}
 		if (size(%path) == 0 || %path[1] != ':' || %path[size(%path)-1] != "\") %path = "C:\";
 		else if (size($file)) {
-			$files = FileInfo(%path +s "*");
+			$files = %GetFileList();
 			for ($i=0; $i<size($files); $i++) {
 				if ($files[$i].name ==s $file) {
 					%sel = $i;
@@ -71,6 +73,21 @@ struct FileBrowser {
 		}
 	}
 
+	function GetFileList() {
+		$time = Time();
+		if (!IsNull(%cachedList) && $time < %lastUpdate+60) {
+			return %cachedList;
+		}
+		%lastUpdate = $time;
+		%cachedList = list(@FileInfo(%path +s "*"), @DriveList());
+		return %cachedList;
+	}
+
+	function SetPath($_path) {
+		%cachedList = null;
+		%path = $_path;
+	}
+
 	function KeyDown($event, $param, $modifiers, $vk, $string) {
 		$vk = MediaFlip($vk);
 		NeedRedraw();
@@ -80,6 +97,11 @@ struct FileBrowser {
 				return 1;
 			}
 			return 0;
+		}
+		if ($vk == VK_F5) {
+			// Forces refresh.
+			%SetPath(%path);
+			return 1;
 		}
 		if (!IsNull(%rename)) {
 			if ($vk == VK_RETURN) {
@@ -191,7 +213,7 @@ struct FileBrowser {
 			}
 			%searchTime = GetTickCount();
 			%search +=s $string;
-			$files = list(@FileInfo(%path +s "*"), @DriveList());
+			$files = %GetFileList();
 			$index = %sel;
 
 			while (1) {
@@ -216,7 +238,7 @@ struct FileBrowser {
 			%sel--;
 		}
 		else if ($vk == VK_NEXT || $vk == VK_RIGHT) {
-			$count = size(FileInfo(%path +s "*")) + size(DriveList());
+			$count = size(%GetFileList());
 			%sel += %pageHeight;
 			if (%sel >= $count) %sel = $count - 1;
 		}
@@ -237,23 +259,23 @@ struct FileBrowser {
 		else if (($vk == VK_RETURN) && !IsNull(%selInfo)) {
 			if (IsString(%selInfo)) {
 				%sel = 0;
-				%path = %selInfo;
+				%SetPath(%selInfo);
 			}
 			else if (%selInfo.attributes & FILE_ATTRIBUTE_DIRECTORY) {
 				if (%selInfo.name !=s "..") {
 					%sel = 0;
-					%path = %path +s %selInfo.name +s "\"; //"
+					%SetPath(%path +s %selInfo.name +s "\"); //"
 				}
 				else {
 					$match = RegExp(%path, "^(.*\\)(.*)\\$");
 					$newPath = $match[0][0];
 					$oldDir = $match[1][0];
 					if (IsString($newPath)) {
-						%path = $newPath;
-						$files = FileInfo(%path +s "*");
+						%SetPath($newPath);
+						$files = %GetFileList();
 						%sel = 0;
 						for ($i=0; $i<size($files); $i++) {
-							if ($files[$i].name ==S $oldDir) {
+							if ($files[$i].name ==S $oldDir && !IsNull($files[$i].name)) {
 								%sel = $i;
 								break;
 							}
@@ -332,7 +354,7 @@ struct FileBrowser {
 		$font = GetThemeFont(%fontIds[$highRes]);
 		UseFont($font);
 
-		$files = list(@FileInfo(%path +s "*"), @DriveList());
+		$files = %GetFileList();
 
 		if (!IsNull(%rename)) {
 			for ($i=0; $i<size($files); $i++) {
@@ -396,7 +418,7 @@ struct FileBrowser {
 					}
 					else {
 						if ($index != %sel) SetDrawColor(colorText);
-						DisplayText(Elipsisify($files[$index].name, $clearStart-2), 2, $pos);
+						DisplayText(Ellipsisify($files[$index].name, $clearStart-2), 2, $pos);
 						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
 					}
 				}
@@ -431,7 +453,7 @@ struct FileBrowser {
 						DisplayText("|2" +s $files[$index].name,1, $pos);
 					}
 					else {
-						DisplayText(Elipsisify($files[$index].name, $clearStart-1), 1, $pos);
+						DisplayText(Ellipsisify($files[$index].name, $clearStart-1), 1, $pos);
 						DisplayTextRight(FormatSize($files[$index].bytes,,,3), $rightEdge, $pos);
 					}
 				}

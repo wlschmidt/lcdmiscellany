@@ -32,7 +32,12 @@ function UnregisterKeyRange($modifiers, $min, $max) {
 	return UnregisterKeyEvent($modifiers, @$values);
 }
 
-function Elipsisify($text, $width) {
+// For compatibilty with old scripts...  Oops.
+function Elipsisify() {
+	Ellipsisify(@$);
+}
+
+function Ellipsisify($text, $width) {
 	if (TextSize($text)[0] <= $width || size($text)<=3) return $text;
 	$w = $s = TextSize("...")[0];
 	while ($w < $width) {
@@ -42,6 +47,29 @@ function Elipsisify($text, $width) {
 		$w = $s + TextSize(substring($text, 0, $next+1))[0];
 	}
 	return substring($text, 0, $len+1) +s "...";
+}
+
+function EllipsisifyPath($text, $width) {
+	if (TextSize($text)[0] <= $width || size($text)<=3) return $text;
+	$path = strsplit($text, "\");//"
+	if (size($path) <= 2) return Elipsisify($text, $width);
+
+	$prefix = $path[0] +s "\...\";//"
+
+	$index = size($path) - 1;
+	$suffix = $path[$index];
+	$index--;
+
+	$s = TextSize($prefix)[0];
+	while ($index) {
+		$suffix2 = $path[$index] +s "\" +s $suffix;//"
+		$w = $s + TextSize($suffix2)[0];
+		if ($w >= $width) break;
+	}
+	// May have to use two Ellipses with really long directory names.
+	if ($index)	return Elipsisify($prefix +s $suffix, $width);
+	// Shouldn't happen, unless there are a lot of extra backslashes (Need at least 3 or 4).
+	return $path[0] +s "\" +s $suffix;//"
 }
 
 // Doesn't handle overdraw on either side of text...Yet.

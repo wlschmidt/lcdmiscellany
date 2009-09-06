@@ -597,7 +597,7 @@ struct TaskManager extends View {
 			$index = %indices[$pos];
 			//DisplayText(%nameList[$index], 8, $i);
 			//ClearRect($width2, $i, 159, $i+$height-1);
-			DisplayText(Elipsisify(%nameList[$index], $width2-$prefix2-1), $prefix2+1, $i);
+			DisplayText(Ellipsisify(%nameList[$index], $width2-$prefix2-1), $prefix2+1, $i);
 
 			// 0 and %font are the same, except 0 has been modified so
 			// 1 is as wide as the other numbers, and %font supports
@@ -634,7 +634,7 @@ struct TaskManager extends View {
 							if (!size($text)) {
 								$text = "No Name";
 							}
-							DisplayText(Elipsisify($text, $right-3*$prefix), 3*$prefix, $i);
+							DisplayText(Ellipsisify($text, $right-3*$prefix), 3*$prefix, $i);
 						}
 					}
 				}

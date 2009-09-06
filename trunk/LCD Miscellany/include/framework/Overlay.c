@@ -115,7 +115,7 @@ struct MessageBoxOverlay {
 		$fh = GetFontHeight();
 		$middleGap = $fh/2;
 
-		$fixedPrompt = Elipsisify(%prompt, $w - 2 * (2 + $hmargins));
+		$fixedPrompt = Ellipsisify(%prompt, $w - 2 * (2 + $hmargins));
 		$box = TextSize($fixedPrompt);
 		$tw = $box[0];
 		$th = $box[1];
