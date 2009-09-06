@@ -9,10 +9,10 @@ struct FileTextEdit {
 		%path,
 		%file,
 		%error;
-	function FileTextEdit($_path, $_file, $_font, $_width) {
+	function FileTextEdit($_path, $_file, $_width, $_height, $_font) {
 		%path = $_path;
 		%file = $_file;
-		%editor = TextEditor($_width, $_font);
+		%editor = TextEditor($_width, $_height, $_font);
 		if (!%editor.Load($_file)) {
 			%error = 1;
 		}
@@ -144,7 +144,7 @@ struct TextEditorView extends View {
 		$res = GetMaxRes();
 		$font = GetThemeFont(%fontIds[IsHighRes(@$res)]);
 
-		$file = FileTextEdit($path, $file, $font, $res[0]);
+		$file = FileTextEdit($path, $file, $res[0], $res[1], $font);
 		if (!$file.error) {
 			%current = size(%files);
 			%files[%current] = $file;
@@ -225,7 +225,7 @@ struct TextEditorView extends View {
 			$font = GetThemeFont(%fontIds[$highRes]);
 
 			UseFont($font);
-			%files[%current].editor.ChangeFormat($res[0], $font);
+			%files[%current].editor.ChangeFormat($res[0], $res[1], $font);
 			%files[%current].editor.Draw(0, 0, $res);
 
 			if (size(%displayFileName)) {

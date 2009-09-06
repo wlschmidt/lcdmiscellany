@@ -16,12 +16,13 @@ struct Position {
  */
 struct TextEditor {
 	var %text, %cursorPos, %selStart, %hasFocus, %flashTimer, %cursor, %textSize, %offset,
-		%font, %width,
+		%font, %width, %height,
 		%cursorPx, %selPx, %offsetHeight,
 		%undo, %redo, %splitUndo;
 
-	function TextEditor($_width, $_font) {
+	function TextEditor($_width, $_height, $_font) {
 		%text = list("");
+		%height = $_height;
 		%offset = Position(0,0);
 		%cursorPos = Position(0,0);
 		%selStart = Position(0,0);
@@ -34,26 +35,26 @@ struct TextEditor {
 		$start = 0;
 		$line = %text[$pos.line];
 		$fh = GetFontHeight();
-		$height = 0;
+		$h = 0;
 		while (!IsNull($end = strstr($line, "|n", $start))) {
 			if ($end >= $pos.pos) break;
 			$start = $end+1;
-			$height += $fh;
+			$h += $fh;
 		}
 		if ($pos.line != %offset.line) {
 			$i = $pos.line;
 			while ($i < %offset.line) {
-				$height -= TextSize(%text[$i])[1];
+				$h -= TextSize(%text[$i])[1];
 				$i++;
 			}
 			while ($i > %offset.line) {
 				$i--;
-				$height += TextSize(%text[$i])[1];
+				$h += TextSize(%text[$i])[1];
 			}
 		}
 		$p = TextSize(substring($line, $start, $pos.pos))[0];
 		if ($p) $p--;
-		return list($p, $height);
+		return list($p, $h);
 	}
 
 	function Update() {
@@ -65,9 +66,9 @@ struct TextEditor {
 		if ($offsetPx[1] > %cursorPx[1]) {
 			%offset = Position(%cursorPos.line, %cursorPos.pos);
 		}
-		else if ($offsetPx[1] + 43 - $fh < %cursorPx[1]) {
+		else if ($offsetPx[1] + %height - $fh < %cursorPx[1]) {
 			%offset = %cursorPos;
-			for ($i=0; $i<43-2*$fh; $i+=$fh) {
+			for ($i=0; $i<%height-2*$fh; $i+=$fh) {
 				%offset = %LineUp(%offset, 0);
 			}
 		}
@@ -111,11 +112,13 @@ struct TextEditor {
 		return 1;
 	}
 
-	function ChangeFormat($_width, $_font) {
-		if ($_width == %width && Equals($_font, %font)) {
+	function ChangeFormat($_width, $_height, $_font) {
+		if ($_width == %width && $_height == %height && Equals($_font, %font)) {
 			return;
 		}
+		UseFont(%font);
 		%font = $_font;
+		%height = $_height;
 		%width = $_width;
 		for ($i=size(%text)-1; $i>=0; $i--) {
 			%text[$i] = FormatText(strreplace(%text[$i], "|n", ""), $_width);
@@ -503,14 +506,14 @@ struct TextEditor {
 		$h = $res[1];
 
 		UseFont(%font);
-		$height = GetFontHeight();
+		$fh = GetFontHeight();
 		$pos = $y - %offsetHeight;
 		for ($i=%offset.line; $i<size(%text) && $pos < $h; $i++) {
 			DisplayText(%text[$i],$x,$pos);
 			$pos += TextSize(%text[$i])[1];
 		}
 		if (%cursor) {
-			InvertRect(%cursorPx[0]+$x, $y+%cursorPx[1], %cursorPx[0]+$x, $y+$height+%cursorPx[1]-1);
+			InvertRect(%cursorPx[0]+$x, $y+%cursorPx[1], %cursorPx[0]+$x, $y+$fh+%cursorPx[1]-1);
 		}
 		if (%selPx[0] != %cursorPx[0] || %selPx[1] != %cursorPx[1]) {
 			$start = %cursorPx;
@@ -524,18 +527,18 @@ struct TextEditor {
 			if ($start[1] < 0) {
 				$start = list(0, 0);
 			}
-			if ($end[1] > 60) {
-				$end = list(%width, 60);
+			if ($end[1] > $res[1]+$fh) {
+				$end = list(%width, $res[1]+$fh);
 			}
 			$lineStart = $start[0];
 			$line = $start[1];
 			while ($line < $end[1]) {
 				$lineEnd = %width;
-				InvertRect($x + $lineStart, $y + $line, $x + $lineEnd, $y - 1 + ($line += $height));
+				InvertRect($x + $lineStart, $y + $line, $x + $lineEnd, $y - 1 + ($line += $fh));
 				$lineStart = 0;
 			}
 			$lineEnd = $end[0];
-			InvertRect($x + $lineStart, $y + $line, $x + $lineEnd, $y + $line + $height-1);
+			InvertRect($x + $lineStart, $y + $line, $x + $lineEnd, $y + $line + $fh-1);
 		}
 
 	}
