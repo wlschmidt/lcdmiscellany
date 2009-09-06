@@ -150,7 +150,7 @@ function Init() {
 
 
 
-// Founr views that are currently not functional.  Chat only requires a few modifications to work, may revive it later.
+// Four views that are currently not functional.  Chat only requires a few modifications to work, may revive it later.
 // Pidgin was discontinued due to memory leaks (In Pidgin or webpidgin).  CommandView and ConfigView each need a ton
 // of work.
 

@@ -1,38 +1,66 @@
-// Config screen not finished yet...
-//#import <views\ConfigView.c>
-// Note:  Uses globals LightRestoreState, LightBlinkRestoreState, and alert
+function SetGxxStates($id, $MLights, $Light, $LCDLight, $LCDColor) {
+	G15SetBacklightColor($LCDColor, $id);
+	Wait(10);
+	G15SetBacklightColor($LCDColor, $id);
+	Wait(10);
+	G15SetLight($Light, $id);
+	Wait(10);
+	G15SetLight($Light, $id);
+	Wait(10);
+	G15SetLCDLight($LCDLight, $id);
+	Wait(10);
+	G15SetLCDLight($LCDLight, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+}
 
-// Represents the state of G15's lights.
-struct G15State {
-	var %Light, %LCDLight, %MLights;
-	function G15State($_auto, $_Light, $_LCDLight, $_MLights) {
-		if ($_auto) {
-			$state = G15GetState();
-			%Light = $state[0];
-			%LCDLight = $state[1];
-			%MLights = $state[2];
+function SetG15State($id, $MLights, $Light, $LCDLight) {
+	G15SetLight($Light, $id);
+	Wait(10);
+	G15SetLight($Light, $id);
+	Wait(10);
+	G15SetLCDLight($LCDLight, $id);
+	Wait(10);
+	G15SetLCDLight($LCDLight, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+}
+
+function SetG19State($id, $MLights, $LCDColor) {
+	G15SetBacklightColor($LCDColor, $id);
+	Wait(10);
+	G15SetBacklightColor($LCDColor, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+	Wait(10);
+	G15SetMLights($MLights, $id);
+}
+
+function BackupLightStates() {
+	if (!gLightBackupCount) gBackupLightStates = list();
+	gBackupLightStates[gLightBackupCount] = GetDeviceState();
+	gLightBackupCount++;
+}
+
+function RestoreLightStates() {
+	if (gLightBackupCount) gLightBackupCount--;
+	else return;
+	for ($i=0; $i<size(gBackupLightStates[gLightBackupCount]); $i++) {
+		$state = gBackupLightStates[gLightBackupCount][$i];
+		$type = $state.type;
+		if ($type == LCD_G11 || $type == LCD_G15_V1 || $type == LCD_G15_V2 || $type == LCD_Z10 || $type == LCD_GAME_PANEL) {
+			SetG15State($state.name, $state.mkeys, $state.LCDColor, $state.LCDLight);
 		}
-		else {
-			%Light = $_Light;
-			%LCDLight = $_LCDLight;
-			%MLights = $_MLights;
+		else if ($type == LCD_G19) {
+			SetG19State($state.name, $state.mkeys, $state.LCDColor);
 		}
 	}
-
-	function setState() {
-		G15SetLight(%Light);
-		Wait(10);
-		G15SetLight(%Light);
-		Wait(10);
-		G15SetLCDLight(%LCDLight);
-		Wait(10);
-		G15SetLCDLight(%LCDLight);
-		Wait(10);
-		G15SetMLights(%MLights);
-		Wait(10);
-		G15SetMLights(%MLights);
-	}
-};
+	if (!gLightBackupCount) gBackupLightStates = null;
+}
 
 struct ScreenSaverLightToggle {
 	var %saving, %enabled;
@@ -58,28 +86,13 @@ struct ScreenSaverLightToggle {
 		if (%enabled) {
 			if ($starting) {
 				if (!%saving) {
-					$lightsOff = G15State(0);
-					// Not blinking.
-					if (IsNull(LightRestoreState)) {
-						LightRestoreState = G15State(1);
-					}
-					else {
-						// Blinking.
-						LightBlinkRestoreState = $lightsOff;
-					}
-					$lightsOff.setState();
+					BackupLightStates();
+					SetG15State("", 0,0,0);
+					SetG19State("", 0,0);
 				}
 			}
 			else if (%saving) {
-				// Not blinking
-				if (IsNull(LightBlinkRestoreState)) {
-					LightRestoreState.setState();
-					LightRestoreState = null;
-				}
-				else {
-					// Blinking, don't bother doing anything.
-					LightBlinkRestoreState = null;
-				}
+				RestoreLightStates();
 			}
 		}
 		%saving = $starting;
@@ -95,69 +108,31 @@ struct ScreenSaverLightToggle {
 	}
 }
 
-function LightAlert($blinks, $mainLight, $lcdLight, $mLights) {
+function LightAlert($blinks, $mainLight, $lcdLight, $mLights, $lcdColor) {
 	if ($blinks <= 0) return;
-	if (!IsList(alert)) {
-		alert = list();
-		// Saver off.
-		if (IsNull(LightRestoreState)) {
-			LightRestoreState = G15State(1);
-		}
-		else {
-			// Saver on.
-			LightBlinkRestoreState = G15State(0);
-		}
+
+	$old = gAlertState[0];
+	gAlertState = list(2*$blinks, $mainLight, $lcdLight, $mLights, $lcdColor);
+	if ($old > 0) {
+		return;
 	}
-	if ($mainLight || $lcdLight || $mLights) {
-		$old = alert[0];
-		if (alert[0] < $blinks) {
-			alert[0] = $blinks;
-			alert[1] = $mainLight;
-			alert[2] = $lcdLight;
-			alert[3] = $mLights;
-		}
-		if (!$old) {
-			alert[4] = 0;
-			alert[5] = G15GetState();
-			CreateFastTimer("LightAlerter", 500, 1);
-		}
-	}
+	BackupLightStates();
+	CreateFastTimer("LightAlerter", 500, 1);
 }
 
 function LightAlerter($timer) {
-	if (alert[4] == 1) {
-		alert[0] --;
-		if (alert[0] <= 0) {
-			KillTimer($timer);
-			alert = null;
-			if (IsNull(LightBlinkRestoreState)) {
-				LightRestoreState.setState();
-				LightRestoreState = null;
-			}
-			else {
-				LightBlinkRestoreState.setState();
-				LightBlinkRestoreState = null;
-			}
-			return;
-		}
+	gAlertState[0]--;
+	if (gAlertState[0] == 0) {
+		RestoreLightStates();
+		KillTimer($timer);
+		gAlertState = null;
+		return;
 	}
-	$temp = alert[4] = !alert[4];
-	if (alert[2]) {
-		G15SetLCDLight(2*$temp);
-		Wait(10);
-		G15SetLCDLight(2*$temp);
-		Wait(10);
+	if ((gAlertState[0] & 1) == 0) {
+		RestoreLightStates();
+		BackupLightStates();
+		return;
 	}
-	if (alert[1]) {
-		G15SetLight(2*$temp);
-		Wait(10);
-		G15SetLight(2*$temp);
-		Wait(10);
-	}
-	if (alert[3]) {
-		G15SetMLights(15*$temp);
-		Wait(10);
-		G15SetMLights(15*$temp);
-	}
+	SetGxxStates(, gAlertState[1], gAlertState[2], gAlertState[3], gAlertState[4]);
 }
 
