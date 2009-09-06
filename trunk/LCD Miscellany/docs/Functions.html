@@ -446,7 +446,7 @@ Returns a list of the SMART attributes for a specified drive.  Drive should be t
 
 <P><SPAN class="FXN">GetEmailCount</SPAN> ()<BR>
 Gets the number of unread email from the registry.  As far as I know, only Outlook and Outlook Express update these values.
-<SPAN class="FXN">GetVersion</SPAN> ()<BR>
+<P><SPAN class="FXN">GetVersion</SPAN> ()<BR>
 Returns the version of the application as a 5-element list.  Version 0.2.9 revision 14, 32-bit would be (0,2,9,14,32).
 <P><SPAN class="FXN">GetVersionString</SPAN> (format)<BR>
 Returns the version number as a single string.  If format is 0, it's prefixed by "LCD Miscellany".  If it's 1, it doesn' include "LCD Miscellany", and if it's 2, it excludes the executable type (32/64-bits).
@@ -695,7 +695,7 @@ Works with all supported device types.
 };</PRE></div>
 
 <P> <SPAN class="FXN">G15GetState</SPAN> (keyboard)<BR>
-Supports G15s.
+Supports G15s only.
 <P>
 Gets the state of the lights on the specified keyboard.  Keyboard works as in the previous function, except a value of 0 will return the state of the first G15 HID keyboard and if it's the identifier of a non-HID attached keyboard, it returns null.  The return value is a 4-element list consisting of (Light, LCDLight, MLights, keyboard) for G15s.  For G15s, each value is the input you'd pass to the next 3 functions to set the current state of the keyboard, except for keyboard, which is the HID identifier string of the keyboard you changed the value of.  Returns null on failure.<BR>
 
