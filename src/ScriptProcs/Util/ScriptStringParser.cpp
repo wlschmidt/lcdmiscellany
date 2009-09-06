@@ -30,10 +30,9 @@ void ScriptToLower(ScriptValue &s, ScriptValue *args) {
 }
 
 void ParseBinaryInt(ScriptValue &s, ScriptValue *args) {
-	if (args[1].intVal > args[0].stringVal->len || args[2].intVal <= 0 || args[1].intVal < 0) return;
+	if (args[1].intVal >= args[0].stringVal->len || args[2].intVal <= 0 || args[1].intVal < 0) return;
 	unsigned char *str = args[0].stringVal->value;
 	__int64 len = args[2].intVal;
-	if (args[1].intVal == args[0].stringVal->len) return;
 	int start = args[1].i32;
 	if (start+len > args[0].stringVal->len) {
 		len = args[0].stringVal->len - start;

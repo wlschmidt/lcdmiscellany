@@ -1265,6 +1265,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\ScriptObjects\MutableString.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ScriptObjects\MutableString.h"
+						>
+					</File>
+					<File
 						RelativePath=".\ScriptObjects\PerfCounter.cpp"
 						>
 					</File>

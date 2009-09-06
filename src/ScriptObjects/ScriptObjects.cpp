@@ -12,6 +12,7 @@
 #include "MediaFile.h"
 #include "MiniObjects.h"
 #include "SysTrayIcon.h"
+#include "MutableString.h"
 
 #include "WMI.h"
 
@@ -365,6 +366,37 @@ int RegisterObjectTypes() {
 		res &= CreateObjectType("SystemState", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), 0, 0, 0);
 		SystemStateType = count++;
 	}
+
+	{
+		const char *vals[] = {"&1","&2","&3","&4"};
+		const ProcDescription script[] = {{"ReadInt", MutableStringReadInt, C_3ints},
+										  {"ReadInts", MutableStringReadInts, C_4ints},
+										  {"LoadImage", MutableStringLoadImage, C_5ints},
+		};
+		const ProcDescription dest[] = {{"MutableString::~MutableString", FreeMutableString, C_noArgs}};
+
+		res &= CreateObjectType("MutableString", vals, sizeof(vals)/sizeof(vals[0]), 0, 0, script, sizeof(script)/sizeof(script[0]), dest);
+		MutableStringType = count++;
+	}
+
+	{
+		const char *vals[] = {"&1"};
+		const ProcDescription create[] = {{"OpenFileMapping", MyOpenFileMapping, C_string}};
+		const ProcDescription script[] = {{"MapViewOfFile", FileMappingMapViewOfFile, C_2ints},
+		};
+		const ProcDescription dest[] = {{"FileMapping::~FileMapping", MyFreeFileMapping, C_noArgs}};
+
+		res &= CreateObjectType("FileMapping", vals, sizeof(vals)/sizeof(vals[0]), create, sizeof(create)/sizeof(create[0]), script, sizeof(script)/sizeof(script[0]), dest);
+		FileMappingType = count++;
+	}
+
+	{
+		const char *vals[] = {"&1","&2","&3","&4","&5","&6"};
+		res &= CreateObjectType("MutableImage", vals, sizeof(vals)/sizeof(vals[0]), 0, 0, 0, 0, 0);
+		MutableImageType = count++;
+	}
+
+
 	return res && InitFonts();
 }
 

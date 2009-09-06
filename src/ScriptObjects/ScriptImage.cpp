@@ -8,6 +8,7 @@
 
 unsigned int ImageType;
 unsigned int Image32Type;
+extern unsigned int MutableImageType;
 
 void LoadImage32(ScriptValue &s, ScriptValue *args) {
 	ScriptValue sv;
@@ -149,13 +150,37 @@ void DrawImage(ScriptValue &s, ScriptValue* args) {
 			activeScreen->DisplayImage(args[1].i32, args[2].i32, args[3].i32, args[4].i32, args[5].i32, args[6].i32, img);
 			CreateIntValue(s, 1);
 		}
+		else if (args[0].objectVal->type == MutableImageType) {
+			GenericImage<unsigned char> img;
+			img.pixels = (unsigned char*) args[0].objectVal->values[0].intVal;
+			img.width  = args[0].objectVal->values[1].i32;
+			img.height = args[0].objectVal->values[2].i32;
+			img.spp    = args[0].objectVal->values[3].i32/8;
+			img.memWidth = args[0].objectVal->values[4].i32;
+			if (!args[5].i32) args[5].i32 = img.width;
+			if (!args[6].i32) args[6].i32 = img.height;
+			activeScreen->DisplayImage(args[1].i32, args[2].i32, args[3].i32, args[4].i32, args[5].i32, args[6].i32, &img);
+			CreateIntValue(s, 1);
+		}
 	}
 }
 
 void DrawTransformedImage(ScriptValue &s, ScriptValue* args) {
 	if (args[0].type == SCRIPT_OBJECT) {
-		if (args[0].objectVal->type == Image32Type) {
-			GenericImage<unsigned char> *img = (GenericImage<unsigned char> *)args[0].objectVal->values[0].stringVal->value;
+		if (args[0].objectVal->type == Image32Type || args[0].objectVal->type == MutableImageType) {
+			GenericImage<unsigned char> *img;
+			GenericImage<unsigned char> simg;
+			if (args[0].objectVal->type == Image32Type) {
+				img = (GenericImage<unsigned char> *)args[0].objectVal->values[0].stringVal->value;
+			}
+			else {
+				img = &simg;
+				simg.pixels = (unsigned char*) args[0].objectVal->values[0].intVal;
+				simg.width  = args[0].objectVal->values[1].i32;
+				simg.height = args[0].objectVal->values[2].i32;
+				simg.spp    = args[0].objectVal->values[3].i32/8;
+				simg.memWidth = args[0].objectVal->values[4].i32;
+			}
 			//activeScreen->DisplayImage(args[1].i32, args[2].i32, args[3].i32, args[4].i32, args[5].i32, args[6].i32, img);
 			DoubleQuad src, dst;
 			int fullImage = 1;
