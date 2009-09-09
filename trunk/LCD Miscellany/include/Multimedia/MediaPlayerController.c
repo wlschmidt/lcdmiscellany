@@ -1,5 +1,6 @@
 struct MediaPlayerController {
-	var %bigMediaImage,
+	var %visible,
+		%bigMediaImage,
 		%mediaImage,
 		%state,
 		%lastDrawn,
@@ -24,6 +25,14 @@ struct MediaPlayerController {
 		%image;
 	// Just to prevent a warning.
 	function MediaPlayerController() {
+	}
+
+	function Show() {
+		%visible = 1;
+	}
+
+	function Hide() {
+		%visible = 0;
 	}
 
 	function ToggleMute() {
