@@ -19,4 +19,6 @@ extern unsigned int MutableImageType;
 
 void MutableStringLoadImage(ScriptValue &s, ScriptValue *args);
 
+void MutableImageSize(ScriptValue &s, ScriptValue *args);
+
 #endif

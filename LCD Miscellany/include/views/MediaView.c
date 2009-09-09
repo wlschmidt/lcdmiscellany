@@ -4,6 +4,7 @@
 #requires <util\G15.c>
 #requires <util\time.c>
 #requires <util\Text.c>
+#requires <framework\Theme.c>
 
 function DrawSpectrum2($cache, $specHist, $left, $top, $right, $bottom) {
 	// Significant speed optimization.
@@ -337,10 +338,25 @@ struct MediaView extends View {
 		}
 	}
 
-	function DrawG19() {
+	function DrawG19($event, $param, $name, $res) {
 		$p = %players[%player];
 
-		if (size($p.specHist)) {
+		if (!IsNull($p.image)) {
+			$imageRes = $p.image.Size();
+
+			$h = 106;
+			if ($imageRes[1] < $res[1]-$h) {
+				// Vertical center if too short.
+				$h += ($res[1]-$h - $imageRes[1])/2;
+			}
+			else {
+				// Align bottom if too tall.
+				$h = $res[1] - $imageRes[1];
+			}
+
+			DrawImage($p.image, ($res[0]-$imageRes[0])/2, $h);
+		}
+		else if (size($p.specHist)) {
 			// Flash lights to music.  Could probably do much better.
 			// G15SetBacklightColor(RGB($p.spectrum[20], $p.spectrum[160], $p.spectrum[300]));
 			DrawSpectrum2(%specCache, $p.specHist, 0, 105, 319, 239);
@@ -476,6 +492,15 @@ struct MediaView extends View {
 		else if (size($p.waveform)) {
 			DrawWave($p.waveform, 0, 106, 319, 239);
 		}//*/
+		/*
+		$mapping = OpenFileMapping("VLC_SVIDEOPIPE");
+		$view = $mapping.MapViewOfFile(0, 640*480*4+64);
+		$headerSize = $view.ReadInt(0, 4);
+		$res2 = $view.ReadInts(7*4, 2, 1, 2);
+		$bpp = $view.ReadInt(8*4, 1);
+		$image = $view.LoadImage($res2[0], $res2[1], $bpp, $headerSize);
+		DrawImage($image, ($res[0]-$res2[0])/2, 106);
+		//*/
 	}
 
 	function Draw($event, $param, $name, $res) {
@@ -493,8 +518,8 @@ struct MediaView extends View {
 			%bump %= 6;
 		}
 
-		if ($res[0] >= 320)
-			%DrawG19();
+		if (IsHighRes(@$res))
+			%DrawG19(@$);
 		else
 			%DrawG15();
 	}

@@ -20,7 +20,8 @@ struct MediaPlayerController {
 		%track,
 		%noBalance,
 		%tracks,
-		%playerName;
+		%playerName,
+		%image;
 	// Just to prevent a warning.
 	function MediaPlayerController() {
 	}

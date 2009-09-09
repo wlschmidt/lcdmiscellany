@@ -9,6 +9,7 @@ function GetVLCXMLName($xml) {
 
 struct VLCController extends MediaPlayerController {
 	var %rawVolume, %modes, %rmode, %statusUrl, %playlistUrl, %needTitle;
+	var %lastPlaying, %mapping, %view;
 
 	function VLCController($url) {
 		if (!size($_url)) {
@@ -128,6 +129,8 @@ struct VLCController extends MediaPlayerController {
 			%artist = null;
 			%year = null;
 			%state = -1;
+			%lastPlaying = null;
+			%image = null;
 			return;
 		}
 		// RegExps aren't fast, but they're faster than my XML parser, because of
@@ -181,6 +184,22 @@ struct VLCController extends MediaPlayerController {
 		%artist = RegExp($xml, "<artist><!\[CDATA\[(.*?)\]\]></artist>")[0][0];
 		%year = RegExp($xml, "<date><!\[CDATA\[(.*?)\]\]></date>")[0][0];
 
+		if (%state && %lastPlaying !=s %title) {
+			%lastPlaying = %title;
+			if (IsNull(%mapping)) {
+				%mapping = OpenFileMapping("VLC_SVIDEOPIPE");
+				%view = %mapping.MapViewOfFile(0, 640*480*4+64);
+				if (IsNull(%view)) {
+					%view = %mapping = null;
+				}
+			}
+		}
+		if (!IsNull(%view)) {
+			$headerSize = %view.ReadInt(0, 4);
+			$res2 = %view.ReadInts(7*4, 2, 1, 2);
+			$bpp = %view.ReadInt(8*4, 1);
+			%image = %view.LoadImage($res2[0], $res2[1], $bpp, $headerSize);
+		}
 
 		if ($needUpdate) {
 			NeedRedraw();

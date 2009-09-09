@@ -392,7 +392,9 @@ int RegisterObjectTypes() {
 
 	{
 		const char *vals[] = {"&1","&2","&3","&4","&5","&6"};
-		res &= CreateObjectType("MutableImage", vals, sizeof(vals)/sizeof(vals[0]), 0, 0, 0, 0, 0);
+		const ProcDescription script[] = {{"Size", MutableImageSize, C_noArgs},
+		};
+		res &= CreateObjectType("MutableImage", vals, sizeof(vals)/sizeof(vals[0]), 0, 0, script, sizeof(script)/sizeof(script[0]), 0);
 		MutableImageType = count++;
 	}
 
