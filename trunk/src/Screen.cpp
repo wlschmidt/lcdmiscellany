@@ -86,7 +86,6 @@ Screen::Screen(int width, int height, int bpp) {
 			}
 			DeleteObject(hDC);
 		}
-		DeleteObject(hDC);
 		exit(0);
 	}
 }

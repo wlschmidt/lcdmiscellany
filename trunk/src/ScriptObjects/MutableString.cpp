@@ -144,3 +144,13 @@ void MutableStringLoadImage(ScriptValue &s, ScriptValue *args) {
 		sv.AddRef();
 	}
 }
+
+void MutableImageSize(ScriptValue &s, ScriptValue *args) {
+	ObjectValue *obj = s.objectVal;
+	if (CreateListValue(s, 3)) {
+		s.listVal->PushBack(obj->values[1]);
+		s.listVal->PushBack(obj->values[2]);
+		s.listVal->PushBack(obj->values[3].i32/8);
+	}
+}
+
