@@ -97,14 +97,17 @@ struct MediaView extends View {
 	function Bump() {
 		%bump++;
 		if (!(%bump%2)) {
-			%titleScroller.Bump();
-			%bigTitleScroller.Bump();
-			NeedRedraw();
+			if (%titleScroller.Bump() || %bigTitleScroller.Bump()) {
+				NeedRedraw();
+			}
 		}
 		if (!(%bump%3)) {
-			%artistScroller.Bump();
-			%bigArtistScroller.Bump();
-			NeedRedraw();
+			if (%artistScroller.Bump() || %bigArtistScroller.Bump()) {
+				NeedRedraw();
+			}
+			else if (!(%bump%6)) {
+				NeedRedraw();
+			}
 		}
 	}
 
@@ -125,6 +128,7 @@ struct MediaView extends View {
 					%player = $i;
 			}
 			%scrollTimer = CreateFastTimer("Bump", 60,,$this);
+			%players[%player].Show();
 		}
 	}
 
@@ -138,6 +142,7 @@ struct MediaView extends View {
 			%bigTitleScroller = 0;
 			%bigArtistScroller = 0;
 			UnregisterKeyEvent(0, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3);
+			%players[%player].Hide();
 		}
 	}
 
@@ -156,7 +161,9 @@ struct MediaView extends View {
 				if ($button == G15_LEFT)
 					$delta = -1;
 				if (%selected == -1) {
+					%players[%player].Hide();
 					%player = (%player + size(%players)+$delta) % size(%players);
+					%players[%player].Show();
 				}
 				else {
 					%selected = (%selected + $delta + 3)%3;
@@ -178,7 +185,9 @@ struct MediaView extends View {
 				$delta = 1;
 				if ($button == G15_UP)
 					$delta = -1;
+				%players[%player].Hide();
 				%player = (%player + size(%players)+$delta) % size(%players);
+				%players[%player].Show();
 			}
 			NeedRedraw();
 			return 1;
@@ -250,8 +259,8 @@ struct MediaView extends View {
 		DisplayText("Balance:", 69, 28);
 
 		if ($p.state >= 0) {
+			%artistScroller.SetText($p.artist);
 			if (size($p.artist)) {
-				%artistScroller.SetText($p.artist);
 				%artistScroller.DisplayText(1, 0);
 
 				UseFont(%titleFont);
@@ -404,8 +413,9 @@ struct MediaView extends View {
 				ColorRect(0, 0, 319, 44, colorHighlightBg);
 				SetDrawColor(colorHighlightText);
 			}
+
+			%bigArtistScroller.SetText($p.artist);
 			if (size($p.artist)) {
-				%bigArtistScroller.SetText($p.artist);
 				%bigArtistScroller.DisplayText(1, 0);
 
 				UseFont(%bigTitleFont);

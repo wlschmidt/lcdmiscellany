@@ -9,7 +9,7 @@ function GetVLCXMLName($xml) {
 
 struct VLCController extends MediaPlayerController {
 	var %rawVolume, %modes, %rmode, %statusUrl, %playlistUrl, %needTitle;
-	var %lastPlaying, %mapping, %view;
+	var %lastPlaying, %mapping, %view, %updateTimer;
 
 	function VLCController($url) {
 		if (!size($_url)) {
@@ -121,6 +121,38 @@ struct VLCController extends MediaPlayerController {
 		NeedRedraw();
 	}
 
+	function UpdateImage() {
+		$headerSize = %view.ReadInt(0, 4);
+		$res2 = %view.ReadInts(7*4, 2, 1, 2);
+		$bpp = %view.ReadInt(8*4, 1);
+		%image = %view.LoadImage($res2[0], $res2[1], $bpp, $headerSize);
+		NeedRedraw();
+	}
+
+	function SetUpdateTimer() {
+		if (!%updateTimer) {
+			%updateTimer = CreateFastTimer("UpdateImage", 30,, $this);
+		}
+	}
+
+	function KillUpdateTimer() {
+		if (%updateTimer) {
+			KillTimer(%updateTimer);
+			%updateTimer = 0;
+		}
+	}
+
+	function Show() {
+		%visible = 1;
+		if (%state == 1 && !IsNull(%view)) {
+			%SetUpdateTimer();
+		}
+	}
+
+	function Hide() {
+		%visible = 0;
+		%KillUpdateTimer();
+	}
 
 	function UpdateWait() {
 		$xml = HttpGetWait(%statusUrl);
@@ -190,15 +222,25 @@ struct VLCController extends MediaPlayerController {
 				%mapping = OpenFileMapping("VLC_SVIDEOPIPE");
 				%view = %mapping.MapViewOfFile(0, 640*480*4+64);
 				if (IsNull(%view)) {
-					%view = %mapping = null;
+					%image = null;
+					%view = null;
+					%mapping = null;
 				}
 			}
 		}
+		if (!%state) {
+			%image = null;
+			%view = null;
+			%mapping = null;
+			%KillUpdateTimer();
+		}
 		if (!IsNull(%view)) {
-			$headerSize = %view.ReadInt(0, 4);
-			$res2 = %view.ReadInts(7*4, 2, 1, 2);
-			$bpp = %view.ReadInt(8*4, 1);
-			%image = %view.LoadImage($res2[0], $res2[1], $bpp, $headerSize);
+			if (%visible) {
+				%SetUpdateTimer();
+			}
+			else {
+				%UpdateImage();
+			}
 		}
 
 		if ($needUpdate) {
