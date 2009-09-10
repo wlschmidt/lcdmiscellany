@@ -7,7 +7,7 @@ extern unsigned int MutableStringType;
 void FreeMutableString(ScriptValue &s, ScriptValue *args);
 void MutableStringReadInt(ScriptValue &s, ScriptValue *args);
 void MutableStringReadInts(ScriptValue &s, ScriptValue *args);
-void MutableStringReadInts(ScriptValue &s, ScriptValue *args);
+void MutableStringWriteInt(ScriptValue &s, ScriptValue *args);
 
 extern unsigned int FileMappingType;
 
