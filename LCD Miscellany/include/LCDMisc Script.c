@@ -82,8 +82,7 @@ function Init() {
 		// Note:  SABnzbdView works fine, but is currently only formatted for G15s.
 		// Delete the first "/*" to show it.
 
-		// SABnzbdView 0.1.7 by 4wd:
-		// Designed for small 2-color LCDs only.
+		// SABnzbdView 0.1.9 by 4wd:
 		// Parameters are: SABnzbdView(URL, header, subview),
 		// Where: URL = "http://ip:port/sabnzbd/"
 		//     header = 0 if you want the TIME/DATE header
@@ -96,28 +95,27 @@ function Init() {
 		//
 		// If you are only interested in one SABnzbd+ daemon, you can leave the
 		// URL empty and place it in the LCDMisc.ini under [URLs].  See the example.
-
 		/* SABnzbdView(, 0, 0), //*/
-
 
 		// The sample below shows using StatusView to monitor more than one SABnzbd+
 		// Switching between screens is done by pressing the LCDMisc 'OK' button,
 		// (third LCD button).  URL is required when using StatusView.
 		// You can mix URLs for SABnzbd+ versions.
 		/*
-			StatusView(,
+			StatusView("Images\SABnzbd.png",
 			  SABnzbdView("http://1.2.3.4:8080/sabnzbd/",1, 1),
 			  SABnzbdView("http://5.6.7.8:8080/sabnzbd/api?apikey=77e45017",1, 1)
 			),
 		*/
 
 
+
+
 		/* Parameters aren't needed, but replace the 0 with a 1 to display location
-		 * instead of time at the top, over the header.  No room for both,
+		 * instead of time at the top, over the header (Small LCDs only).  No room for both,
 		 * unfortunately.  Could squeeze the location and either the date or time on
 		 * together for most location names, but not all, so sticking with either-or
-		 * for now.  May switch to a smaller forecast ticker to squeeze everything
-		 * on, or separate current weather/forecast screens.
+		 * for now.
 		 */
 		WeatherView(,0),
 
