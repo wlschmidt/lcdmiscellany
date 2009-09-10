@@ -46,10 +46,10 @@ struct SABnzbdView extends View {
 		%noDrawOnCounterUpdate = 0;
 
 		%lastUpdate = Time()-60*60-5;
-		%toolbarImage = LoadImage("Images\SABnzbd.png");
+		%InitImages();
 
 		%miniFont = Font("6px2bus", 6);
-		
+
 		if (!size($_url)) {
 			%url = GetString("URLs", "SABnzbd");
 		}
