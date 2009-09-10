@@ -371,6 +371,7 @@ int RegisterObjectTypes() {
 		const char *vals[] = {"&1","&2","&3","&4"};
 		const ProcDescription script[] = {{"ReadInt", MutableStringReadInt, C_3ints},
 										  {"ReadInts", MutableStringReadInts, C_4ints},
+										  {"WriteInt", MutableStringWriteInt, C_3ints},
 										  {"LoadImage", MutableStringLoadImage, C_5ints},
 		};
 		const ProcDescription dest[] = {{"MutableString::~MutableString", FreeMutableString, C_noArgs}};

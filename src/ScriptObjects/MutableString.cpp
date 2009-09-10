@@ -111,6 +111,30 @@ void MutableStringReadInts(ScriptValue &s, ScriptValue *args) {
 	}
 }
 
+void MutableStringWriteInt(ScriptValue &s, ScriptValue *args) {
+	__int64 val = args[0].intVal;
+	__int64 offset = args[1].intVal;
+	__int64 length = args[2].intVal;
+
+	__int64 dlen = s.objectVal->values[1].intVal;
+	unsigned char *data = (unsigned char*) s.objectVal->values[0].intVal;
+	if (offset >= 0 && length >= 0 && offset < dlen) {
+		if (offset + length > dlen) {
+			length = dlen - offset;
+		}
+		while (length) {
+			data[offset] = (unsigned char) val;
+			val >>= 8;
+			length --;
+			offset ++;
+		}
+		CreateIntValue(s, 1);
+	}
+	else {
+		CreateIntValue(s, 0);
+	}
+}
+
 void MutableStringLoadImage(ScriptValue &s, ScriptValue *args) {
 	int w = args[0].i32;
 	int h = args[1].i32;

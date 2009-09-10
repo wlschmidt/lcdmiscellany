@@ -227,7 +227,7 @@ Also note that unlike the string parsing functions below, these do not stop at t
 <div>
 <B>String Parsing functions</B><BR>
 <SPAN class="FXN">ParseBinaryInt</SPAN> (string, startOffset, length, unsigned)<BR>
-Reads an integer in binary format from a string.  The integer is assumed to be in little-endian format (low-order bytes first).  startOffset is where the 0-based offset where the first byte appears, and length is the number of bytes.  If length is no greater than 0 or startOffset is beyond the end of the string or less than 0, null is returned.  If startOffset+length is beyond the end of the string, length is reduced as needed.  If unsigned is not 0, the value is not sign-extended.  Overflows when length is greater than 8.
+Reads an integer in binary format from a string.  The integer is assumed to be in little-endian format (low-order bytes first).  startOffset is the 0-based offset where the first byte appears, and length is the number of bytes.  If length is no greater than 0 or startOffset is beyond the end of the string or less than 0, null is returned.  If startOffset+length is beyond the end of the string, length is reduced as needed.  If unsigned is not 0, the value is not sign-extended.  Safely overflows when length is greater than 8.
 <P>
 <SPAN class="FXN">ParseBinaryInts</SPAN> (string, startOffset, length, unsigned, count)<BR>
 Same as above, except it returns a list of count consecutive integers.  It returns 0's (Not nulls) when it runs off the end of the string, and can return partially parsed values from the start/end of the string.
@@ -378,6 +378,7 @@ Formats val using sprintf.  p1 is the value before the period, p2 is the value a
 Formats size as a number of bytes.  minSize is the minimum display type to use (0 is bytes, 1 is kB, 2 is MB, etc).  Digits are the number of digits to use, less 3.  This function exists to ensure consistency in terms of number of digits displayed and to make it easier to prevent overlapping text.  The size is labeled with a k, M, G, etc, as needed.  If no space is 0, there's a space between the displayed number and the label.  If it's 1, there is no space.  If it's 2, there is no label or space.  If nospace is 3 or 4, it behaves just like 0 and 1, respectively, except that "b" is used for bytes.  If you always want to display using the same units, you should just use FormatValue.
 </div>
 <P>
+
 <div>
 <B>Data collection Functions</B><BR>
 <SPAN class="FXN">Time</SPAN> ()<BR>
@@ -450,8 +451,6 @@ Gets the number of unread email from the registry.  As far as I know, only Outlo
 Returns the version of the application as a 5-element list.  Version 0.2.9 revision 14, 32-bit would be (0,2,9,14,32).
 <P><SPAN class="FXN">GetVersionString</SPAN> (format)<BR>
 Returns the version number as a single string.  If format is 0, it's prefixed by "LCD Miscellany".  If it's 1, it doesn' include "LCD Miscellany", and if it's 2, it excludes the executable type (32/64-bits).
-<P><SPAN class="FXN">GetSharedMemory</SPAN> (name)<BR>
-Gets the shared memory buffer with the specified name and returns it as a string (in binary format).  Length is generally a multiple of 4096, regardless of how many meaningful bytes are in the string, so don't rely on this being the exact size of the data structure you're reading.
 <P><SPAN class="FXN">GetFrapsData</SPAN> ()<BR>
 Returns a dictionary containing data from Fraps.  Fraps must be running to get any data.  The entries in the dictionary are "name", "fps", "frame", "lastframe", "width", "height", "renderer", and "unknown2".  "name" is the executable name for the game, without the extension.  fps is the frames per second.  "frame" is a frame count of some sort.  Stopping and restarting the running app doesn't reset this.  "lastframe" is the time, in millisecond, when the last frame was displayed.  I believe the time starts at 0 when the computer boots, but I'm not positive.  "width" and "height" are self-explanatory.  According to <B>linFox</B>, "renderer" is 1 for OpenGL, 2 for DX7, 3 for DX8, 4 for DX9 and 5 for DX10.  "unknown2" I'm unsure of.  When no game is running, the "name" is generally the last game run and all other values (except frame) are 0.  Before Fraps is loaded, null is returned instead of a dictionary, and dictionary ops on it (null) will just return null.
 
@@ -466,7 +465,7 @@ Gets your local ip/host name.  If you have multiple NICS, it will only display o
 <SPAN class="FXN">GetRemoteDNS</SPAN> ()<BR>
 Gets your remote ip/host name.  Your ip is taken from one of a number of sites in the config file ("IP Lookup").  It always starts with a random one and then goes down the list each time it updates (Update times are in the file.  Currently it's once every two hours by default.  4 minutes if the last try didn't get any value, by default).  Http code still could use a bit of work, but it should work fine with most servers.  Code searches for an IPv4 ip and picks the one surrounded by the least garbage.  It's not perfect, by any means, but it works on the few sites I tried it on.  Code is ignorant of HTML, too, so it could even return a value in a tag.
 <P>
-<div><PRE>struct <SPAN class="FXN">SystemState</SPAN> () {
+<div><PRE>struct <SPAN class="CLASS">SystemState</SPAN> () {
     var <SPAN class="CLASS_VAR">%screenSaverOn</SPAN>,    // 1 if screensaver is on, 0 otherwise.
         <SPAN class="CLASS_VAR">%monitorOff</SPAN>;       // 1 is monitor is off, 0 otherwise.  Always 0 on pre-Vista
                            //    OSes, as no easy way to get it, pre-Vista.
@@ -483,7 +482,7 @@ Returns a list of fan speeds of every nVidia's GPU's fan on the system.  GPU's t
 <P><SPAN class="FXN">NvAPI_GPU_GetThermalSettings</SPAN> ()<BR>
 Returns a list containing one list of temperatures for every nVidia physical GPU installed on the system.  GPU order should match NvAPI_GPU_GetTachReading(), with null returned for GPUs that fail to return any information.  Each GPU has between 1 and 3 temperatures, and each temperature is an object of type:
 
-<P><PRE>struct <SPAN class="FXN">NvGPUThermalSettings</SPAN> {
+<P><PRE>struct <SPAN class="CLASS">NvGPUThermalSettings</SPAN> {
     var <SPAN class="CLASS_VAR">%controller</SPAN>;
     var <SPAN class="CLASS_VAR">%defaultMinTemp</SPAN>;
     var <SPAN class="CLASS_VAR">%defaultMaxTemp</SPAN>;
@@ -494,7 +493,7 @@ Returns a list containing one list of temperatures for every nVidia physical GPU
 </P>See nvapi documentation for what values actually mean.  Note that the nVidia documentation often has little to no information content ("The max default temperature value of the thermal sensor in degrees centigrade").
 </div>
 <P>
-<div><PRE>struct <SPAN class="FXN">NvThermalSettings</SPAN> {
+<div><PRE>struct <SPAN class="CLASS">NvThermalSettings</SPAN> {
     var <SPAN class="CLASS_VAR">%coreTemp</SPAN>,    // Core temperature
         <SPAN class="CLASS_VAR">%ambientTemp</SPAN>, // Ambient temperature. Experimentally, returns 0 on my system.
         <SPAN class="CLASS_VAR">%tempLimit</SPAN>;   // Maximum safe temperature (?)
@@ -506,8 +505,51 @@ Returns a list containing one list of temperatures for every nVidia physical GPU
 Note that on x64 systems, you generally only have a 64-bit version of nvcpl.dll installed.  Therefore, this function will generally fail if you use the 32-bit LCDMisc.exe.  Seems to crash on a great number of 32-bit systems, for reasons unknown.
 </div>
 </div>
-<BR>
+<P>
 <div>
+<B>Shared Memory/File Mapping Functions</B><BR>
+<P><SPAN class="FXN">GetSharedMemory</SPAN> (name)<BR>
+Gets the shared memory buffer with the specified name and returns it as a string (in binary format).  Length is generally a multiple of 4096, regardless of how many meaningful bytes are in the string, so don't rely on this being the exact size of the data structure you're reading.
+<P><SPAN class="FXN">OpenFileMapping</SPAN> (name)<BR>
+Opens a handle to a file mapping with the specified name, and return a <SPAN class="CLASS">FileMapping</SPAN> object.  The mapping remains open until all handles to it and objects that point to its data are destroyed.  If a mapping with the specified name does not exist, or any other error occurs, returns null.
+<P>
+<div><PRE>struct <SPAN class="CLASS">FileMapping</SPAN> {
+    function <SPAN class="FXN">MapViewOfFile</SPAN> (offset, length);
+}
+</PRE>
+</P><SPAN class="FXN">MapViewOfFile</SPAN> (offset, length)<BR>
+Attempts to map the specified region of an open file mapping object to local memory, and returns a <SPAN class="CLASS">MutableString</SPAN> object on success.  On failure, returns null.  Note that reading/writing from/to position 0 of the MutableString corresponds to the position at offset of the memory mapped files.
+</div>
+
+<P>
+<div><PRE>struct <SPAN class="CLASS">MutableString</SPAN> {
+    function <SPAN class="FXN">ReadInt</SPAN> (offset, length, unsigned);
+    function <SPAN class="FXN">ReadInts</SPAN> (offset, length, unsigned, count);
+    function <SPAN class="FXN">WriteInt</SPAN> (val, offset, length);
+    function <SPAN class="FXN">LoadImage</SPAN> (offset, length);
+}
+</PRE>
+<P>A <SPAN class="CLASS">MutableString</SPAN> object wraps around a string that can be modified.  Currently, they can only wrap around memory mapped files, but other data sources may be added in the future.  For MutableStrings created from a memory mapped file, the file will remain open until the MutableString is destroyed by falling out of scope.
+
+<P><SPAN class="FXN">ReadInt</SPAN> (offset, length, unsigned)<BR>
+Reads an integer in binary format from the string.  The integer is assumed to be in little-endian format (low-order bytes first).  offset is the 0-based offset of the first byte, and length is the number of bytes.  If length is no greater than 0 or offset is beyond the end of the string or less than 0, null is returned.  If offset+length is beyond the end of the string, length is reduced as needed.  If unsigned is not 0, the value is not sign-extended.  Safely overflows when length is greater than 8.
+
+<P><SPAN class="FXN">ReadInts</SPAN> (offset, length, unsigned, count)<BR>
+Same as above, except it returns a list of count consecutive integers.  It returns 0's (Not nulls) when it runs off the end of the string, and can return partially parsed values from the start/end of the string.
+
+<P><SPAN class="FXN">WriteInt</SPAN> (val, offset, length)<BR>
+Writes the integer val in binary format to the MutableString.  The integer is written in little-endian format (low-order bytes first).  offset is the 0-based offset of where the first byte is written, and length is the number of bytes to write.  If length is greater than 8, the integer is sign-extended as necessary.  offset must be greater than 0 and less than the length of the string, or the function will fail.  If length extends beyond the end of the string, it is reduced as necessary.  Returns 1 if anything is written to the string, and 0 otherwise.
+
+<P><SPAN class="FXN">LoadImage</SPAN> (width, height, bpp, offset, memWidth)<BR>
+Attempts to create a <SPAN class="CLASS">MutableImage</SPAN> from the MutableString.  width and height are the dimensions of the image, in pixels.  bpp must be 8, 24, or 32, and is the number of bits per pixel of the image.  For 32-bit images, byte order is rgba, just as with bitmaps.  8 is grayscale, and 24 is rgb.  offset is the address of the first pixel in the MutableString.  If not given, it's assumed to be 0.  memWidth is the size of each line, in bytes.  If not given or 0, it's assumed to be width*bpp/8.  memWidth allows loading of padded Windows-style bitmaps.  If the image extends beyond the end of the MutableString, the function fails.  Null is returned on failure.
+
+</P>The resulting MutableImage mirrors the state of the MutableString, so a change of the MutableString instantly modifies the image as well, and the MutableString will not be freed until the MutableImage is destroyed.  MutableImages can currently only be used with the DrawImage() and DrawRotatedScaledImage() functions, and they only support the Size() method.  See Image32 docs for information on the Size() method and those drawing functions.
+
+</div>
+
+</div>
+
+<P><div>
 <B>Window functions</B><BR>
 <SPAN class="FXN">GetScriptWindow</SPAN> ()<BR>
 Returns the window handle (HWND) of LCD Miscellany's window.  The window can be used to trigger events.
