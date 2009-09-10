@@ -6,6 +6,7 @@
 #include "sdk/v3.01/lglcd.h"
 #include "stringUtil.h"
 #include <math.h>
+#include <mmintrin.h>
 
 #ifdef X64
 #pragma comment(lib, "sdk\\v3.01\\lgLcd64.lib")
@@ -18,15 +19,40 @@
 Screen *activeScreen = 0;
 Screen *dummyScreen = 0;
 
+// About half the speed of non-MMX version.
+/*
+inline void AlphaColorPixelMMX (Color4 *dst, const Color4 src) {
+	unsigned int alpha = src.a + 1;
+	const __m64 a = {alpha + (alpha << 16) + ((__int64)alpha<<32) + ((__int64)alpha<<48)};
+	const __m64 q = {0};
+	__m64 s = _mm_cvtsi32_si64 (src.val);
+	__m64 d = _mm_cvtsi32_si64 (dst->val);
+	__m64 diff = _mm_sub_pi16(_mm_unpacklo_pi8(s,q), _mm_unpacklo_pi8(d,q));
+	//__m64 big = _mm_unpacklo_pi8(diff, q);
+	__m64 big = diff;
+	__m64 mul = _mm_mullo_pi16(big, a);
+	__m64 sh = _mm_srli_pi16(mul, 8);
+	__m64 pk = _mm_packs_pu16(sh, sh);
+	__m64 res = _mm_add_pi8(pk, d);
+	dst->val = _mm_cvtsi64_si32(res);
+}//*/
+
 inline void AlphaColorPixel (Color4 *dst, const Color4 src) {
+	// May or may not be faster.  Appears faster with the default graphics,
+	// but may be slower when there are a lot of intermediate transparency values.
+	/*if ((src.a-1) >= 0xFE) {
+		int mask = -(src.a == 0);
+		dst->val = src.val + ((dst->val - src.val) & mask);
+		return;
+	}//*/
 	unsigned int alpha = src.a + (unsigned int)(src.a>>7);
 
 	unsigned int evens1 = dst->val   & 0xFF00FF;
 	unsigned int evens2 = src.val    & 0xFF00FF;
-	unsigned int odds1  = dst->val & 0xFF00FF00;
-	unsigned int odds2  = src.val  & 0xFF00FF00;
+	unsigned int odds1  = (dst->val>>8) & 0xFF00FF;
+	unsigned int odds2  = (src.val >>8) & 0xFF00FF;
 	unsigned int evenRes = ((((evens2-evens1)*alpha)>>8) + evens1)& 0xFF00FF;
-	unsigned int oddRes =  (((odds2-odds1)>>8)*alpha + odds1) & 0xFF00FF00;
+	unsigned int oddRes =  ((odds2-odds1)*alpha + (odds1<<8)) & 0xFF00FF00;
 	dst->val = evenRes + oddRes;
 	/*unsigned int res = evenRes + oddRes;
 
@@ -40,17 +66,6 @@ inline void AlphaColorPixel (Color4 *dst, const Color4 src) {
 		dst=dst;
 	}//*/
 }
-
-
-//__declspec(align(16))
-//lgLcdBitmap160x43x1 lcdbmp;
-/*struct {
-#ifndef NOGDI
-	int junk[3];
-#endif
-	lgLcdBitmap160x43x1 lcdbmp;
-} ;
-//*/
 
 void Screen::SetClipRect(RECT *r) {
 	if (r) {
@@ -610,16 +625,53 @@ void Screen::FillRect(RECT &r, Color4 c) {
 			endx += width;
 		}
 	}
+	else if (!c.a) {
+		return;
+	}
 	else {
+		unsigned int alpha = c.a + (unsigned int)(c.a>>7);
+		const __m64 evenMask = {0x00FF00FF00FF00FF};
+		//const __m64 oddMask = {0xFF00FF00FF00FF00};
+
+		unsigned int evens = (c.val&0xFF00FF) * alpha + 0x800080;
+		unsigned int odds = ((c.val>>8)&0xFF00FF) * alpha + 0x800080;
+		const __m64 oddSrc = {odds +((__int64)odds<<32)};
+		const __m64 evenSrc = {evens +((__int64)evens<<32)};
+		alpha = 256-alpha;
+		const __m64 alphaMul = {alpha + (alpha << 16) + ((__int64)alpha<<32) + ((__int64)alpha<<48)};
+		alpha = 256-alpha;
 		while (starty < endy) {
 			int pos = starty;
-			while (pos <= endx) {
-				AlphaColorPixel(&image[pos], c);
-				pos++;
+			Color4 *dst = &image[pos];
+			Color4 *end = &image[endx];
+			if (((int)dst)&4) {
+				AlphaColorPixel(dst, c);
+				dst++;
+			}
+			Color4 *end2 = (Color4*) ((4 + (UINT_PTR)end) & ~0x4);
+			while (dst < end2) {
+				// About twice as fast for large rectangles as non-MMX version.
+				__m64 evenDst = _mm_and_si64(evenMask, *(__m64*)dst);
+				__m64 oddDst = _mm_srli_pi16(*(__m64*)dst, 8);
+				__m64 evenMul = _mm_mullo_pi16(evenDst, alphaMul);
+				__m64 oddMul = _mm_mullo_pi16(oddDst, alphaMul);
+				__m64 evenMulAdd = _mm_add_pi16(evenMul, evenSrc);
+				__m64 oddMulAdd = _mm_add_pi16(oddMul, oddSrc);
+				__m64 evenMulAdd2 = _mm_srli_pi16(evenMulAdd, 8);
+				__m64 oddMulAdd2 = _mm_andnot_si64(evenMask, oddMulAdd);
+				*(__m64*)dst = _mm_or_si64(evenMulAdd2, oddMulAdd2);
+				dst += 2;
+
+				/*AlphaColorPixel(dst, c);
+				dst++;//*/
+			}
+			if (dst <= end) {
+				AlphaColorPixel(dst, c);
 			}
 			starty += width;
 			endx += width;
 		}
+		_mm_empty();
 	}
 }
 
@@ -1161,9 +1213,12 @@ void Screen::DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int
 		else if (img->spp == 4) {
 			while (y <= endy) {
 				Color4* src = (Color4*) (img->pixels + srcy);
-				for (int x = r.left; x<=r.right; x++) {
-					AlphaColorPixel(&image[x+y], *src);
+				Color4* dst = &image[y + r.left];
+				Color4* end = &image[y + r.right];
+				while (dst <= end) {
+					AlphaColorPixel(dst, *src);
 					src ++;
+					dst ++;
 				}
 				srcy += srcWidth;
 				y += this->width;
