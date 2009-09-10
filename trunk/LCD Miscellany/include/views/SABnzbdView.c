@@ -1,4 +1,4 @@
-// SABnzbdView.c module 0.1.7 (20090419)
+// SABnzbdView.c module 0.1.9 (20090604)
 // 4wd   major.crap@gmail.com
 //
 // For LCDMisc by Dwarg for the Logitech G15
@@ -30,26 +30,38 @@ struct SABnzbdView extends View {
 	%miniFont,
     %displayLocation,
     %subview,
-    %warnings;
+    %warnings,
+    %tempurl,
+    %counters,
+    %lastPingTime,
+    %ip;
+
+	function Ping() {
+	  %ip = IPAddrWait(%tempurl)[0].GetString();
+	}
 
 	function SABnzbdView ($_url, $_location, $_sub) {
+		%lastPingTime = GetTickCount()-100000;
+		%counters = GetCounterManager();
 		%noDrawOnCounterUpdate = 0;
 
 		%lastUpdate = Time()-60*60-5;
+		%toolbarImage = LoadImage("Images\SABnzbd.png");
 
 		%miniFont = Font("6px2bus", 6);
-
+		
 		if (!size($_url)) {
 			%url = GetString("URLs", "SABnzbd");
 		}
 		else
 			%url = $_url;
 
-        if (strstr(%url, "apikey", 0, 20)) {
+        if (strstr(%url, "apikey", 0, 0)) {
             %mode = "&";
         }
         else
             %mode = "api?";
+        %tempurl = substring(%url, 7, strstr(%url, ":", 10,0));
 		// Draw on counter updates and after 1.5 second intervals for scrolling.
 		// Means more redraws than are really needed, but scrolling is too fast at 1 second,
 		// too slow at 2 second, and need to update the time display, too.
@@ -104,9 +116,6 @@ struct SABnzbdView extends View {
                             $jobs[$pos]["id"],
                             $jobs[$pos]["mb"]
                            );
-//            WriteLogLn(%joblist[0][1], 1);
-
-
 			$pos++;
           }
 		NeedRedraw();
@@ -163,42 +172,47 @@ struct SABnzbdView extends View {
 	}
 
 	function Draw() {
-		ClearScreen();
-		UseFont(0);
-    ClearRect(0,0,159,6);
-    DisplayTextRight(FormatTime("HH:NN:SS"), 57);
-		DrawLine(75, 0, 75, 42);
-		DrawLine(0, 7, 75, 7);
-    if (Time()-%lastUpdate >= 30) {
-			%lastUpdate = Time();
-			SpawnThread("Update", $this);
-		}
-		if (IsNull(%dlspeed)) {
+	  $t = GetTickCount();
+	  if ($t - %lastPingTime >= 5000) {
+		%lastPingTime = $t;
+		SpawnThread("Ping", $this);
+      }
+      ClearScreen();
       UseFont(0);
-      ClearRect(35, 22, 125, 30);
-      DrawLine(35, 22, 125, 22);
-      DrawLine(35, 30, 125, 30);
-      DrawLine(35, 22, 35, 30);
-      DrawLine(125, 22, 125, 30);
-      DisplayText("No SABnzbd data", 38, 23);
-		}
-		else {
-      UseFont(%miniFont);
-      DisplayText("IP:" +s substring(%url, 7, strstr(%url, ":", 8)), 2, 9);
-      DisplayTextRight("[" +s %numdl +s "]", 74, 15);
-      DisplayText("SPD:" +s %dlspeed +s "K", 2, 15);
-      DisplayText("REM:" +s %leftmb +s "/" +s %totalmb +s " GB", 2, 21);
-      DisplayTextRight("[" +s %warnings +s "]", 74, 27);
-  	  if (%dspace1 == %dspace2) {
-        DisplayText("SPC:" +s %dspace1 +s " GB", 2, 27);
+      ClearRect(0,0,159,6);
+      DisplayTextRight(FormatTime("HH:NN:SS"), 57);
+      DrawLine(75, 0, 75, 42);
+      DrawLine(0, 7, 75, 7);
+      if (Time()-%lastUpdate >= 30) {
+        %lastUpdate = Time();
+		SpawnThread("Update", $this);
+      }
+      if (IsNull(%dlspeed)) {
+        UseFont(0);
+        ClearRect(35, 22, 125, 30);
+        DrawLine(35, 22, 125, 22);
+        DrawLine(35, 30, 125, 30);
+        DrawLine(35, 22, 35, 30);
+        DrawLine(125, 22, 125, 30);
+        DisplayText("No SABnzbd data", 38, 23);
       }
       else {
-        DisplayText("COMP:" +s %dspace1 +s " GB", 2, 27);
-        DisplayText("DNLD:" +s %dspace2 +s " GB", 2, 33);
-      }
+        UseFont(%miniFont);
+        DisplayText("IP:" +s %ip, 2, 9);
+        DisplayTextRight("[" +s %numdl +s "]", 74, 15);
+        DisplayText("SPD:" +s %dlspeed +s "K", 2, 15);
+        DisplayText("REM:" +s %leftmb +s "/" +s %totalmb +s " GB", 2, 21);
+        DisplayTextRight("[" +s %warnings +s "]", 74, 27);
+  	    if (%dspace1 == %dspace2) {
+          DisplayText("SPC:" +s %dspace1 +s " GB", 2, 27);
+        }
+        else {
+          DisplayText("COMP:" +s %dspace1 +s " GB", 2, 27);
+          DisplayText("DNLD:" +s %dspace2 +s " GB", 2, 33);
+        }
 
-      $height = 2;
-      $jobleft = 0;
+        $height = 2;
+        $jobleft = 0;
 		for (;$i<3;$i++) {
 		  $job = %joblist[$i];
 		  $height += ((7 * $i) - (7 * ($i == 2)));
