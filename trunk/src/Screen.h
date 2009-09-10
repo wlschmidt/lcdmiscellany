@@ -144,17 +144,6 @@ public:
 		image[index].a = (unsigned char)((256 * (unsigned int)image[index].a + (colora-image[index].a) * alpha) >> 8);
 	}
 
-	inline void AlphaColorPixel (int index, Color4 color) {
-		unsigned int alpha = color.a + (unsigned int)(color.a>>7);
-
-		image[index].r = (unsigned char)((256 * (unsigned int)image[index].r + (color.r-image[index].r) * alpha) >> 8);
-		image[index].g = (unsigned char)((256 * (unsigned int)image[index].g + (color.g-image[index].g) * alpha) >> 8);
-		image[index].b = (unsigned char)((256 * (unsigned int)image[index].b + (color.b-image[index].b) * alpha) >> 8);
-
-		// ??
-		image[index].a = (unsigned char)((256 * (unsigned int)image[index].a + (color.r-image[index].a) * alpha) >> 8);
-	}
-
 	void ColorPixel(unsigned int x, unsigned int y, Color4 color);
 	void TogglePixel(unsigned int x, unsigned int y);
 

@@ -18,6 +18,30 @@
 Screen *activeScreen = 0;
 Screen *dummyScreen = 0;
 
+inline void AlphaColorPixel (Color4 *dst, const Color4 src) {
+	unsigned int alpha = src.a + (unsigned int)(src.a>>7);
+
+	unsigned int evens1 = dst->val   & 0xFF00FF;
+	unsigned int evens2 = src.val    & 0xFF00FF;
+	unsigned int odds1  = dst->val & 0xFF00FF00;
+	unsigned int odds2  = src.val  & 0xFF00FF00;
+	unsigned int evenRes = ((((evens2-evens1)*alpha)>>8) + evens1)& 0xFF00FF;
+	unsigned int oddRes =  (((odds2-odds1)>>8)*alpha + odds1) & 0xFF00FF00;
+	dst->val = evenRes + oddRes;
+	/*unsigned int res = evenRes + oddRes;
+
+	dst->r = (unsigned char)((256 * (unsigned int)dst->r + (src.r-dst->r) * alpha) >> 8);
+	dst->g = (unsigned char)((256 * (unsigned int)dst->g + (src.g-dst->g) * alpha) >> 8);
+	dst->b = (unsigned char)((256 * (unsigned int)dst->b + (src.b-dst->b) * alpha) >> 8);
+
+	// ??
+	dst->a = (unsigned char)((256 * (unsigned int)dst->a + (src.a-dst->a) * alpha) >> 8);
+	if (dst->val != res) {
+		dst=dst;
+	}//*/
+}
+
+
 //__declspec(align(16))
 //lgLcdBitmap160x43x1 lcdbmp;
 /*struct {
@@ -419,7 +443,7 @@ __forceinline void Screen::ColorPixelFast(unsigned int x, unsigned int y, Color4
 
 __forceinline void Screen::AlphaColorPixelFast(unsigned int x, unsigned int y, Color4 color) {
 	if (x < (unsigned int)width && y < (unsigned int)pixelCount) {
-		AlphaColorPixel(y+x, color);
+		AlphaColorPixel(&image[y+x], color);
 	}
 }
 
@@ -590,7 +614,7 @@ void Screen::FillRect(RECT &r, Color4 c) {
 		while (starty < endy) {
 			int pos = starty;
 			while (pos <= endx) {
-				AlphaColorPixel(pos, c);
+				AlphaColorPixel(&image[pos], c);
 				pos++;
 			}
 			starty += width;
@@ -997,7 +1021,7 @@ void Screen::DisplayTransformedImageTriangle(DoublePoint *dst, DoublePoint *src,
 		for (int x=x0; x!=x1; x+=dx, sx += dsx, sy += dsy) {
 			Color4 c;
 			img->GetPixelBilinear(&c, (float)sx, (float)sy);
-			AlphaColorPixel(width * y + x, c);
+			AlphaColorPixel(&image[width * y + x], c);
 		}
 	}
 
@@ -1049,7 +1073,7 @@ void Screen::DisplayTransformedImageTriangle(DoublePoint *dst, DoublePoint *src,
 			//}
 			Color4 c;
 			img->GetPixelBilinear(&c, (float)sx, (float)sy);
-			AlphaColorPixel(width * y + x, c);
+			AlphaColorPixel(&image[width * y + x], c);
 		}
 	}
 }
@@ -1100,6 +1124,12 @@ void Screen::DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int
 
 	ClipRect(r);
 
+	for (int i=0; i<256; i++) {
+		Color4 s = {i, i+1, i+2, i+3};
+		Color4 d = {i+128, i+128+1, i+128+2, i+128+3};
+		AlphaColorPixel(&d, s);
+	}
+
 	if (((r.right - r.left) | (r.bottom - r.top)) < 0) return;
 	{
 		int srcWidth = (img->width * img->spp+3)&~3;
@@ -1132,7 +1162,7 @@ void Screen::DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int
 			while (y <= endy) {
 				Color4* src = (Color4*) (img->pixels + srcy);
 				for (int x = r.left; x<=r.right; x++) {
-					AlphaColorPixel(x+y, *src);
+					AlphaColorPixel(&image[x+y], *src);
 					src ++;
 				}
 				srcy += srcWidth;
@@ -1203,7 +1233,7 @@ void Screen::DisplayImage(int dstx, int dsty, int srcx, int srcy, int width, int
 				for (int x = r.left; x<=r.right; x++) {
 					int srcx = x - dx;
 					if ((img->data[srcy + srcx/32] >> (srcx&31))&1) {
-						AlphaColorPixel(x+y, drawColor);
+						AlphaColorPixel(&image[x+y], drawColor);
 					}
 					//if (img->data[srcy + srcx/32] & (1 << (srcx&31)))
 					//	SetPixelFast(x, y);
