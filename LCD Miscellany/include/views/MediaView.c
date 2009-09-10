@@ -63,7 +63,7 @@ function DrawWave($waveform, $left, $top, $right, $bottom) {
 
 struct MediaView extends View {
 	// %selected is a control index, %player is a player index.
-	var %font, %titleFont, %bigFont, %bigTitleFont, %players, %player, %selected;
+	var %players, %player, %selected;
 	var %titleScroller, %artistScroller;
 	var %bigTitleScroller, %bigArtistScroller;
 	var %scrollTimer;
@@ -73,14 +73,15 @@ struct MediaView extends View {
 	function MediaView () {
 		%specCache = list();
 		%players = list();
+
+		%InitFonts();
 		%InitImages();
+
+		%fontIds = list(@%fontIds, @RegisterThemeFontPair(type($this) +s "Title"));
+
 		for ($i=0; $i<size($); $i++) {
 			if (!IsNull($[$i])) %players[size(%players)] = $[$i];
 		}
-		%bigFont = Font("Arial", 20,0,0,0,CLEARTYPE_QUALITY);
-		%bigTitleFont = Font("Arial", 26,0,0,0,CLEARTYPE_QUALITY);
-		%titleFont = Font("Arial", 13);
-		%font = Font("6px2bus", 6);
 		%selected = -1;
 
 		%noDrawOnCounterUpdate = 1;
@@ -254,7 +255,9 @@ struct MediaView extends View {
 			$pos+=13;
 		}
 
-		UseFont(%font);
+		$font = GetThemeFont(%fontIds[0]);
+		$titleFont = GetThemeFont(%fontIds[2]);
+
 		DisplayText("Volume:", 1, 28);
 		DisplayText("Balance:", 69, 28);
 
@@ -263,17 +266,17 @@ struct MediaView extends View {
 			if (size($p.artist)) {
 				%artistScroller.DisplayText(1, 0);
 
-				UseFont(%titleFont);
+				UseFont($titleFont);
 				%titleScroller.SetText($p.title);
 				%titleScroller.DisplayText(1, 6);
 			}
 			else {
-				UseFont(%titleFont);
+				UseFont($titleFont);
 				%titleScroller.SetText($p.title);
 				%titleScroller.DisplayText(1, 3);
 
 			}
-			UseFont(%font);
+			UseFont($font);
 
 			ClearRect(119,0,159,20);
 			DisplayText("of", 80, 21);
@@ -350,6 +353,9 @@ struct MediaView extends View {
 	function DrawG19($event, $param, $name, $res) {
 		$p = %players[%player];
 
+		$font = GetThemeFont(%fontIds[1]);
+		$titleFont = GetThemeFont(%fontIds[3]);
+
 		if (!IsNull($p.image)) {
 			$imageRes = $p.image.Size();
 
@@ -362,7 +368,6 @@ struct MediaView extends View {
 				// Align bottom if too tall.
 				$h = $res[1] - $imageRes[1];
 			}
-
 			DrawImage($p.image, ($res[0]-$imageRes[0])/2, $h);
 		}
 		else if (size($p.specHist)) {
@@ -384,7 +389,7 @@ struct MediaView extends View {
 
 
 		ColorRect(0, 86, 319, 87, colorHighlightBg);
-		for (; $i<size(%players); $i++) {
+		for ($i=0; $i<size(%players); $i++) {
 			if (%player == $i) {
 				ColorRect($pos, 88, $pos+17, 103, colorHighlightBg);
 			}
@@ -393,7 +398,7 @@ struct MediaView extends View {
 		}
 		ColorRect(0, 104, 319, 105, colorHighlightBg);
 
-		UseFont(%bigFont);
+		UseFont($font);
 
 		DisplayText("Volume:", 1, 66);
 		DisplayText("Balance:", 120, 66);
@@ -418,17 +423,17 @@ struct MediaView extends View {
 			if (size($p.artist)) {
 				%bigArtistScroller.DisplayText(1, 0);
 
-				UseFont(%bigTitleFont);
+				UseFont($titleFont);
 				%bigTitleScroller.SetText($p.title);
 				%bigTitleScroller.DisplayText(1, 20);
 			}
 			else {
-				UseFont(%bigTitleFont);
+				UseFont($titleFont);
 				%bigTitleScroller.SetText($p.title);
 				%bigTitleScroller.DisplayText(1, 10);
 
 			}
-			UseFont(%bigFont);
+			UseFont($font);
 
 			SetDrawColor(colorHighlightText);
 

@@ -56,6 +56,8 @@ smallFileBrowserFont = 04b03, 8
 smallOverlayFont = 04b03, 8
 smallTextEditorViewFont = 04b03, 8
 
+smallMediaViewFont = 6px2bus, 6
+smallMediaViewTitleFont = Arial, 13
 
 // Icons
 smallTextEditorViewImage = TextEdit.png
@@ -93,6 +95,8 @@ bigFileBrowserFont = Lucida Sans Unicode, 16,0,0,0,5
 bigOverlayFont = Arial, 18,0,0,0,5
 bigTextEditorViewFont = Arial, 18,0,0,0,5
 
+bigMediaViewFont = Arial, 20,0,0,0,5
+bigMediaViewTitleFont = Arial, 26,0,0,0,5
 
 // Icons
 bigTextEditorViewImage = TextEdit32.png
