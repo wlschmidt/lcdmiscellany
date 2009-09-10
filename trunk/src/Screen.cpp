@@ -7,6 +7,7 @@
 #include "stringUtil.h"
 #include <math.h>
 #include <mmintrin.h>
+#include <xmmintrin.h>
 
 #ifdef X64
 #pragma comment(lib, "sdk\\v3.01\\lgLcd64.lib")
@@ -672,6 +673,31 @@ void Screen::FillRect(RECT &r, Color4 c) {
 			endx += width;
 		}
 		_mm_empty();
+	}
+}
+
+void Screen::Clear() {
+	Color4 *pos = image;
+	Color4 *end = image + pixelCount;
+	Color4 *loopEnd = end-4;
+	union {
+		__m128 color;
+		unsigned int junk[4];
+	};
+	junk[0] = junk[1] = junk[2] = junk[3] = bgColor.val;
+	while (((UINT_PTR)pos & 0xF) && pos < end) {
+		*pos = bgColor;
+		pos++;
+	}
+	// Experimentally, one xmm copy per iteration seems to be fastest.
+	// No clue why.
+	while (pos <= loopEnd) {
+		_mm_store_ps((float*)pos, color);
+		pos += 4;
+	}
+	while (pos < end) {
+		*pos = bgColor;
+		pos++;
 	}
 }
 

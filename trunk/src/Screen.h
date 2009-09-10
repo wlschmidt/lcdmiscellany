@@ -93,11 +93,7 @@ public:
 	
 
 
-	inline void Clear() {
-		for (int i=0; i<pixelCount; i++) {
-			image[i] = bgColor;
-		}
-	}
+	void Clear();
 
 	inline void Invert() {
 		for (int i=0; i<pixelCount; i++) {
