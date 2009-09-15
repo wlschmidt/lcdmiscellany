@@ -6,7 +6,7 @@
 #include "sdk/v3.01/lglcd.h"
 #include "stringUtil.h"
 #include <math.h>
-#include <mmintrin.h>
+//#include <mmintrin.h>
 #include <xmmintrin.h>
 
 #ifdef X64
@@ -630,9 +630,8 @@ void Screen::FillRect(RECT &r, Color4 c) {
 		return;
 	}
 	else {
-		unsigned int alpha = c.a + (unsigned int)(c.a>>7);
+		/*unsigned int alpha = c.a + (unsigned int)(c.a>>7);
 		const __m64 evenMask = {0x00FF00FF00FF00FF};
-		//const __m64 oddMask = {0xFF00FF00FF00FF00};
 
 		unsigned int evens = (c.val&0xFF00FF) * alpha + 0x800080;
 		unsigned int odds = ((c.val>>8)&0xFF00FF) * alpha + 0x800080;
@@ -641,6 +640,7 @@ void Screen::FillRect(RECT &r, Color4 c) {
 		alpha = 256-alpha;
 		const __m64 alphaMul = {alpha + (alpha << 16) + ((__int64)alpha<<32) + ((__int64)alpha<<48)};
 		alpha = 256-alpha;
+		//*/
 		while (starty < endy) {
 			int pos = starty;
 			Color4 *dst = &image[pos];
@@ -651,7 +651,9 @@ void Screen::FillRect(RECT &r, Color4 c) {
 			}
 			Color4 *end2 = (Color4*) ((4 + (UINT_PTR)end) & ~0x4);
 			while (dst < end2) {
+				/*
 				// About twice as fast for large rectangles as non-MMX version.
+				// Doesn't like x64.  :(
 				__m64 evenDst = _mm_and_si64(evenMask, *(__m64*)dst);
 				__m64 oddDst = _mm_srli_pi16(*(__m64*)dst, 8);
 				__m64 evenMul = _mm_mullo_pi16(evenDst, alphaMul);
@@ -662,8 +664,9 @@ void Screen::FillRect(RECT &r, Color4 c) {
 				__m64 oddMulAdd2 = _mm_andnot_si64(evenMask, oddMulAdd);
 				*(__m64*)dst = _mm_or_si64(evenMulAdd2, oddMulAdd2);
 				dst += 2;
+				//*/
 
-				/*AlphaColorPixel(dst, c);
+				AlphaColorPixel(dst, c);
 				dst++;//*/
 			}
 			if (dst <= end) {
@@ -672,7 +675,7 @@ void Screen::FillRect(RECT &r, Color4 c) {
 			starty += width;
 			endx += width;
 		}
-		_mm_empty();
+		//_mm_empty();
 	}
 }
 
