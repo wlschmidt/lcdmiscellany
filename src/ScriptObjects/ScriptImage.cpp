@@ -244,7 +244,7 @@ void DrawRotatedScaledImage(ScriptValue &s, ScriptValue* args) {
 			src.p[3].y = img->height-1;
 
 			double rx = scaleX * img->width/2.0;
-			double ry = scaleY * img->width/2.0;
+			double ry = scaleY * img->height/2.0;
 
 			double cx = x + rx;
 			double cy = y + ry;
