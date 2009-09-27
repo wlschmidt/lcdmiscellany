@@ -287,6 +287,15 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 	unsigned int xStart, dx, xEnd,
 		yStart, dy, yEnd;
 	unsigned int width;
+	{
+		if (image->spp == 4)
+		for (int y=0; y<image->height; y++) {
+			for (int x=0; x<image->width; x++) {
+				int base = y*image->memWidth + x*image->spp;
+				image->pixels[base+3] = 0;
+			}
+		}
+	}
 	for (i=0; i<1+head.interlace*6; i++) {
 		unsigned int lineLength;
 		if (head.interlace==0) {
@@ -358,6 +367,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 		}
 		lineLength = (1+(bitsPerPixel*width+7)/8);
 		int q = -1;
+		int outsppdx = outspp * dx;
 
 		for (y=yStart; y<yEnd; y+=dy) {
 			if (pos+lineLength>uncompressedBytes) {
@@ -446,7 +456,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 					for (x=xStart; x<xEnd; x+=dx) {
 						pixels[0] = pixels[1] = pixels[2] = uncompressed[pos];
 						pixels[3] = 255;
-						pixels += outspp;
+						pixels += outsppdx;
 						pos+=step;
 					}
 				}
@@ -456,7 +466,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 						unsigned char color = (uncompressed[pos]>>offset) & mask;
 						pixels[0] = pixels[1] = pixels[2] = (unsigned char) (color * scale);
 						pixels[3] = 255;
-						pixels += outspp;
+						pixels += outsppdx;
 						offset -= head.depth;
 						if (offset<0) {
 							offset = 8 - head.depth;
@@ -477,14 +487,14 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 					if (dx==1) {
 						while (c<e) {
 							((unsigned int*)c)[0] = ((unsigned int*)&uncompressed[pos])[0]|0xFF000000;
-							c+=outspp;
+							c+=outsppdx;
 							pos+=3;
 						}
 					}
 					else {
 						for (; c<e; c+=dx) {
 							((unsigned int*)c)[0] = ((unsigned int*)&uncompressed[pos])[0]|0xFF000000;
-							c+=outspp;
+							c+=outsppdx;
 							pos+=3;
 						}
 					}
@@ -498,7 +508,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 						pixels[2] = uncompressed[pos];
 						pos+=step;
 						pixels[3] = 255;
-						pixels+=outspp;
+						pixels+=outsppdx;
 					}
 				}
 			}
@@ -508,7 +518,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 					unsigned char color = (uncompressed[pos]>>offset) & mask;
 					if (color>numPalette) color = 0;
 					((Color4*)pixels)[0] = palette[color];
-					pixels+=outspp;
+					pixels+=outsppdx;
 					offset-=head.depth;
 					if (offset <= 0) {
 						offset = 8 - head.depth;
@@ -523,7 +533,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 					pixels[0] = pixels[1] = pixels[2] = uncompressed[pos];
 					pos+=step;
 					pixels[3] = uncompressed[pos];
-					pixels += outspp;
+					pixels += outsppdx;
 					pos+=step;
 				}
 			}
@@ -532,7 +542,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 				if (step==1) {
 					for (x=xStart; x<xEnd; x+=dx) {
 						((int*)pixels)[0] = ((int*)&uncompressed[pos])[0];
-						pixels += outspp;
+						pixels += outsppdx;
 						pos+=4;
 					}
 				}
@@ -545,7 +555,7 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 						pixels[2] = uncompressed[pos];
 						pos+=step;
 						pixels[3] = uncompressed[pos];
-						pixels += outspp;
+						pixels += outsppdx;
 						pos+=step;
 					}
 				}
