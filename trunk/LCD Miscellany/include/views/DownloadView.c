@@ -4,6 +4,7 @@
 #import <constants.h>
 #requires <util\Text.c>
 #requires <util\G15.c>
+#requires <util\html.c>
 
 struct DownloadInfo {
 	var %hash,
@@ -35,7 +36,7 @@ struct DownloadInfo {
 #define DOWNLOAD_DOWNLOADING_FORCED 15
 
 struct DownloadView extends View {
-	var %url, %downloads, %sel, %talking, %queuedTalk;
+	var %url, %downloads, %sel, %talking, %queuedTalk, %token, %errorCount;
 	var %pageHeight;
 
 	function DownloadView ($_url) {
@@ -53,102 +54,142 @@ struct DownloadView extends View {
 		%noDrawOnCounterUpdate = 1;
 	}
 
-	function CounterUpdate() {
+	function Update() {
 		if (%talking) {
+			WriteLogLn(1);
 			%queuedTalk = 1;
 			return;
 		}
 		%talking = 1;
 		%queuedTalk = 0;
-		$temp = HttpGetWait(%url +s "?list=1");
-		%talking = 0;
-		if (%queuedTalk) {
-			%queuedTalk = 0;
-			SpawnThread("CounterUpdate", $this);
+		if (!size(%token)) {
+			$temp = HttpGetWait(%url +s "?list=1");
+		}
+		else {
+			$temp = HttpGetWait(%url +s "?token=" +s %token +s "&list=1");
+		}
+
+		if (!size($temp) || !size($json = JSONdecode($temp)) || !IsList($entries = $json["torrents"])) {
+			if (size(%token)) {
+				%token = null;
+			}
+			else {
+				$tokenHtml = HttpGetWait(%url +s "token.html");
+				if (!size($tokenHtml) || !size(%token = StripHTML($tokenHtml))) {
+					%token = null;
+				}
+			}
+			%talking = 0;
+			if (%queuedTalk) {
+				%queuedTalk = 0;
+				SpawnThread("Update", $this);
+			}
+			%errorCount++;
+			if (%errorCount >= 2) {
+				%downloads = null;
+				NeedRedraw();
+			}
+			return;
 		}
 		NeedRedraw();
+		%errorCount = 0;
 		if (IsNull($temp)) {
 			%downloads = null;
 		}
 		else {
 			$pos = 0;
 			%downloads = list();
-			$json = JSONdecode($temp);
-			$entries =	$json["torrents"];
-			if (IsList($entries))
-			while ($pos < size($entries)) {
-				$entry = $entries[$pos];
-				$e = %downloads[$pos] = DownloadInfo();
-				$pos ++;
-				$e.hash     = $entry[0];
-				$e.name     = $entry[2];
-				$e.fileSize = $entry[3];
-				$e.have     = $entry[5];
-				$e.remaining= $entry[18];
-				$e.uploaded = $entry[6];
-				$e.ratio    = $entry[7]/1000.0;
 
-				$e.upstream = $entry[8];
-				$e.downstream = $entry[9];
-				$status = $entry[1];
+			$entries ;
+			if (!IsList($entries)) {
+				%token = null;
+			}
+			else {
+				while ($pos < size($entries)) {
+					$entry = $entries[$pos];
+					$e = %downloads[$pos] = DownloadInfo();
+					$pos ++;
+					$e.hash     = $entry[0];
+					$e.name     = $entry[2];
+					$e.fileSize = $entry[3];
+					$e.have     = $entry[5];
+					$e.remaining= $entry[18];
+					$e.uploaded = $entry[6];
+					$e.ratio    = $entry[7]/1000.0;
 
-				// Basic code from Pleh on utorrent forums.
-				if ($status & 1) {
-					if ($status & 32) {
-						$e.status = DOWNLOAD_PAUSED;
+					$e.upstream = $entry[8];
+					$e.downstream = $entry[9];
+					$status = $entry[1];
+
+					// Basic code from Pleh on utorrent forums.
+					if ($status & 1) {
+						if ($status & 32) {
+							$e.status = DOWNLOAD_PAUSED;
+						}
+						else if ($status & 64) {
+							if ($e.remaining)
+								$e.status = DOWNLOAD_DOWNLOADING;
+							else
+								$e.status = DOWNLOAD_SEEDING;
+						}
+						else {
+							if ($e.remaining)
+								$e.status = DOWNLOAD_DOWNLOADING_FORCED;
+							else
+								$e.status = DOWNLOAD_SEEDING_FORCED;
+						}
 					}
-					else if ($status & 64) {
-						if ($e.remaining)
-							$e.status = DOWNLOAD_DOWNLOADING;
-						else
-							$e.status = DOWNLOAD_SEEDING;
+					else if ($t & 2) {
+						$e.status = DOWNLOAD_CHECKING;
+					}
+					else if ($t & 16) {
+						$e.status = DOWNLOAD_ERROR;
+					}
+					else if ($t & 64) {
+						$e.status = DOWNLOAD_QUEUED;
+					}
+					else if (!$e.remaining) {
+						$e.status = DOWNLOAD_COMPLETE;
 					}
 					else {
-						if ($e.remaining)
-							$e.status = DOWNLOAD_DOWNLOADING_FORCED;
-						else
-							$e.status = DOWNLOAD_SEEDING_FORCED;
+						$e.status = DOWNLOAD_STOPPED;
 					}
-				}
-				else if ($t & 2) {
-					$e.status = DOWNLOAD_CHECKING;
-				}
-				else if ($t & 16) {
-					$e.status = DOWNLOAD_ERROR;
-				}
-				else if ($t & 64) {
-					$e.status = DOWNLOAD_QUEUED;
-				}
-				else if (!$e.remaining) {
-					$e.status = DOWNLOAD_COMPLETE;
-				}
-				else {
-					$e.status = DOWNLOAD_STOPPED;
-				}
 
-				$e.order = $entry[17];
-				if ($e.order < 0) {
-					$e.order = 0xFFFFFFFF - ($e.status|1);
-				}
-			}
-			for ($i = 1; $i < size(%downloads); $i++) {
-				$entry = %downloads[$i];
-				for ($j = $i; $j > 0; $j--) {
-					//if (%downloads[$j-1].status > $entry.status) break;
-					if (//%downloads[$j-1].status == $entry.status &&
-						%downloads[$j-1].order < $entry.order) break;
-					if (%downloads[$j-1].order == $entry.order &&
-						%downloads[$j-1].name <s $entry.name) {
-							break;
+					$e.order = $entry[17];
+					if ($e.order < 0) {
+						$e.order = 0xFFFFFFFF - ($e.status|1);
 					}
-					%downloads[$j] = %downloads[$j-1];
 				}
-				%downloads[$j] = $entry;
+				for ($i = 1; $i < size(%downloads); $i++) {
+					$entry = %downloads[$i];
+					for ($j = $i; $j > 0; $j--) {
+						//if (%downloads[$j-1].status > $entry.status) break;
+						if (//%downloads[$j-1].status == $entry.status &&
+							%downloads[$j-1].order < $entry.order) break;
+						if (%downloads[$j-1].order == $entry.order &&
+							%downloads[$j-1].name <s $entry.name) {
+								break;
+						}
+						%downloads[$j] = %downloads[$j-1];
+					}
+					%downloads[$j] = $entry;
+				}
 			}
+		}
+		%talking = 0;
+		if (%queuedTalk) {
+			%queuedTalk = 0;
+			SpawnThread("Update", $this);
 		}
 	}
 
+	function CounterUpdate() {
+		%Update();
+	}
+
 	function Show() {
+		// Update to blank faster when changing windows.
+		if (%errorCount) %downloads = null;
 		SpawnThread("CounterUpdate", $this);
 	}
 

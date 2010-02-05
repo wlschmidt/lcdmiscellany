@@ -287,15 +287,6 @@ int LoadPNG(ScriptValue &sv, unsigned char *data, int len) {
 	unsigned int xStart, dx, xEnd,
 		yStart, dy, yEnd;
 	unsigned int width;
-	{
-		if (image->spp == 4)
-		for (int y=0; y<image->height; y++) {
-			for (int x=0; x<image->width; x++) {
-				int base = y*image->memWidth + x*image->spp;
-				image->pixels[base+3] = 0;
-			}
-		}
-	}
 	for (i=0; i<1+head.interlace*6; i++) {
 		unsigned int lineLength;
 		if (head.interlace==0) {

@@ -54,7 +54,7 @@ inline void AlphaColorPixel (Color4 *dst, const Color4 src) {
 	unsigned int odds2  = (src.val >>8) & 0xFF00FF;
 	unsigned int evenRes = ((((evens2-evens1)*alpha)>>8) + evens1)& 0xFF00FF;
 	unsigned int oddRes =  ((odds2-odds1)*alpha + (odds1<<8)) & 0xFF00FF00;
-	dst->val = evenRes + oddRes;
+	dst->val = evenRes | oddRes;
 	/*unsigned int res = evenRes + oddRes;
 
 	dst->r = (unsigned char)((256 * (unsigned int)dst->r + (src.r-dst->r) * alpha) >> 8);
@@ -107,7 +107,7 @@ Screen::Screen(int width, int height, int bpp) {
 	bmi.bmiHeader.biHeight = -height-1;
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 32;
-	bmi.bmiHeader.biCompression = BI_RGB; 
+	bmi.bmiHeader.biCompression = BI_RGB;
 	bmi.bmiHeader.biSizeImage = 0;
 	bmi.bmiHeader.biXPelsPerMeter = 0;
 	bmi.bmiHeader.biYPelsPerMeter = 0;
@@ -137,7 +137,7 @@ Screen::~Screen() {
 	activeNewFont->Release();
 }
 
-//odbc32.lib odbccp32.lib 
+//odbc32.lib odbccp32.lib
 #ifndef NOGDI
 #include <stdio.h>
 #endif
@@ -271,10 +271,10 @@ int Screen::InitFont() {
 					if (h < font.chars[i].top)
 						font.chars[i].top = h;
 				}
-				font.img->data[row+j] |= 
+				font.img->data[row+j] |=
 					(bmp.data[h*(160/32) + j] << (font.chars[i].start & 31));
 				if (font.chars[i].start & 31)
-					font.img->data[row+j+1] |= 
+					font.img->data[row+j+1] |=
 						(bmp.data[h*(160/32) + j] >> (32-(font.chars[i].start & 31)));
 			}
 		}
