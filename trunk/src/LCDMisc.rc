@@ -76,8 +76,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,4,3,2
- PRODUCTVERSION 0,4,3,2
+ FILEVERSION 0,4,6,0
+ PRODUCTVERSION 0,4,6,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -94,12 +94,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Goat Hats, Inc."
             VALUE "FileDescription", "LCD Miscellany"
-            VALUE "FileVersion", "0, 4, 3, 2"
+            VALUE "FileVersion", "0, 4, 6, 0"
             VALUE "InternalName", "LCD Miscellany"
             VALUE "LegalCopyright", "Copyright (C) 2008"
             VALUE "OriginalFilename", "LCDMisc.exe"
             VALUE "ProductName", "LCD Miscellany"
-            VALUE "ProductVersion", "0, 4, 3, 2"
+            VALUE "ProductVersion", "0, 4, 6, 0"
         END
     END
     BLOCK "VarFileInfo"
