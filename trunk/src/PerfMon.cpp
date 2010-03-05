@@ -656,276 +656,274 @@ void __fastcall PerfMon::Update(int bandwidth) {
 		PERF_DATA_BLOCK *header = (PERF_DATA_BLOCK *) data;
 		if (w != ERROR_SUCCESS || dataSize < sizeof(PERF_DATA_BLOCK) ||
 			header->HeaderLength < 0 || header->HeaderLength > dataSize) {
-				free(data);
 				lastDataSize = 0;
-				// ??
-				return;
 		}
+		else {
+			lastDataSize = dataSize;
 
-		lastDataSize = dataSize;
+			int pos = header->HeaderLength;
 
-		int pos = header->HeaderLength;
-
-		for (unsigned int k=0; k<header->NumObjectTypes; k++) {
-			PERF_OBJECT_TYPE *type = (PERF_OBJECT_TYPE*) (data+pos);
-			//if (pos + sizeof(PERF_OBJECT_TYPE) > dataSize ||
-			//	((pos + type->TotalByteLength > dataSize) |
-			//	 (type->HeaderLength < sizeof(PERF_OBJECT_TYPE)) |
-			//	 (type->DefinitionLength < type->HeaderLength) |
-			//	 (type->DefinitionLength > type->TotalByteLength))) break;
+			for (unsigned int k=0; k<header->NumObjectTypes; k++) {
+				PERF_OBJECT_TYPE *type = (PERF_OBJECT_TYPE*) (data+pos);
+				//if (pos + sizeof(PERF_OBJECT_TYPE) > dataSize ||
+				//	((pos + type->TotalByteLength > dataSize) |
+				//	 (type->HeaderLength < sizeof(PERF_OBJECT_TYPE)) |
+				//	 (type->DefinitionLength < type->HeaderLength) |
+				//	 (type->DefinitionLength > type->TotalByteLength))) break;
 
 
-			if (type->NumInstances) {
-				for (i=0; i<numCounters; i++) {
-					if (!counters[i].normalUpdate) continue;
-					PERF_COUNTER_DEFINITION* counter = 0;
-					if (counters[i].objectType.id == type->ObjectNameTitleIndex) {
-						int pos2 = pos + type->HeaderLength;
-						for (unsigned int j = 0; j <type->NumCounters; j++) {
-							PERF_COUNTER_DEFINITION* def = (PERF_COUNTER_DEFINITION*) &data[pos2];
-							//if (pos2 + sizeof(PERF_COUNTER_DEFINITION) > pos + type->TotalByteLength ||
-							//	pos2 + def->ByteLength > pos + type->TotalByteLength ||
-							//	def->ByteLength < 0 ||
-							//	def->CounterOffset < 0 || def->CounterSize < 0)
-							//	break;
-							if (def->CounterNameTitleIndex == counters[i].counter.id) {
-								counter = def;
-								break;
-							}
-							pos2 += def->ByteLength;
-						}
-					}
-					if (counter) {
-						__int64 perfCounter;
-						int counterType = counter->CounterType;
-						int size = counterType&0x300;
-						int dataType = counterType&0xC00;
-						int dataFormat = counterType&0xF0000;
-						int timerType =  counterType&0x300000;
-						int extraCalc =  counterType&0x2C00000;
-						int display =  counterType&0x70000000;
-						__int64 freq = 1;
-
-						//if (dataFormat == PERF_COUNTER_RATE) {
-							if (timerType == PERF_TIMER_TICK) {
-								perfCounter = *(__int64*)&header->PerfTime;
-								freq = *(__int64*)&header->PerfFreq;
-							}
-							else if (timerType == PERF_OBJECT_TIMER) {
-								perfCounter = *(__int64*)&type->PerfTime;
-								freq = *(__int64*)&type->PerfFreq;
-							}
-							else /*if (timerType == PERF_TIMER_100NS)//*/ {
-								perfCounter = *(__int64*)&header->PerfTime100nSec;
-							}
-							int t1 = PERF_COUNTER_100NS_QUEUELEN_TYPE;
-							t1=t1;
-						//}
-
-						/*if (counter->CounterType == PERF_100NSEC_TIMER ||
-							counter->CounterType == PERF_100NSEC_TIMER_INV) {
-							perfCounter = *(__int64*)&header->PerfTime100nSec;
-						}//*/
-						int c=type->NumInstances;
-						int pos2 = pos + type->DefinitionLength;
-						while (c) {
-							PERF_INSTANCE_DEFINITION *inst = 0;
-							char *name = 0;
-							if (type->NumInstances != PERF_NO_INSTANCES) {
-								inst = (PERF_INSTANCE_DEFINITION *) &data[pos2];
-								/*
-								if (pos2 + sizeof(PERF_INSTANCE_DEFINITION) > dataSize ||
-									inst->ByteLength < 0 || pos2 + inst->ByteLength > dataSize ||
-									(inst->NameLength &&
-									 (inst->NameOffset < 0 || inst->NameOffset < 0 ||
-									  inst->ByteLength < inst->NameOffset + inst->NameLength)))
+				if (type->NumInstances) {
+					for (i=0; i<numCounters; i++) {
+						if (!counters[i].normalUpdate) continue;
+						PERF_COUNTER_DEFINITION* counter = 0;
+						if (counters[i].objectType.id == type->ObjectNameTitleIndex) {
+							int pos2 = pos + type->HeaderLength;
+							for (unsigned int j = 0; j <type->NumCounters; j++) {
+								PERF_COUNTER_DEFINITION* def = (PERF_COUNTER_DEFINITION*) &data[pos2];
+								//if (pos2 + sizeof(PERF_COUNTER_DEFINITION) > pos + type->TotalByteLength ||
+								//	pos2 + def->ByteLength > pos + type->TotalByteLength ||
+								//	def->ByteLength < 0 ||
+								//	def->CounterOffset < 0 || def->CounterSize < 0)
+								//	break;
+								if (def->CounterNameTitleIndex == counters[i].counter.id) {
+									counter = def;
 									break;
-									//*/
-								wchar_t * name2;
-								if (inst->NameLength > 2 && ((wchar_t*)&data[pos2 + inst->NameOffset])[0]) {
-									name2 = (wchar_t*)&data[pos2 + inst->NameOffset];
-									name2[inst->NameLength/2-1] = 0;
+								}
+								pos2 += def->ByteLength;
+							}
+						}
+						if (counter) {
+							__int64 perfCounter;
+							int counterType = counter->CounterType;
+							int size = counterType&0x300;
+							int dataType = counterType&0xC00;
+							int dataFormat = counterType&0xF0000;
+							int timerType =  counterType&0x300000;
+							int extraCalc =  counterType&0x2C00000;
+							int display =  counterType&0x70000000;
+							__int64 freq = 1;
+
+							//if (dataFormat == PERF_COUNTER_RATE) {
+								if (timerType == PERF_TIMER_TICK) {
+									perfCounter = *(__int64*)&header->PerfTime;
+									freq = *(__int64*)&header->PerfFreq;
+								}
+								else if (timerType == PERF_OBJECT_TIMER) {
+									perfCounter = *(__int64*)&type->PerfTime;
+									freq = *(__int64*)&type->PerfFreq;
+								}
+								else /*if (timerType == PERF_TIMER_100NS)//*/ {
+									perfCounter = *(__int64*)&header->PerfTime100nSec;
+								}
+								int t1 = PERF_COUNTER_100NS_QUEUELEN_TYPE;
+								t1=t1;
+							//}
+
+							/*if (counter->CounterType == PERF_100NSEC_TIMER ||
+								counter->CounterType == PERF_100NSEC_TIMER_INV) {
+								perfCounter = *(__int64*)&header->PerfTime100nSec;
+							}//*/
+							int c=type->NumInstances;
+							int pos2 = pos + type->DefinitionLength;
+							while (c) {
+								PERF_INSTANCE_DEFINITION *inst = 0;
+								char *name = 0;
+								if (type->NumInstances != PERF_NO_INSTANCES) {
+									inst = (PERF_INSTANCE_DEFINITION *) &data[pos2];
 									/*
-									//if (type->CodePage == 0) {
-									if (name[1] == 0) {
-										name [inst->NameLength-2] = 0;
-										int j = -1;
-										do {
-											j++;
-											if (((wchar_t*)name)[j] > 127) {
-												name[j] = '?';
+									if (pos2 + sizeof(PERF_INSTANCE_DEFINITION) > dataSize ||
+										inst->ByteLength < 0 || pos2 + inst->ByteLength > dataSize ||
+										(inst->NameLength &&
+										 (inst->NameOffset < 0 || inst->NameOffset < 0 ||
+										  inst->ByteLength < inst->NameOffset + inst->NameLength)))
+										break;
+										//*/
+									wchar_t * name2;
+									if (inst->NameLength > 2 && ((wchar_t*)&data[pos2 + inst->NameOffset])[0]) {
+										name2 = (wchar_t*)&data[pos2 + inst->NameOffset];
+										name2[inst->NameLength/2-1] = 0;
+										/*
+										//if (type->CodePage == 0) {
+										if (name[1] == 0) {
+											name [inst->NameLength-2] = 0;
+											int j = -1;
+											do {
+												j++;
+												if (((wchar_t*)name)[j] > 127) {
+													name[j] = '?';
+												}
+												else {
+													name[j] = (char) ((wchar_t*)name)[j];
+												}
 											}
-											else {
-												name[j] = (char) ((wchar_t*)name)[j];
-											}
-										}
-										while (((wchar_t*)name)[j]);
-									}//*/
-									name = (char*)UTF16toUTF8Alloc(name2);
+											while (((wchar_t*)name)[j]);
+										}//*/
+										name = (char*)UTF16toUTF8Alloc(name2);
+									}
+									else {
+										name = "";
+									}
+									if (!((name[0] >= '0' && name[0] <= '9') ||
+										  (name[0] >= 'a' && name[0] <= 'z') ||
+										  (name[0] >= 'A' && name[0] <= 'Z') ||
+										  name[0] == '_')) {
+											  name=name;
+									}
+
+									pos2 += inst->ByteLength;
 								}
 								else {
 									name = "";
 								}
-								if (!((name[0] >= '0' && name[0] <= '9') ||
-									  (name[0] >= 'a' && name[0] <= 'z') ||
-									  (name[0] >= 'A' && name[0] <= 'Z') ||
-									  name[0] == '_')) {
-										  name=name;
-								}
 
-								pos2 += inst->ByteLength;
-							}
-							else {
-								name = "";
-							}
+								PERF_COUNTER_BLOCK * block = (PERF_COUNTER_BLOCK *) &data[pos2];
+								/*
+								if (pos2 + sizeof(PERF_COUNTER_BLOCK) > dataSize ||
+									block->ByteLength < 0 || pos2 + block->ByteLength > dataSize ||
+									block->ByteLength < counter->CounterOffset + counter->CounterSize)
+									break;
+									//*/
 
-							PERF_COUNTER_BLOCK * block = (PERF_COUNTER_BLOCK *) &data[pos2];
-							/*
-							if (pos2 + sizeof(PERF_COUNTER_BLOCK) > dataSize ||
-								block->ByteLength < 0 || pos2 + block->ByteLength > dataSize ||
-								block->ByteLength < counter->CounterOffset + counter->CounterSize)
-								break;
-								//*/
-
-							if ((counters[i].object->len == 1 && counters[i].object->value[0] == '*') ||
-								stricmp((char*)counters[i].object->value, name) == 0) {
-								if (counter->CounterOffset + counter->CounterSize <= block->ByteLength) {
-									__int64 value;
-									int happy = 0;
-									if (counter->CounterSize == 4) {
-										value = ((int*)&data[pos2 + counter->CounterOffset])[0];
-										happy = 1;
-									}
-									else if (counter->CounterSize == 8) {
-										value = ((__int64*)&data[pos2 + counter->CounterOffset])[0];
-										happy = 1;
-									}
-									if (happy) {
-										Value *v = counters[i].FindOldValue(name);
-										if (!v) {
-											v = counters[i].AddValue(name, value);
-											if (!v) happy = 0;
+								if ((counters[i].object->len == 1 && counters[i].object->value[0] == '*') ||
+									stricmp((char*)counters[i].object->value, name) == 0) {
+									if (counter->CounterOffset + counter->CounterSize <= block->ByteLength) {
+										__int64 value;
+										int happy = 0;
+										if (counter->CounterSize == 4) {
+											value = ((int*)&data[pos2 + counter->CounterOffset])[0];
+											happy = 1;
 										}
-										else {
-											v->updated = 1;
-											happy = 2;
+										else if (counter->CounterSize == 8) {
+											value = ((__int64*)&data[pos2 + counter->CounterOffset])[0];
+											happy = 1;
 										}
 										if (happy) {
-											__int64 denom = 0;
-											PERF_COUNTER_DEFINITION* counter2 = 0;
-											double d = v->doubleValue;
-											if (dataType == PERF_TYPE_COUNTER &&
-												dataFormat == PERF_COUNTER_FRACTION) {
-												counter2 = (PERF_COUNTER_DEFINITION*)&((char*)counter)[counter->ByteLength];
-												if ((counter2->CounterType & 0x00000C00) == 0x00000400 &&
-													(counter2->CounterType & 0x00070000) == 0x00030000) {
-													if ((counter2->CounterType & 0x300) == 0) {
-														denom = *(int*)&((char*)block)[counter2->CounterOffset];
+											Value *v = counters[i].FindOldValue(name);
+											if (!v) {
+												v = counters[i].AddValue(name, value);
+												if (!v) happy = 0;
+											}
+											else {
+												v->updated = 1;
+												happy = 2;
+											}
+											if (happy) {
+												__int64 denom = 0;
+												PERF_COUNTER_DEFINITION* counter2 = 0;
+												double d = v->doubleValue;
+												if (dataType == PERF_TYPE_COUNTER &&
+													dataFormat == PERF_COUNTER_FRACTION) {
+													counter2 = (PERF_COUNTER_DEFINITION*)&((char*)counter)[counter->ByteLength];
+													if ((counter2->CounterType & 0x00000C00) == 0x00000400 &&
+														(counter2->CounterType & 0x00070000) == 0x00030000) {
+														if ((counter2->CounterType & 0x300) == 0) {
+															denom = *(int*)&((char*)block)[counter2->CounterOffset];
+														}
+														else if ((counter2->CounterType & 0x300) == 0x100) {
+															denom = *(__int64*)&((char*)block)[counter2->CounterOffset];
+														}
+														else {
+															counter2 = 0;
+														}
+														if (denom == 0) denom = 1;
 													}
-													else if ((counter2->CounterType & 0x300) == 0x100) {
-														denom = *(__int64*)&((char*)block)[counter2->CounterOffset];
-													}
-													else {
+													else
 														counter2 = 0;
-													}
-													if (denom == 0) denom = 1;
 												}
-												else
-													counter2 = 0;
-											}
-											/*if (counter->DefaultScale) {
-												int c = counter->DefaultScale;
-												while (c<0) {
-													c++;
-													value /= 10;
-												}
-												while (c>0) {
-													c--;
-													value *= 10;
-												}
-											}//*/
-											if (counter->CounterType == PERF_RAW_FRACTION ||
-												counter->CounterType == PERF_LARGE_RAW_FRACTION) {
-												if (counter2) {
-													d = 100*(double)value / (double)denom;
-												}
-											}
-											else if (counter->CounterType == PERF_COUNTER_RAWCOUNT ||
-												counter->CounterType == PERF_COUNTER_LARGE_RAWCOUNT) {
-												d = (double)value;
-												//v->intValue = value;
-											}
-											else if (counter->CounterType ==  PERF_ELAPSED_TIME) {
-												// divide by secs/100 ns
-												d = (perfCounter-value)/10000000.0;
-											}
-											else if (happy == 2) {
-												if (perfCounter != counters[i].freqCounter) {
-													double diff;
-													double div = (double)(perfCounter - counters[i].freqCounter);
-													if (counter->CounterSize == 4) {
-													/* if ((counter->CounterType & 0x300) == 0) { */
-														diff = (int) value - (int)v->oldValue;
+												/*if (counter->DefaultScale) {
+													int c = counter->DefaultScale;
+													while (c<0) {
+														c++;
+														value /= 10;
 													}
-													else /*if ((counter->CounterType & 0x300) == 0x100)*/ {
-														diff = (double)(value - v->oldValue);
+													while (c>0) {
+														c--;
+														value *= 10;
 													}
-													if (counter->CounterType == PERF_COUNTER_COUNTER ||
-														counter->CounterType == PERF_SAMPLE_COUNTER ||
-														counter->CounterType == PERF_COUNTER_BULK_COUNT) {
-														d = diff/(div/(double)*(__int64*)&header->PerfFreq);
-													}
-													else if (counter->CounterType == PERF_100NSEC_TIMER ||
-															 counter->CounterType == PERF_COUNTER_TIMER ||
-															 counter->CounterType == PERF_OBJ_TIME_TIMER ||
-															 counter->CounterType == PERF_PRECISION_SYSTEM_TIMER ||
-															 counter->CounterType == PERF_PRECISION_100NS_TIMER ||
-															 counter->CounterType == PERF_PRECISION_OBJECT_TIMER ||
-															 counter->CounterType == PERF_SAMPLE_FRACTION) {
-														d = 100*diff/div;
-														if (d<0) d = 0;
-														//else if (d > 100) d = 100;
-													}
-													else if (counter->CounterType == PERF_AVERAGE_BULK ||
-															 counter->CounterType == PERF_COUNTER_QUEUELEN_TYPE ||
-															 counter->CounterType == PERF_COUNTER_100NS_QUEUELEN_TYPE ||
-															 counter->CounterType == PERF_COUNTER_OBJ_TIME_QUEUELEN_TYPE ||
-															 counter->CounterType == PERF_COUNTER_LARGE_QUEUELEN_TYPE) {
-														d = diff/div;
-														//else if (d > 100) d = 100;
-													}
-													else if (counter->CounterType == PERF_AVERAGE_TIMER) {
-														d = diff/div/((double)*(__int64*)&header->PerfFreq);
-														//else if (d > 100) d = 100;
-													}
-													else if (counter->CounterType == PERF_100NSEC_TIMER_INV) {
-														d = 100*(1-diff/div);
-														if (d<0) d = 0;
-														//else if (d > 100) d = 100;
+												}//*/
+												if (counter->CounterType == PERF_RAW_FRACTION ||
+													counter->CounterType == PERF_LARGE_RAW_FRACTION) {
+													if (counter2) {
+														d = 100*(double)value / (double)denom;
 													}
 												}
-												v->oldValue = value;
+												else if (counter->CounterType == PERF_COUNTER_RAWCOUNT ||
+													counter->CounterType == PERF_COUNTER_LARGE_RAWCOUNT) {
+													d = (double)value;
+													//v->intValue = value;
+												}
+												else if (counter->CounterType ==  PERF_ELAPSED_TIME) {
+													// divide by secs/100 ns
+													d = (perfCounter-value)/10000000.0;
+												}
+												else if (happy == 2) {
+													if (perfCounter != counters[i].freqCounter) {
+														double diff;
+														double div = (double)(perfCounter - counters[i].freqCounter);
+														if (counter->CounterSize == 4) {
+														/* if ((counter->CounterType & 0x300) == 0) { */
+															diff = (int) value - (int)v->oldValue;
+														}
+														else /*if ((counter->CounterType & 0x300) == 0x100)*/ {
+															diff = (double)(value - v->oldValue);
+														}
+														if (counter->CounterType == PERF_COUNTER_COUNTER ||
+															counter->CounterType == PERF_SAMPLE_COUNTER ||
+															counter->CounterType == PERF_COUNTER_BULK_COUNT) {
+															d = diff/(div/(double)*(__int64*)&header->PerfFreq);
+														}
+														else if (counter->CounterType == PERF_100NSEC_TIMER ||
+																 counter->CounterType == PERF_COUNTER_TIMER ||
+																 counter->CounterType == PERF_OBJ_TIME_TIMER ||
+																 counter->CounterType == PERF_PRECISION_SYSTEM_TIMER ||
+																 counter->CounterType == PERF_PRECISION_100NS_TIMER ||
+																 counter->CounterType == PERF_PRECISION_OBJECT_TIMER ||
+																 counter->CounterType == PERF_SAMPLE_FRACTION) {
+															d = 100*diff/div;
+															if (d<0) d = 0;
+															//else if (d > 100) d = 100;
+														}
+														else if (counter->CounterType == PERF_AVERAGE_BULK ||
+																 counter->CounterType == PERF_COUNTER_QUEUELEN_TYPE ||
+																 counter->CounterType == PERF_COUNTER_100NS_QUEUELEN_TYPE ||
+																 counter->CounterType == PERF_COUNTER_OBJ_TIME_QUEUELEN_TYPE ||
+																 counter->CounterType == PERF_COUNTER_LARGE_QUEUELEN_TYPE) {
+															d = diff/div;
+															//else if (d > 100) d = 100;
+														}
+														else if (counter->CounterType == PERF_AVERAGE_TIMER) {
+															d = diff/div/((double)*(__int64*)&header->PerfFreq);
+															//else if (d > 100) d = 100;
+														}
+														else if (counter->CounterType == PERF_100NSEC_TIMER_INV) {
+															d = 100*(1-diff/div);
+															if (d<0) d = 0;
+															//else if (d > 100) d = 100;
+														}
+													}
+													v->oldValue = value;
+												}
+												if (_finite(d))
+													v->doubleValue = d;
 											}
-											if (_finite(d))
-												v->doubleValue = d;
 										}
 									}
 								}
+								if (name[0]) free(name);
+								if (type->NumInstances == PERF_NO_INSTANCES) {
+									c = 0;
+								}
+								else {
+									c--;
+								}
+								pos2 += block->ByteLength;
 							}
-							if (name[0]) free(name);
-							if (type->NumInstances == PERF_NO_INSTANCES) {
-								c = 0;
-							}
-							else {
-								c--;
-							}
-							pos2 += block->ByteLength;
+							counters[i].freqCounter = perfCounter;
 						}
-						counters[i].freqCounter = perfCounter;
 					}
 				}
+				pos += type->TotalByteLength;
 			}
-			pos += type->TotalByteLength;
 		}
 		free(data);
 	}
