@@ -19,7 +19,7 @@
 #define NOSYSMETRICS
 //*/
 
-#define VERSION_STRING_SHORT "0.4.6.0"
+#define VERSION_STRING_SHORT "0.4.5.1"
 
 #ifdef X64
 #define BITS 64
@@ -31,7 +31,7 @@
 
 #define APP_NAME "LCD Miscellany " VERSION_STRING_LONG
 
-#define VERSION {0,4,6,0, BITS}
+#define VERSION {0,4,5,1, BITS}
 
 #ifdef NDEBUG
 
