@@ -138,7 +138,7 @@ struct ManualScrollingText {
 	var %offset, %text, %overflow;
 
 	function %Bump() {
-		if (%width < %textWidth) {
+		if (%width > %textWidth) {
 			return 0;
 		}
 		%offset -= %shift;
