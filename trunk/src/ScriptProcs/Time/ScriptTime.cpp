@@ -183,7 +183,7 @@ void FormatTime(ScriptValue &s, ScriptValue *args) {
 			if (date->tm_hour >= 12) letter = 'P';
 			if (start[0] == 't')
 				out++[0]  = LCASE(letter);
-			else 
+			else
 				out++[0]  = letter;
 			start ++;
 			if (start[0] == 't') {
@@ -232,7 +232,7 @@ void FormatTime(ScriptValue &s, ScriptValue *args) {
 				int incr = 1;
 				wchar_t day[100];
 				int len;
-				if (LCASE(start[1]) == 'd') {
+				if (LCASE(start[1]) == 'm') {
 					len = GetDateFormat(locale, 0, &st, L"MMMM", day, sizeof(day)/sizeof(wchar_t));
 					//day = wday2[date->tm_wday];
 					incr = 2;
