@@ -1,0 +1,7 @@
+LCD Miscellany is a tool allowing one to write scripts to display stuff on Logitech LCD displays.  It currently supports both the 160 by 43 black and white displays and the 320 by 240 color displays.  It communicates to both via Logitech's SDK, and, when Logitech's software isn't running, can also communicate to the 160 by 43 displays on most devices directly.  Can also draw icons to be displayed on the system tray and set the state of the backlight on G15 and G19 keyboards.  It also supports dll plugins that add support for other LCD models.
+
+Code is a bit of a mess, with new functionality added with minimal planning, but figured I might as well release it.
+
+Note that to compile, you currently need two copies of Logitech's library files, so it can fall back to the older version if the newer one isn't present.  As the libraries aren't designed for that, all the functions in the .h and .lib files of the older one have to be renamed.  You also need nVidia's SDK.  These files aren't included because of licensing issues.  nVidia clearly prohibits redistribution.  Logitech is a bit less clear on the subject, but I prefer to play it safe.  It also depends on every Microsoft SDK under the sun:  Windows, DirectX (for VRAM info), and the DDK.
+
+For help with the software, or just a more detailed description of it, there are threads at both [G15 mods](http://www.g15mods.com/forum/viewtopic.php?f=4&t=1108) and [G15 forums](http://www.g15forums.com/forum/showthread.php?t=3957).
