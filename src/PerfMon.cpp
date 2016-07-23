@@ -475,10 +475,10 @@ inline void PerfMon::UpdateNetwork() {
 					v2->oldValue = ifTable->table[i].dwOutOctets;
 					vals[i*2] = v->doubleValue;
 					vals[i*2+1] = v2->doubleValue;
-					if (ifTable->table[i].dwType == IF_TYPE_ETHERNET_CSMACD && ifTable->table[i].dwPhysAddrLen == 6) {
+					if ((ifTable->table[i].dwType == IF_TYPE_ETHERNET_CSMACD || ifTable->table[i].dwType == IF_TYPE_IEEE80211) && ifTable->table[i].dwPhysAddrLen == 6) {
 						int foundMatch = 0;
 						for (unsigned int j=0; j<i; j++) {
-							if (ifTable->table[j].dwType == IF_TYPE_ETHERNET_CSMACD && ifTable->table[j].dwPhysAddrLen == 6) {
+							if ((ifTable->table[j].dwType == IF_TYPE_ETHERNET_CSMACD || ifTable->table[j].dwType == IF_TYPE_IEEE80211) && ifTable->table[j].dwPhysAddrLen == 6) {
 								if (!memcmp(ifTable->table[j].bPhysAddr, ifTable->table[i].bPhysAddr, 6) &&
 									vals[i*2] == vals[j*2] && vals[i*2+1] == vals[j*2+1]) {
 										foundMatch = 1;
